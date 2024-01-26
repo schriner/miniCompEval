@@ -37,8 +37,6 @@ Create Tree PNG:
 make png
 ```
 
-[comment]: <> (This is a comment, it will not be included)
-
 ## Grammar
 ```
           Program    ::=   MainClass ( ClassDeclaration )* <EOF>  
@@ -46,7 +44,9 @@ make png
  ClassDeclaration    ::=   "class" Identifier ( "extends" Identifier )? "{" ( VarDeclaration )* ( MethodDeclaration )* "}"  
    VarDeclaration    ::=   Type Identifier ";"  
 MethodDeclaration    ::=   "public" Type Identifier "(" ( Type Identifier ( "," Type Identifier )* )? ")" "{" ( VarDeclaration )* ( Statement )* "return" Expression ";" "}"  
-             Type    ::=   "int" "[" "]"  
+             Type    ::=   "boolean" ( "[" "]" )* 
+                      |    "int" ( "[" "]" )*
+                      |    Identifier ( "[" "]" )*
                       |    "boolean"
                       |    "int"
                       |    Identifier
