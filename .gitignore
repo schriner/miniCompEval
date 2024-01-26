@@ -1,0 +1,7 @@
+MiniJava_lex.o
+MiniJava_syntax.o
+main.o
+TreeNode.o
+*.swp
+*.dot
+tree.png
