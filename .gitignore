@@ -5,3 +5,4 @@ meval
 deleteme.*
 build*
 parse
+CMakeCache.txt
