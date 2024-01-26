@@ -1,0 +1,5 @@
+class Foo_123bar_ {
+    public static void main(String[] a) {
+			a = ++++ (38 ) +!- b;
+    }
+}
