@@ -48,11 +48,13 @@ using namespace std;
 
 %{
 
-
 int yylex();
 void yyerror(const char *s);	
 void yyrestart(FILE * fp);
-//int yydebug = 1;
+
+#ifdef DEBUG_BISON
+int yydebug = 1;
+#endif
 
 // Root of AST
 extern Program * programRoot; 

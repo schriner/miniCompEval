@@ -18,7 +18,7 @@ $(PARSE):
 	@mkdir $(PARSE)
 
 $(PARSE)/MiniJava_syntax.cpp $(PARSE)/MiniJava_syntax.dot: $(PARSE) $(SRC)/parser.y $(INC)/TreeNode.hpp
-	bison -v -y -d --graph=$(PARSE)/MiniJava_syntax.dot -t --debug -o $(PARSE)/MiniJava_syntax.cpp $(SRC)/parser.y
+	bison -v -d --graph=$(PARSE)/MiniJava_syntax.dot --debug -o $(PARSE)/MiniJava_syntax.cpp $(SRC)/parser.y
 
 png: $(PARSE) $(PARSE)/MiniJava_syntax.dot
 	dot -Tpng parse/MiniJava_syntax.dot > parse/tree.png

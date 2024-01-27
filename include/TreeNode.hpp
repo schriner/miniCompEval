@@ -14,7 +14,12 @@
 #include <iostream>
 
 #include "TableNode.hpp"
-#define PRINTDEBUGTREE(x) //fprintf(stderr, "At Node: %s\n", (x));
+
+#ifdef PRINTTREE
+#define PRINTDEBUGTREE(x) fprintf(stderr, "At Node: %s\n", (x));
+#else
+#define PRINTDEBUGTREE(x)
+#endif
 
 #ifdef ASSEM
 #define PRINTLN_EXP "pln"
