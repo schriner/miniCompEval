@@ -6,50 +6,43 @@
 
 #include "TreeNode.hpp"
 
+#define INPUT_FORMAT "Expected: meval [-o <output_file>] <inputfile>.java"
+#define PARSING_ERROR(x) { fprintf(stderr, "meval: %s\n%s\n\n", (x), INPUT_FORMAT); abort(); }
+
 int yyparse(void);
 
 using namespace std;
 
-Program * programRoot = NULL;
-TableNode * rootScope = NULL;
+Program * programRoot = nullptr;
+TableNode * rootScope = nullptr;
 bool programTypeError = false;
 
 /* Main */
 int main( int argc, char** argv ) {
 	extern FILE * yyin;
-	
+	streambuf * old;
+
 	// Pass fp to yy
 	if (argc == 4 && !string("-o").compare(argv[1])
 			&& string(argv[3]).find(".java") != string::npos
 			&& string(argv[2]).find(".java") == string::npos) {
 		
-		ofstream file(argv[2]);
-		streambuf * old = cout.rdbuf(file.rdbuf());
-		
-		FILE * fp = fopen(argv[3], "r");
-		yyin = fp;
-		yyparse();
-		
-		// Evaluate Expressions (Interpreter): 
-		if (!programTypeError) { programRoot->evaluate(); }
-
-		cout.rdbuf(old); // restore
+		ofstream file(argv[2], fstream::trunc);
+		old = cout.rdbuf(file.rdbuf());
+		yyin = fopen(argv[3], "r");
 
 	} else if (argc == 2 && string(argv[1]).find(".java") != string::npos) {
+		yyin = fopen(argv[1], "r");
 		
-		FILE * fp = fopen(argv[1], "r");
-		yyin = fp;
-		yyparse();
-
-		// Traverse AST : 
-		// programRoot->traverse();
-		
-		// Evaluate Expressions (Interpreter): 
-		if (!programTypeError) { programRoot->evaluate(); }
-		
-	}  else {
-		cerr << "meval: invalid argument format" << endl;
-		cerr << "Expected: meval [-o <output_file>] <inputfile>.java" << endl;
+	} else {
+		PARSING_ERROR("invalid argument format");
 	}
+	
+	if (!yyin) { PARSING_ERROR(".java filepath not found"); }
+	yyparse();
 
+	// Evaluate Expressions (Interpreter): 
+	programRoot->evaluate();
+
+	if (argc == 4) cout.rdbuf(old);
 }

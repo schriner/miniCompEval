@@ -71,7 +71,7 @@ void Program::assem() {
 void MainClass::assem() {
   instr = new vector<string * >;
   string str("");
-  s->assem(&str, NULL);
+  s->assem(&str, nullptr);
   instr->push_back( new string(str) );
 }
 
@@ -139,7 +139,7 @@ void MethodDecl::assem(string *objName) {
   s->assem(&stmt_str, nameTable);
   programRoot->c->instr->push_back(new string ("\t" + stmt_str + "\n"));
   stmt_str = string("");
-  if (s) { e->assem(&stmt_str, NULL); }
+  if (s) { e->assem(&stmt_str, nullptr); }
   programRoot->c->instr->push_back(new string (stmt_str + "\n\tmov r0, r1\n"));
   programRoot->c->instr->push_back(new string ("\n\tpop {pc}\n"));
 
@@ -191,7 +191,7 @@ void WhileStatement::assem(string * stmt_str, map<string, string*> * nameTable) 
 void PrintLineExp::assem(string * stmt_str, map<string, string*> * nameTable){
   // need to put the format string somewhere
   string e_str("");
-  e->assem(&e_str, NULL);
+  e->assem(&e_str, nullptr);
   string s("ldr r0, =");
   s = e_str + "\t" + s + PRINTLN_EXP + "\n\tbl printf\n";
   *stmt_str = *stmt_str + s.substr(1);
@@ -209,7 +209,7 @@ void PrintLineString::assem(string * stmt_str, map<string, string*> * nameTable)
 
 void PrintExp::assem(string * stmt_str, map<string, string*> * nameTable){
   string e_str("");
-  e->assem(&e_str, NULL);
+  e->assem(&e_str, nullptr);
   string s("ldr r0, =");
   s = e_str + "\t" + s + PRINT_EXP + "\n\tbl printf\n";
   *stmt_str = *stmt_str + s.substr(1);
@@ -222,7 +222,7 @@ void PrintString::assem(string * stmt_str, map<string, string*> * nameTable){
 
 void Assign::assem(string * stmt_str, map<string, string*> * nameTable) {
   string exp_str = "";
-  e->assem(&exp_str, NULL);
+  e->assem(&exp_str, nullptr);
   *stmt_str = *stmt_str + exp_str.substr(1) + "\n";
 
   map<string, string*> * table = nameTableStack.back();
@@ -241,7 +241,7 @@ void Assign::assem(string * stmt_str, map<string, string*> * nameTable) {
 void IndexAssign::assem(string * stmt_str, map<string, string*> *nT) {}
 
 void ReturnStatement::assem(string * stmt_str, map<string, string*> *nT){
-  e->assem(stmt_str, NULL);
+  e->assem(stmt_str, nullptr);
   *stmt_str = *stmt_str + "\n\tmov r0, r1\n\tpop {pc}\n";
 }
 
@@ -262,7 +262,7 @@ void Or::assem(string * exp_str, string * branchLabel) {
   string label2( "e_or_E" + to_string(expCnt++) );
 
   if (!branchLabel) {
-    e1->assem(exp_str, NULL);
+    e1->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tpush {r1}\n";
   } else {
     e1->assem(exp_str, &label1);
@@ -292,9 +292,9 @@ void And::assem(string * exp_str, string * branchLabel){
 }
 
 void Equal::assem(string * exp_str, string * branchLabel){
-  e1->assem(exp_str, NULL); // has to b int
+  e1->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
-  e2->assem(exp_str, NULL); // has to b int
+  e2->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tbne " + *branchLabel + "\n";
@@ -304,9 +304,9 @@ void Equal::assem(string * exp_str, string * branchLabel){
 }
 
 void NotEqual::assem(string * exp_str, string * branchLabel){
-  e1->assem(exp_str, NULL); // has to b int
+  e1->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
-  e2->assem(exp_str, NULL); // has to b int
+  e2->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tbeq " + *branchLabel + "\n";
@@ -316,9 +316,9 @@ void NotEqual::assem(string * exp_str, string * branchLabel){
 }
 
 void Lesser::assem(string * exp_str, string * branchLabel){
-  e1->assem(exp_str, NULL); // has to b int
+  e1->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
-  e2->assem(exp_str, NULL); // has to b int
+  e2->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tbge " + *branchLabel + "\n";
@@ -328,9 +328,9 @@ void Lesser::assem(string * exp_str, string * branchLabel){
 }
 
 void Greater::assem(string * exp_str, string * branchLabel){
-    e1->assem(exp_str, NULL); // has to b int
+    e1->assem(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, NULL); // has to b int
+    e2->assem(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n\t";
   if (branchLabel) {
     *exp_str = *exp_str + "ble " + *branchLabel + "\n";
@@ -340,9 +340,9 @@ void Greater::assem(string * exp_str, string * branchLabel){
 }
 
 void LessEqual::assem(string * exp_str, string * branchLabel){
-  e1->assem(exp_str, NULL); // has to b int
+  e1->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
-  e2->assem(exp_str, NULL); // has to b int
+  e2->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tbgt " + *branchLabel + "\n";
@@ -352,9 +352,9 @@ void LessEqual::assem(string * exp_str, string * branchLabel){
 }
 
 void GreatEqual::assem(string * exp_str, string * branchLabel){
-    e1->assem(exp_str, NULL); // has to b int
+    e1->assem(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, NULL); // has to b int
+    e2->assem(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tblt " + *branchLabel + "\n";
@@ -369,7 +369,7 @@ void Add::assem(string * exp_str, string * branchLabel){
         std::string lit_string("");
         getIntLiteral (e1, &lit_string);
         //LitInt * expr = (LitInt *) e1;
-        e2->assem(exp_str, NULL);
+        e2->assem(exp_str, nullptr);
         *exp_str = *exp_str + "\tadd r1, r1, " + lit_string + "\n";
         //*exp_str = *exp_str + "\tadd r1, r1, #" + to_string(expr->i->i) + "\n";
     //} else if (dynamic_cast<LitInt *>( e2 )) {
@@ -377,12 +377,12 @@ void Add::assem(string * exp_str, string * branchLabel){
         //LitInt * expr = (LitInt *) e2;
         std::string lit_string("");
         getIntLiteral (e2, &lit_string);
-        e1->assem(exp_str, NULL);
+        e1->assem(exp_str, nullptr);
         *exp_str = *exp_str + "\tadd r1, r1, " + lit_string + "\n";
     } else {
-        e1->assem(exp_str, NULL);
+        e1->assem(exp_str, nullptr);
         *exp_str = *exp_str + "\tpush {r1}\n";
-        e2->assem(exp_str, NULL);
+        e2->assem(exp_str, nullptr);
         *exp_str = *exp_str + "\tpop {r2}\n\tadd r1, r2, r1\n";
     }
 }
@@ -392,25 +392,25 @@ void Subtract::assem(string * exp_str, string * branchLabel){
   if ( isIntLiteral( e2 ) ) {
     std::string lit_string("");
     getIntLiteral (e2, &lit_string);
-    e1->assem(exp_str, NULL);
+    e1->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tsub r1, r1, " + lit_string + "\n";
   } else if ( isIntLiteral( e1 ) ) {
     std::string lit_string("");
     getIntLiteral (e1, &lit_string);
-    e2->assem(exp_str, NULL);
+    e2->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tmov r2, " + lit_string + "\n\tsub r1, r2, r1\n";
   } else {
-    e1->assem(exp_str, NULL);
+    e1->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, NULL);
+    e2->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tpop {r2}\n\tsub r1, r2, r1\n";
   }
 }
 
 void Divide::assem(string * exp_str, string * branchLabel) {
-    e1->assem(exp_str, NULL);
+    e1->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, NULL);
+    e2->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tpop {r2}\n\tmov r0, #0\n";
     *exp_str = *exp_str + "\tmov r4, #0\n\tcmp r2, #0\n\tbge div" + to_string(lCnt) + "\n\tmov r4, #1\n\trsb r2, #0\n";
     *exp_str = *exp_str + "div" + to_string(lCnt) + ":\n\tcmp r2, r1\n\tblt d" + to_string(lCnt) + "\n";
@@ -433,19 +433,19 @@ void Multiply::assem(string * exp_str, string * branchLabel){
   } else if (isIntLiteral( e1 )) { // op1 is a literal
     std::string lit_string("");
     getIntLiteral (e1, &lit_string);
-    e2->assem(exp_str, NULL);
+    e2->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tmov r2, " + lit_string + "\n";
     *exp_str = *exp_str + "\tmul r1, r2, r1\n";
   } else if (isIntLiteral( e2 )) { // op 2 is a literal
     std::string lit_string("");
     getIntLiteral (e2, &lit_string);
-    e1->assem(exp_str, NULL);
+    e1->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tmov r2, " + lit_string + "\n";
     *exp_str = *exp_str + "\tmul r1, r2, r1\n";
   } else { // Neither are int pos int literals
-    e1->assem(exp_str, NULL);
+    e1->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, NULL);
+    e2->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\tpop {r2}\n\tmul r1, r2, r1\n";
   }
 }
@@ -467,7 +467,7 @@ void Not::assem(string * exp_str, string * branchLabel) {
     Not * expr = (Not * ) e;
     expr->e->assem(exp_str, branchLabel);
   } else if ( dynamic_cast< ParenExp * >( e ) ) { // if !()
-    Exp * nExp = NULL;
+    Exp * nExp = nullptr;
     ParenExp * p = (ParenExp *) e;
     nExp = p->e;
     while (dynamic_cast<ParenExp *>( nExp )) {
@@ -501,7 +501,7 @@ void Not::assem(string * exp_str, string * branchLabel) {
     }
   } else {
     if (!branchLabel) {
-      e->assem(exp_str, NULL);
+      e->assem(exp_str, nullptr);
       *exp_str = *exp_str + "\teor r1, r1, #1\n";
     } else {
       string label("not" + to_string(expCnt++));
@@ -512,7 +512,7 @@ void Not::assem(string * exp_str, string * branchLabel) {
 }
 
 void Pos::assem(string * exp_str, string * branchLabel) {
-  e->assem(exp_str, NULL);
+  e->assem(exp_str, nullptr);
 }
 
 void Neg::assem(string * exp_str, string * branchLabel) {
@@ -521,11 +521,11 @@ void Neg::assem(string * exp_str, string * branchLabel) {
     *exp_str = *exp_str + "\tmov r1, #-"+ to_string(expr->i->i) + "\n";
   } else if (dynamic_cast<Neg *>( e )) {
     Neg * expr = (Neg *) e;
-    expr->e->assem(exp_str, NULL);
+    expr->e->assem(exp_str, nullptr);
   } else if (dynamic_cast< ParenExp * >( e )
               || dynamic_cast< Pos * >( e ) ) { // eliminate paren
 
-    Exp * nExp = NULL;
+    Exp * nExp = nullptr;
     if (dynamic_cast< ParenExp * >( e )) {
       ParenExp * p = (ParenExp *) e;
       nExp = p->e;
@@ -554,13 +554,13 @@ void Neg::assem(string * exp_str, string * branchLabel) {
       *exp_str = *exp_str + "\tmov r1, #-"+ to_string(expr->i->i) + "\n";
     } else if (dynamic_cast<Neg *>(nExp)) { // it was another neg
       Neg * expr = (Neg *) nExp;
-      expr->e->assem(exp_str, NULL);
+      expr->e->assem(exp_str, nullptr);
     } else { // something else
-      nExp->assem(exp_str, NULL);
+      nExp->assem(exp_str, nullptr);
       *exp_str = *exp_str + "\trsb r1, r1, #0\n";
     }
   } else {
-    e->assem(exp_str, NULL);
+    e->assem(exp_str, nullptr);
     *exp_str = *exp_str + "\trsb r1, r1, #0\n";
     //*exp_str = *exp_str + "\tmov r2, #-1\n\tmul r1, r1, r2\n";
   }
@@ -576,14 +576,14 @@ void LitInt::assem(string * exp_str, string * branchLabel) {
 
 void True::assem(string * exp_str, string * branchLabel){
   // Do Nothing - true will always execute the first part of the statement
-  if (branchLabel == NULL){
+  if (branchLabel == nullptr){
     *exp_str = *exp_str + "\tmov r1, #1\n";
   }
 }
 
 void False::assem(string * exp_str, string * branchLabel){
   // False always branches
-  if (branchLabel == NULL){
+  if (branchLabel == nullptr){
     *exp_str = *exp_str + "\tmov r1, #0\n";
   } else {
     *exp_str = *exp_str + "\tb " + *branchLabel + "\n";

@@ -6,3 +6,4 @@ deleteme.*
 build*
 parse
 CMakeCache.txt
+test/*/*.s

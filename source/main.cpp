@@ -7,15 +7,15 @@
 #include "TreeNode.hpp"
 
 #define INPUT_FORMAT "Expected: mjavac [-o <output_file> | --stdout ] <inputfile>.java"
-#define PARSING_ERROR(x) fprintf(stderr, "\nmjavac: %s\n%s\n\n", (x), INPUT_FORMAT);
+#define PARSING_ERROR(x) { fprintf(stderr, "mjavac: %s\n%s\n\n", (x), INPUT_FORMAT); abort(); }
 
 int yyparse(void);
 
 using namespace std;
 
 ofstream assemStream;
-Program * programRoot = NULL;
-TableNode * rootScope = NULL;
+Program * programRoot = nullptr;
+TableNode * rootScope = nullptr;
 bool programTypeError = false;
 
 /* Main */
@@ -30,28 +30,14 @@ int main( int argc, char** argv ) {
 		string assemFileName(argv[2]);
 		assemStream.open(assemFileName, fstream::out | fstream::trunc);
 		
-		FILE * fp = fopen(argv[3], "r");
-		yyin = fp;
-		yyparse();
-
-		// Generate Assembly :
-		if (!programTypeError) { programRoot->assem(); }
-
-		assemStream.close();
+		yyin = fopen(argv[3], "r");
 
 	} else if (argc == 3 && string(argv[2]).find(".java") != string::npos) {
 		if (!string("--stdout").compare(argv[1])) {
 			assemStream.basic_ios<char>::rdbuf(cout.rdbuf());
 			
-			FILE * fp = fopen(argv[2], "r");
+			yyin = fopen(argv[2], "r");
 
-			yyin = fp;
-			yyparse();
-
-			// Generate Assembly : 
-			if (!programTypeError) { programRoot->assem(); }
-
-			//assemStream.close();
 		} else {
 			PARSING_ERROR("invalid flag");
 		}
@@ -63,25 +49,23 @@ int main( int argc, char** argv ) {
 		assemFileName = assemFileName + ".s";
 		assemStream.open(assemFileName, fstream::out | fstream::trunc);
 		
-		FILE * fp = fopen(argv[1], "r");
-		yyin = fp;
-		yyparse();
+		yyin = fopen(argv[1], "r");
 
-		// TODO(ss): Do something with this
-		// Traverse AST : 
-		// programRoot->traverse();
-		
-		// Generate Assembly : 
-		if (!programTypeError) { programRoot->assem(); }
-
-		assemStream.close();
 	} else if (argc == 1){
 		
 		// Parse stdin
 		yyparse();
+		return 0;
 
 	} else {
 		PARSING_ERROR("invalid argument format");
 	}
+
+	if (!yyin) { PARSING_ERROR(".java filepath not found"); }
+	yyparse();
+
+	// Generate Assembly : 
+	programRoot->assem();
+	if (argc != 3) assemStream.close();
 
 }

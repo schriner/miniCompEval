@@ -41,7 +41,7 @@ using namespace std;
 	ExpRestList * erl;
 	Exp * er;
 	IntLiteral * in_l;
-	BoolLiteral * b_l;
+	//BoolLiteral * b_l;
 	StringLiteral * st_l;
 	Ident * id;
 }
@@ -58,7 +58,7 @@ void yyrestart(FILE * fp);
 extern Program * programRoot; 
 extern TableNode * rootScope; 
 extern bool programTypeError;
-string * typeStringHolder = NULL;
+string * typeStringHolder = nullptr;
 
 %}
 
@@ -85,24 +85,25 @@ string * typeStringHolder = NULL;
 %type<el>   exp_list
 %type<erl>  exp_rest_list
 %type<er>   exp_rest
-%type<in_l> INTEGER_LITERAL
-%type<st_l> STRING_LITERAL
-%type<id>   ID
+
+%token<in_l> INTEGER_LITERAL
+%token<st_l> STRING_LITERAL
+%token<id>   ID
 
 %token THIS NEW EXTENDS RETURN LENGTH
 %token PRINT_STATE PRINT_STATE_LN IF ELSE WHILE STRING
 %token CLASS MAIN STATIC VOID PUBLIC
 %token SEMI COMMA NOT PLUS MINUS EQUAL TRUE FALSE DOT
 %token O_PAREN C_PAREN O_BR C_BR O_SQ C_SQ 
-%token STRING_LITERAL INTEGER_LITERAL ID INT BOOL 
+%token INT BOOL 
 %token AND OR G_EQ L_EQ EQEQ N_EQ GREAT LESS MUL DIV
 
 %%
 
-program  : 
+program : 
 	main_class class_decl_list { // TODO: add main + decl to table 
 		programRoot = new Program($1, $2);
-		rootScope = new TableNode(NULL);
+		rootScope = new TableNode(nullptr);
 		programRoot->lowestT = rootScope;
 		$1->lowestT->parent = rootScope; // main_scope->root
 		// for all c class_decl: c->root
@@ -111,22 +112,20 @@ program  :
 		}
 		$2->lowestT = rootScope; // class_decl scope is root scope
 		//programRoot->traverse();
-		//if (!programTypeError) { programRoot->evaluate(); }
 	}
 	| main_class { 
-		programRoot = new Program($1, NULL); 
-		rootScope = new TableNode(NULL);
+		programRoot = new Program($1, nullptr); 
+		rootScope = new TableNode(nullptr);
 		programRoot->lowestT = rootScope;
 		$1->lowestT->parent = rootScope; // main_scope->root
 		//programRoot->traverse();
-		//if (!programTypeError) { programRoot->evaluate(); }
 	}
 	;
 
 main_class : 
 	CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement C_BR C_BR { 
 		$$ = new MainClass($2, $12, $15); 
-		$$->lowestT = new TableNode(NULL);
+		$$->lowestT = new TableNode(nullptr);
 		$2->lowestT = $$->lowestT;
 		$12->lowestT = $$->lowestT;
 		$15->setTable($$->lowestT);
@@ -142,7 +141,7 @@ class_decl_list : /* Eliminate class_decl*  */
 class_decl : 
 	CLASS ID O_BR var_decl_list method_decl_list C_BR /* with method_decl_list */ { 
 		$$ = new ClassDeclSimple($2, $4, $5); // TODO: Add to class_decl table
-		$$->lowestT = new TableNode(NULL); 
+		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$5->setTableParentNodes($$->lowestT); // set parent table node
 		$4->setTableNodes($$->lowestT); // set table node for var_decl
@@ -151,7 +150,7 @@ class_decl :
 	}
   | CLASS ID EXTENDS ID O_BR var_decl_list method_decl_list C_BR /* with method_decl_list */ { 
 		$$ = new ClassDeclExtends($2, $4, $6, $7); 
-		$$->lowestT = new TableNode(NULL); 
+		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->lowestT = $$->lowestT;
 		$7->setTableParentNodes($$->lowestT); // set parent table node 
@@ -160,30 +159,30 @@ class_decl :
 		$7->lowestT = $$->lowestT;
 	}
 	| CLASS ID O_BR var_decl_list C_BR { 
-		$$ = new ClassDeclSimple($2, $4, NULL); 
-		$$->lowestT = new TableNode(NULL); 
+		$$ = new ClassDeclSimple($2, $4, nullptr); 
+		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->setTableNodes($$->lowestT); // set table node for var_decl
 		$4->lowestT = $$->lowestT;
 	}
   | CLASS ID EXTENDS ID O_BR var_decl_list C_BR { 
-		$$ = new ClassDeclExtends($2, $4, $6, NULL); 
-		$$->lowestT = new TableNode(NULL); 
+		$$ = new ClassDeclExtends($2, $4, $6, nullptr); 
+		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->lowestT = $$->lowestT;
 		$6->setTableNodes($$->lowestT); // set table node for var_decl
 		$6->lowestT = $$->lowestT;
 	}
 	/* No var_decl */
-	| CLASS ID O_BR method_decl_list C_BR /* with method_decl_list */ { $$ = new ClassDeclSimple($2, NULL, $4); 
-		$$->lowestT = new TableNode(NULL); 
+	| CLASS ID O_BR method_decl_list C_BR /* with method_decl_list */ { $$ = new ClassDeclSimple($2, nullptr, $4); 
+		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->setTableParentNodes($$->lowestT); 
 		$4->lowestT = $$->lowestT;
 	}
   | CLASS ID EXTENDS ID O_BR method_decl_list C_BR /* with method_decl_list */ { 
-		$$ = new ClassDeclExtends($2, $4, NULL, $6); 
-		$$->lowestT = new TableNode(NULL); 
+		$$ = new ClassDeclExtends($2, $4, nullptr, $6); 
+		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->lowestT = $$->lowestT;
 	  // for all m method_decl: m->classTableNode
@@ -191,13 +190,13 @@ class_decl :
 		$6->lowestT = $$->lowestT;
 	}
 	| CLASS ID O_BR C_BR { 
-		$$ = new ClassDeclSimple($2, NULL, NULL); 
+		$$ = new ClassDeclSimple($2, nullptr, nullptr); 
 		$2->lowestT = $$->lowestT;
-		$$->lowestT = new TableNode(NULL); 
+		$$->lowestT = new TableNode(nullptr); 
 	}
   | CLASS ID EXTENDS ID O_BR C_BR { 
-		$$ = new ClassDeclExtends($2, $4, NULL, NULL); 
-		$$->lowestT = new TableNode(NULL); 
+		$$ = new ClassDeclExtends($2, $4, nullptr, nullptr); 
+		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->lowestT = $$->lowestT;
 	};
@@ -219,7 +218,7 @@ var_decl :
 	| ID ID SEMI { 
 		$$ = new VarDecl( new TypePrime(new IdentType($1)), $2 ); 
 		// TODO: FIXME 
-		$$->data = new RefVar($2->id, $1->id, NULL);
+		$$->data = new RefVar($2->id, $1->id, nullptr);
 	}
 	| INT type_bracket_list ID SEMI {
 		$2->getLastNull()->t = new TypePrime(new IntType());
@@ -237,7 +236,7 @@ var_decl :
 
 type_bracket_list :
 	type_bracket_list O_SQ C_SQ { $$ = new TypeIndexList( $1 ); }
-	| O_SQ C_SQ { $$ = new TypeIndexList( NULL ); }
+	| O_SQ C_SQ { $$ = new TypeIndexList( nullptr ); }
 	;
 
 method_decl_list : /* Eliminate method_decl* */
@@ -256,7 +255,7 @@ method_decl :
 	{ // TODO: Apend to table
 		// DONE: set nodes for -, -, -, - , -, - 
 		$$ = new MethodDecl($2, $3, $5, $8, $9, $11);  
-		$$->lowestT = new TableNode(NULL); 
+		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT); // type
 		$3->lowestT = $$->lowestT; // id
@@ -268,8 +267,8 @@ method_decl :
 		$11->setTable($$->lowestT); // ok set stuff for exp too
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR 
-	{ $$ = new MethodDecl($2, $3, NULL, $7, $8, $10); 
-		$$->lowestT = new TableNode(NULL); 
+	{ $$ = new MethodDecl($2, $3, nullptr, $7, $8, $10); 
+		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
@@ -280,8 +279,8 @@ method_decl :
 		$10->setTable($$->lowestT); // ok set stuff for exp too
 	}
 	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR /* no var_decl */
-	{ $$ = new MethodDecl($2, $3, $5, NULL, $8, $10); 
-		$$->lowestT = new TableNode(NULL); 
+	{ $$ = new MethodDecl($2, $3, $5, nullptr, $8, $10); 
+		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
@@ -291,8 +290,8 @@ method_decl :
 		$10->setTable($$->lowestT); // ok set stuff for exp too
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR /* no var_decl */
-	{ $$ = new MethodDecl($2, $3, NULL, NULL, $7, $9); 
-		$$->lowestT = new TableNode(NULL); 
+	{ $$ = new MethodDecl($2, $3, nullptr, nullptr, $7, $9); 
+		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
@@ -302,8 +301,8 @@ method_decl :
 	}
 	/* No Statement List */
 	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-	{ $$ = new MethodDecl($2, $3, $5, $8, NULL, $10); 
-		$$->lowestT = new TableNode(NULL); 
+	{ $$ = new MethodDecl($2, $3, $5, $8, nullptr, $10); 
+		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
@@ -313,8 +312,8 @@ method_decl :
 		$10->setTable($$->lowestT); // ok set stuff for exp too
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-	{ $$ = new MethodDecl($2, $3, NULL, $7, NULL, $9); 
-		$$->lowestT = new TableNode(NULL); 
+	{ $$ = new MethodDecl($2, $3, nullptr, $7, nullptr, $9); 
+		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
@@ -323,8 +322,8 @@ method_decl :
 		$9->setTable($$->lowestT); // ok set stuff for exp too
 	}
 	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR  RETURN full_exp SEMI C_BR /* no var_decl */
-	{ $$ = new MethodDecl($2, $3, $5, NULL, NULL, $9); 
-		$$->lowestT = new TableNode(NULL); 
+	{ $$ = new MethodDecl($2, $3, $5, nullptr, nullptr, $9); 
+		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
@@ -332,8 +331,8 @@ method_decl :
 		$9->setTable($$->lowestT); // ok set stuff for exp too
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR  RETURN full_exp SEMI C_BR /* no var_decl */
-	{ $$ = new MethodDecl($2, $3, NULL, NULL, NULL, $8); 
-		$$->lowestT = new TableNode(NULL); 
+	{ $$ = new MethodDecl($2, $3, nullptr, nullptr, nullptr, $8); 
+		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
@@ -344,11 +343,11 @@ method_decl :
 formal_list : 
 	type ID formal_rest_list { 
 		$$ = new FormalList( $1, $2, $3 ); 
-		$$->data = new RefVar($2->id, typeStringHolder, NULL);
+		$$->data = new RefVar($2->id, typeStringHolder, nullptr);
 	}
 	| type ID { 
-		$$ = new FormalList( $1, $2, NULL ); 
-		$$->data = new RefVar($2->id, typeStringHolder, NULL);
+		$$ = new FormalList( $1, $2, nullptr ); 
+		$$->data = new RefVar($2->id, typeStringHolder, nullptr);
 	}
 	;
 
@@ -360,7 +359,7 @@ formal_rest_list : /* Eliminate formal_rest* */
 formal_rest :
 	COMMA type ID { 
 		$$ = new FormalRest( $2, $3 ); 
-		$$->data = new RefVar($3->id, typeStringHolder, NULL);
+		$$->data = new RefVar($3->id, typeStringHolder, nullptr);
 	}
 	;
 
@@ -392,7 +391,7 @@ statement_list : /* Eliminate statement* */
 statement : 
 	O_BR statement_list C_BR { 
 		$$ = new BlockStatements($2); } 
-	| O_BR C_BR /* No statement */ { $$ = new BlockStatements(NULL); }
+	| O_BR C_BR /* No statement */ { $$ = new BlockStatements(nullptr); }
   | IF O_PAREN full_exp C_PAREN statement ELSE statement {
 		$$ = new IfStatement( $3, $5, $7 ); }
   | WHILE O_PAREN full_exp C_PAREN statement {
@@ -476,9 +475,9 @@ exp :
 	| object DOT ID O_PAREN exp_list C_PAREN 
 		{ $$ = new ObjectMethodCall( $1, $3, $5 ); }
 	| ID DOT ID O_PAREN C_PAREN 
-		{ $$ = new ObjectMethodCall( new IdObj( $1 ), $3, NULL ); }
+		{ $$ = new ObjectMethodCall( new IdObj( $1 ), $3, nullptr ); }
 	| object DOT ID O_PAREN C_PAREN 
-		{ $$ = new ObjectMethodCall( $1, $3, NULL ); }
+		{ $$ = new ObjectMethodCall( $1, $3, nullptr ); }
 	| O_PAREN full_exp C_PAREN { $$ = new ParenExp( $2 ); }
 	;
 
@@ -495,7 +494,7 @@ exp_rest_list : /* Eliminate exp_rest* */
 
 exp_list : 
 	full_exp exp_rest_list { $$ = new ExpList( $1, $2 ); }
-	| full_exp { $$ = new ExpList( $1, NULL ); }
+	| full_exp { $$ = new ExpList( $1, nullptr ); }
 	;
 
 exp_rest : 

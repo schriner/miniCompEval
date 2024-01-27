@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string * ExpResult = NULL;
+string * ExpResult = nullptr;
 void updateExpResult (const char * r) {
   if (ExpResult) { delete ExpResult; }
   ExpResult = new string(r);

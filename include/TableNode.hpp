@@ -18,14 +18,14 @@ class MethodDecl;
 
 class Data {
 	public:
-		std::string * key = NULL;
-		std::string * symbolType = NULL;
-		std::string * type = NULL; // int, bool, id
+		std::string * key = nullptr;
+		std::string * symbolType = nullptr;
+		std::string * type = nullptr; // int, bool, id
 };
 
 class SimpleVar : public Data {
 	public:
-		TreeNode * val = NULL;
+		TreeNode * val = nullptr;
 
 		SimpleVar (std::string * k, const char * t, TreeNode * v) {
 			key = k;
@@ -37,8 +37,8 @@ class SimpleVar : public Data {
 
 class RefVar : public Data {
 	public:
-		//std::string * className = NULL;
-		TreeNode * val = NULL; // this should b pointer to obj
+		//std::string * className = nullptr;
+		TreeNode * val = nullptr; // this should b pointer to obj
 
 		RefVar (std::string * k, std::string * c, TreeNode * v) {
 			key = k;
@@ -51,9 +51,9 @@ class RefVar : public Data {
 /*class ArrayVar : public Data {
 	public:
 		int dimCnt = 0;
-		TreeNode * val = NULL; // this should b pointer to the array
-		std::string * elKind = NULL;
-		std::string * elType = NULL;
+		TreeNode * val = nullptr; // this should b pointer to the array
+		std::string * elKind = nullptr;
+		std::string * elType = nullptr;
 
 		ArrayVar (const char * k, int d, TreeNode * v, 
 				const char * knd, const char * typ) {
@@ -68,7 +68,7 @@ class RefVar : public Data {
 
 class ClassVar : public Data {
 	public:
-		ClassVar * super = NULL;
+		ClassVar * super = nullptr;
 		ClassVar (const char * k, ClassVar * super ) {
 			key = new std::string(k);
 			this->super = super;
@@ -94,11 +94,11 @@ class FormalParemeterVar : public Data {
 
 class TableNode {
 	public:
-		TableNode * parent = NULL;
-		std::map<std::string, Data * > * table = NULL;
-		std::vector<VarDecl *> * redecVarDecl = NULL;
-		//std::vector<FormalRest *> * redecVarDecl = NULL;
-		std::vector<MethodDecl *> * redecMethodDecl = NULL;
+		TableNode * parent = nullptr;
+		std::map<std::string, Data * > * table = nullptr;
+		std::vector<VarDecl *> * redecVarDecl = nullptr;
+		//std::vector<FormalRest *> * redecVarDecl = nullptr;
+		std::vector<MethodDecl *> * redecMethodDecl = nullptr;
 		TableNode (TableNode * p) {
 			this->parent = p;
 			this->table = new std::map<std::string, Data *>;
