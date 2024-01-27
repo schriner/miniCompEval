@@ -14,7 +14,7 @@ BISON_TARGET(MiniJava_syntax
 	source/parser.y 
 	${AUTOGEN_FLEXBISON}/MiniJava_syntax.cpp
 	COMPILE_FLAGS
-	"-v -y -d --graph=${AUTOGEN_FLEXBISON}/MiniJava_syntax.dot -t --debug -o"
+	"-v -d --graph=${AUTOGEN_FLEXBISON}/MiniJava_syntax.dot --debug -o"
 )
 FLEX_TARGET(MiniJava_lex source/parser.l ${AUTOGEN_FLEXBISON}/MiniJava_lex.cpp)
 set(parser

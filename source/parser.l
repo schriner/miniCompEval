@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #include "y.tab.h"
 #include "MiniJava_syntax.hpp"
 #define PRINTDEBUG(x) // fprintf(stderr, "\n%s\n", (x)); // comment out print statement to remove the printing
 
@@ -36,34 +35,6 @@ B_COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 {STRING} { 
 	PRINTDEBUG(yytext);
 	string temp(yytext + 1, strlen(yytext) - 2);
-	string final("");
-	/*
-	for (int i = 0; i < temp.length(); i++){
-		if (temp[i] == '\\' && (i + 1 < temp.length()) ) {
-			i++;
-			if (temp[i] == 'n') {
-				final.push_back('\n');
-			} else if (temp[i] == 'b') {
-				final.push_back('\b');
-			} else if (temp[i] == 't') {
-				final.push_back('\t');
-			} else if (temp[i] == 'r') {
-				final.push_back('\r');
-			} else if (temp[i] == 'f') {
-				final.push_back('\f');
-			} else if (temp[i] == '\'') {
-				final.push_back('\'');
-			} else if (temp[i] == '\"') {
-				final.push_back('\"');
-			} else if (temp[i] == '\\') {
-				final.push_back('\\');
-			}
-		} else {
-			final.push_back(temp[i]);
-		}
-	}
-	*/
-	// yylval.st_l = new StringLiteral( new string(final) ); 
 	yylval.st_l = new StringLiteral( new string(temp) ); 
 	return STRING_LITERAL; 
 }
