@@ -84,7 +84,7 @@ Used to create a tree representation of the grammar specification ([tree.png](do
 ### mjavac: Compiler to ARM 32 bit assembly 
 
     ```
-    mjavac [-o <output_file> | --stdout ] <inputfile>.java
+    mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
     ```
 
 ### meval:  Interpreter
