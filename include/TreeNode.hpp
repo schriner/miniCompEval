@@ -29,6 +29,8 @@
 using namespace std;
 
 extern int yylineno;
+extern char * exe;
+extern char * yyfilename;
 extern bool programTypeError;
 
 // Forward Class Declarations 
@@ -66,7 +68,17 @@ class TreeNode {
 		virtual void traverse() = 0; 
 		void reportError() {
 			programTypeError = true;
-			fprintf(stderr, "Type Violation in Line %d\n", lineRecord);
+			fprintf(stderr, "%s: Type Violation in Line %d\n", exe, lineRecord);
+			fprintf(stderr, "%s: %s:%d\n", exe, yyfilename, lineRecord);
+			
+			FILE * f = fopen(yyfilename, "r");
+			char buf[256] = "";
+			for (auto i = 0; i < lineRecord; i++) {
+				fgets(buf, 256, f);
+			}
+			buf[255] = '\0';
+			fprintf(stderr, "%s: %s", exe, buf);
+			fclose(f);
 		}
 };
 

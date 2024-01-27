@@ -72,6 +72,23 @@ MethodDeclaration    ::=   "public" Type Identifier "(" ( Type Identifier ( "," 
        Identifier    ::=    <IDENTIFIER>
 ```
 
+### Type and Syntax Violation Reporting
+```
+./build/mjavac: syntax error at token: int
+./build/mjavac: test/ParserError/loopCheck.java:5
+./build/mjavac:                 int a;
+```
+```
+./build/meval: Type Violation in Line 6
+./build/meval: test/Interpreter/simpleCheck.java:6
+./build/meval:         if (true + (2 < 3)) {
+```
+```
+./build/meval: Type Violation in Line 27
+./build/meval: test/Interpreter/loopCheck.java:27
+./build/meval:             multiplier = multiplier + 1;
+```
+
 ## The Makefile produces:
 ### [MiniJava_syntax.output](doc/MiniJava_syntax.output)
     
