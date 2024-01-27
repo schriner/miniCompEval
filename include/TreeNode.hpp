@@ -74,16 +74,13 @@ class Program : public TreeNode {
 		vector<string * > * textSection;
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c), dataSection(NULL), textSection(NULL) {}
-#endif
-#ifndef ASSEM
+		void assem();
+#else
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c) {}
 #endif
 		void traverse(); 
 		void evaluate();
-#ifdef ASSEM
-		void assem();
-#endif
 };
 
 class MainClass : public TreeNode {

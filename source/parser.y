@@ -210,7 +210,7 @@ var_decl_list : /* Eliminate var_decl* */
 var_decl : 
 	INT ID SEMI { 
 		$$ = new VarDecl( new TypePrime(new IntType()), $2 ); 
-		$$->data = new SimpleVar($2->id, "INT", new IntLiteral(0));
+		//$$->data = new SimpleVar($2->id, "INT", new IntLiteral(0));
 	}
 	| BOOL ID SEMI { 
 		$$ = new VarDecl( new TypePrime(new BoolType()), $2 ); 
@@ -500,7 +500,6 @@ exp_list :
 
 exp_rest : 
 	COMMA full_exp { $$ = $2 ; }
-	//COMMA full_exp { $$ = new ExpRest( $2 ); }
 	;
 
 %%

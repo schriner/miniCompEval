@@ -1,7 +1,7 @@
 *.swp
 mjavac
 meval
-.DS_Store
+*.DS_Store
 deleteme.*
 build*
 parse
