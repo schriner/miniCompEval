@@ -933,7 +933,7 @@ void ExpList::traverse() {
 void ExpList::setTable(TableNode * t){
 	if (erl) { erl->setTable(t); }
 	lowestT = t;
-	e->setTable(t);
+	if (e) e->setTable(t);
 }
 
 // Ident //

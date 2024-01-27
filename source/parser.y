@@ -499,7 +499,7 @@ exp_rest_list : /* Eliminate exp_rest* */
 
 exp_list : 
 	full_exp exp_rest_list { $$ = new ExpList( $1, $2 ); }
-	| full_exp { $$ = new ExpList( $1, nullptr ); }
+	| full_exp { $$ = new ExpList( $1 ); }
 	;
 
 exp_rest : 
