@@ -15,7 +15,11 @@
 #include <stdlib.h>
 
 #include "MiniJava_syntax.hpp"
-#define PRINTDEBUG(x) // fprintf(stderr, "\n%s\n", (x)); // comment out print statement to remove the printing
+#ifdef DEBUG_FLEX
+#define PRINTDEBUG(x) fprintf(stderr, "\n%s\n", (x));
+#else
+#define PRINTDEBUG(x)
+#endif
 
 using namespace std;
 
