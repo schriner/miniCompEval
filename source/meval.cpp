@@ -13,8 +13,8 @@ int yyparse(void);
 
 using namespace std;
 
-Program * programRoot = NULL;
-TableNode * rootScope = NULL;
+Program * programRoot = nullptr;
+TableNode * rootScope = nullptr;
 bool programTypeError = false;
 
 /* Main */

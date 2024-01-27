@@ -14,8 +14,8 @@ int yyparse(void);
 using namespace std;
 
 ofstream assemStream;
-Program * programRoot = NULL;
-TableNode * rootScope = NULL;
+Program * programRoot = nullptr;
+TableNode * rootScope = nullptr;
 bool programTypeError = false;
 
 /* Main */

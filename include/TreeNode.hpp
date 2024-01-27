@@ -55,8 +55,8 @@ class TreeNode {
 	protected:
 		TreeNode() : lineRecord(yylineno) {}
 	public: 
-		TableNode * lowestT = NULL;
-		Data * data = NULL; 
+		TableNode * lowestT = nullptr;
+		Data * data = nullptr; 
 		int lineRecord = -1;
 		virtual void traverse() = 0; 
 		void reportError() {
@@ -73,7 +73,7 @@ class Program : public TreeNode {
 		vector<string * > * dataSection;
 		vector<string * > * textSection;
 		Program (MainClass * m, ClassDeclList * c)
-			: m(m), c(c), dataSection(NULL), textSection(NULL) {}
+			: m(m), c(c), dataSection(nullptr), textSection(nullptr) {}
 		void assem();
 #else
 		Program (MainClass * m, ClassDeclList * c)
@@ -88,7 +88,7 @@ class MainClass : public TreeNode {
 		Ident * i1;
 		Ident * i2;
 		Statement * s;
-		vector<string * > * instr = NULL;
+		vector<string * > * instr = nullptr;
 		MainClass (Ident * i1, Ident * i2, Statement * s)
 			: i1(i1), i2(i2), s(s) {}
 		void traverse();
@@ -100,8 +100,8 @@ class MainClass : public TreeNode {
 
 class ClassDeclList : public TreeNode {
 	public:
-		vector<ClassDecl * > * cdVector = NULL;
-		vector<string * > * instr = NULL;
+		vector<ClassDecl * > * cdVector = nullptr;
+		vector<string * > * instr = nullptr;
 		ClassDeclList(ClassDecl * c) { 
 			cdVector = new vector<ClassDecl * >;
 			cdVector->push_back(c);
@@ -126,11 +126,11 @@ class ClassDecl : public TreeNode {
 };
 class ClassDeclSimple : public ClassDecl {
 	public:
-		Ident * i = NULL;
-		VarDeclList * v = NULL;
-		MethodDeclList * m = NULL;
-		map<string, string*> * nameTable = NULL; // id -> symRegLabel
-		map<string, string*> * typeTable = NULL; // id -> symRegLabel
+		Ident * i = nullptr;
+		VarDeclList * v = nullptr;
+		MethodDeclList * m = nullptr;
+		map<string, string*> * nameTable = nullptr; // id -> symRegLabel
+		map<string, string*> * typeTable = nullptr; // id -> symRegLabel
 
 		ClassDeclSimple (Ident * i, VarDeclList * v,  MethodDeclList * m)
 			: i(i), v(v), m(m) { 
@@ -144,9 +144,9 @@ class ClassDeclSimple : public ClassDecl {
 };
 class ClassDeclExtends : public ClassDecl {
 	public:
-		Ident * i1 = NULL; Ident * i2 = NULL;
-		VarDeclList * v = NULL;
-		MethodDeclList * m = NULL;
+		Ident * i1 = nullptr; Ident * i2 = nullptr;
+		VarDeclList * v = nullptr;
+		MethodDeclList * m = nullptr;
 		ClassDeclExtends (Ident * i1, Ident * i2, VarDeclList * v,  MethodDeclList * m) 
 			: i1(i1), i2(i2), v(v), m(m) {}
 		void traverse();
@@ -158,9 +158,9 @@ class ClassDeclExtends : public ClassDecl {
 
 class VarDecl : public TreeNode {
 	public: 
-		Type * t = NULL;
-		Ident * i = NULL;
-		string * label = NULL;
+		Type * t = nullptr;
+		Ident * i = nullptr;
+		string * label = nullptr;
 		VarDecl(Type * t, Ident * i) : t(t), i(i) {} 
 		void traverse();
 		void setTable(TableNode * ta);
@@ -172,7 +172,7 @@ class VarDecl : public TreeNode {
 
 class VarDeclList : public TreeNode { 
 	public:
-		vector<VarDecl * > * vdVector = NULL;
+		vector<VarDecl * > * vdVector = nullptr;
 		VarDeclList(VarDecl * v) {
 			vdVector = new vector<VarDecl * >;
 			vdVector->push_back(v);
@@ -194,14 +194,14 @@ class VarDeclList : public TreeNode {
 
 class MethodDecl : public TreeNode {
 	public:
-		Type * t = NULL;
-		Ident * i = NULL;
-		FormalList * f = NULL;
-		VarDeclList * v = NULL; 
-		StatementList * s = NULL;
-		Exp * e = NULL;
-		map<string, string*> * nameTable = NULL; // id -> symRegLabel
-		map<string, string*> * typeTable = NULL; // id -> symRegLabel
+		Type * t = nullptr;
+		Ident * i = nullptr;
+		FormalList * f = nullptr;
+		VarDeclList * v = nullptr; 
+		StatementList * s = nullptr;
+		Exp * e = nullptr;
+		map<string, string*> * nameTable = nullptr; // id -> symRegLabel
+		map<string, string*> * typeTable = nullptr; // id -> symRegLabel
 
 		MethodDecl(Type * t, Ident * i, FormalList * f, 
 				VarDeclList * v, StatementList * s, Exp * e)
@@ -217,7 +217,7 @@ class MethodDecl : public TreeNode {
 
 class MethodDeclList : public TreeNode {
 	public:
-		vector<MethodDecl * > * mdVector = NULL;
+		vector<MethodDecl * > * mdVector = nullptr;
 		MethodDeclList (MethodDecl * m) { 
 			mdVector = new vector<MethodDecl * >;
 			mdVector->push_back(m);
@@ -234,9 +234,9 @@ class MethodDeclList : public TreeNode {
 
 class FormalList : public TreeNode {
 	public:
-		Type * t = NULL;
-		Ident * i = NULL;
-		FormalRestList * f = NULL;
+		Type * t = nullptr;
+		Ident * i = nullptr;
+		FormalRestList * f = nullptr;
 		FormalList(Type * t, Ident * i, FormalRestList * f)
 			: t(t), i(i), f(f) {}
 		void traverse();
@@ -245,7 +245,7 @@ class FormalList : public TreeNode {
 
 class FormalRestList : public TreeNode {
 	public:
-		vector<FormalRest * > * frVector = NULL;
+		vector<FormalRest * > * frVector = nullptr;
 		FormalRestList(FormalRest * f) {
 			frVector = new vector<FormalRest * >;
 			frVector->push_back(f);
@@ -259,8 +259,8 @@ class FormalRestList : public TreeNode {
 
 class FormalRest : public TreeNode {
 	public:
-		Type * t = NULL;
-		Ident * i = NULL;
+		Type * t = nullptr;
+		Ident * i = nullptr;
 		FormalRest(Type * t, Ident * i) : t(t), i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -285,7 +285,7 @@ class BoolType : public PrimeType {
 };
 class IdentType : public PrimeType { 
 	public: 
-		Ident * i = NULL;
+		Ident * i = nullptr;
 		IdentType(Ident * i) : i(i) {} 
 		void traverse();
 		void setTable(TableNode * t);
@@ -299,19 +299,19 @@ class Type : public TreeNode {
 };
 class TypePrime : public Type { 
 	public:
-		PrimeType * p = NULL;
+		PrimeType * p = nullptr;
 		TypePrime(PrimeType * p) : p(p) {}
 		void traverse();
 		void setTable(TableNode * t);
 };
 class TypeIndexList : public Type {
 	public:
-		Type * t = NULL;
+		Type * t = nullptr;
 		TypeIndexList(Type * t) : t(t) {}
 		TypeIndexList * getLastNull() { // for the type_bracket_list non-term
 			TypeIndexList * node = this;
-			// Find the NULL statement
-			while (node->t != NULL){
+			// Find the nullptr statement
+			while (node->t != nullptr){
 				node = (TypeIndexList *) node->t;
 			}
 			return node;
@@ -335,9 +335,9 @@ class Statement : public TreeNode {
 #endif
 };
 class BlockStatements : public Statement {
-	// For: { StatementList }  -- SL = NULL for: { } 
+	// For: { StatementList }  -- SL = nullptr for: { } 
 	public:
-		StatementList * s = NULL;
+		StatementList * s = nullptr;
 		BlockStatements(StatementList * s) : s(s) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -349,8 +349,8 @@ class BlockStatements : public Statement {
 class IfStatement : public Statement {
 	// For: if (e) s_if else s_el 
 	public:
-		Exp * e = NULL;
-		Statement * s_if = NULL; Statement * s_el = NULL;
+		Exp * e = nullptr;
+		Statement * s_if = nullptr; Statement * s_el = nullptr;
 		IfStatement( Exp * e, Statement * s_if, Statement * s_el ) 
 			: e(e), s_if(s_if), s_el(s_el) {}
 		void traverse();
@@ -363,8 +363,8 @@ class IfStatement : public Statement {
 class WhileStatement : public Statement {
 	// For: while (e) s
 	public:
-		Exp * e = NULL;
-		Statement * s = NULL;
+		Exp * e = nullptr;
+		Statement * s = nullptr;
 		WhileStatement(Exp * e, Statement * s) : e(e), s(s) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -376,7 +376,7 @@ class WhileStatement : public Statement {
 class PrintLineExp : public Statement {
 	// For: .println( e )
 	public:
-		Exp * e = NULL;
+		Exp * e = nullptr;
 		PrintLineExp(Exp * e) : e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -388,7 +388,7 @@ class PrintLineExp : public Statement {
 class PrintLineString : public Statement {
 	// For: .println( s )
 	public:
-		StringLiteral * s = NULL;
+		StringLiteral * s = nullptr;
 		PrintLineString (StringLiteral * s) : s(s) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -400,7 +400,7 @@ class PrintLineString : public Statement {
 class PrintExp : public Statement {
 	// For: .print( e )
 	public:
-		Exp * e = NULL;
+		Exp * e = nullptr;
 		PrintExp (Exp * e) : e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -412,7 +412,7 @@ class PrintExp : public Statement {
 class PrintString : public Statement {
 	// For: .print( s )
 	public:
-		StringLiteral * s = NULL;
+		StringLiteral * s = nullptr;
 		PrintString (StringLiteral * s) : s(s) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -424,8 +424,8 @@ class PrintString : public Statement {
 class Assign : public Statement {
 	// For: i = e
 	public:
-		Ident * i = NULL;
-		Exp * e = NULL;
+		Ident * i = nullptr;
+		Exp * e = nullptr;
 		Assign(Ident * i, Exp * e) : i(i), e(e) {}
 		//TODO(ss): void evaluate();
 		void traverse();
@@ -438,9 +438,9 @@ class Assign : public Statement {
 class IndexAssign : public Statement {
 	// For: i ind = e
 	public:
-		Ident * i = NULL;
-		Index * ind = NULL;
-		Exp * e = NULL;
+		Ident * i = nullptr;
+		Index * ind = nullptr;
+		Exp * e = nullptr;
 		IndexAssign(Ident * i, Index * ind, Exp * e) : i(i), ind(ind), e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -451,7 +451,7 @@ class IndexAssign : public Statement {
 class ReturnStatement : public Statement {
 	// For: return e 
 	public:
-		Exp * e = NULL;
+		Exp * e = nullptr;
 		ReturnStatement(Exp * e) : e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -464,7 +464,7 @@ class ReturnStatement : public Statement {
 
 class StatementList : public TreeNode {
 	public:
-		vector<Statement * > * sVector = NULL;
+		vector<Statement * > * sVector = nullptr;
 		StatementList(Statement * s) {
 			sVector = new vector<Statement * >;
 			sVector->push_back(s);
@@ -487,15 +487,15 @@ class Index : public TreeNode {
 }; 
 class SingleIndex : public Index {
 	public:
-		Exp * e = NULL;
+		Exp * e = nullptr;
 		SingleIndex(Exp * e) : e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
 };
 class MultipleIndices : public Index {
 	public:
-		Index * ind = NULL;
-		Exp * e = NULL;
+		Index * ind = nullptr;
+		Exp * e = nullptr;
 		MultipleIndices(Index * ind, Exp * e) : ind(ind), e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -524,8 +524,8 @@ class BinExp : public Exp {
 	protected:
 		BinExp(Exp * e1, Exp * e2) : e1(e1), e2(e2) {}; 
 	public:
-		Exp * e1 = NULL;
-		Exp * e2 = NULL; 
+		Exp * e1 = nullptr;
+		Exp * e2 = nullptr; 
 		void setTable(TableNode * t);
 };
 class Or : public BinExp { 
@@ -642,7 +642,7 @@ class UnaryExp : public Exp {
 	protected:
 		UnaryExp(Exp * e) : e(e) {};
 	public:
-		Exp * e = NULL;
+		Exp * e = nullptr;
 		void setTable(TableNode * t);
 };
 class Not : public UnaryExp {
@@ -684,30 +684,30 @@ class ParenExp : public UnaryExp {
 };
 class ArrayAccess : public Exp {
 	public:
-		Ident * i = NULL;
-		Index * ind = NULL;
+		Ident * i = nullptr;
+		Index * ind = nullptr;
 		ArrayAccess(Ident * i, Index * ind) : i(i), ind(ind){}
 		void traverse();
 		void setTable(TableNode * t);
 };
 class Length : public Exp {
 	public:
-		Ident * i = NULL;
+		Ident * i = nullptr;
 		Length(Ident * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
 };
 class ArrayAccessLength : public Exp {
 	public:
-		Ident * i = NULL;
-		Index * ind = NULL;
+		Ident * i = nullptr;
+		Index * ind = nullptr;
 		ArrayAccessLength(Ident * i, Index * ind) : i(i), ind(ind) {}
 		void traverse();
 		void setTable(TableNode * t);
 };
 class LitInt : public Exp {
 	public:
-		IntLiteral * i = NULL;
+		IntLiteral * i = nullptr;
 		LitInt(IntLiteral * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -736,7 +736,7 @@ class False : public Exp {
 };
 class ExpObject : public Exp {
 	public:
-		Object * o = NULL;
+		Object * o = nullptr;
 		ExpObject(Object * o) : o(o) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -747,12 +747,13 @@ class ExpObject : public Exp {
 };
 class ObjectMethodCall : public Exp {
 	public:
-		Object * o = NULL;
-		Ident * i = NULL;
-		ExpList * e = NULL;
+		Object * o = nullptr;
+		Ident * i = nullptr;
+		ExpList * e = nullptr;
 		ObjectMethodCall(Object * o, Ident * i, ExpList * e) : o(o), i(i), e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
+		//TODO(ss): int evaluate();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #endif
@@ -771,7 +772,7 @@ class Object : public TreeNode {
 };
 class IdObj : public Object {
 	public: // For: id
-		Ident * i = NULL;
+		Ident * i = nullptr;
 		IdObj(Ident * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -788,7 +789,7 @@ class ThisObj : public Object {
 };
 class NewIdObj : public Object {
 	public: // For: new id ()
-		Ident * i = NULL;
+		Ident * i = nullptr;
 		NewIdObj(Ident * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -796,8 +797,8 @@ class NewIdObj : public Object {
 };
 class NewTypeObj : public Object {
 	public:
-		PrimeType * p = NULL;
-		Index * i = NULL;
+		PrimeType * p = nullptr;
+		Index * i = nullptr;
 		NewTypeObj(PrimeType * p, Index * i) : p(p), i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
@@ -811,9 +812,9 @@ class NewTypeObj : public Object {
 /* list of ",exp" ",exp"..... */
 class ExpRestList : public TreeNode {
 	public:
-		vector<Exp * > * erVector = NULL;
+		vector<Exp * > * erVector = nullptr;
 		ExpRestList(Exp * e) {
-			erVector = new vector<Exp * >;
+			erVector = new vector<Exp * >(1, nullptr);
 			erVector->push_back(e);
 		}
 		void append(Exp * e) {
@@ -824,12 +825,15 @@ class ExpRestList : public TreeNode {
 		// TODO: void evaluate();
 };
 
-/* ExpRestList can be NULL */
+/* ExpRestList can be nullptr */
 class ExpList : public TreeNode { 
 	public:
-		Exp * e = NULL;
-		ExpRestList * erl = NULL;
-		ExpList(Exp * e, ExpRestList * erl) : e(e), erl(erl) {} 
+		// Union and dynamic cast to eliminate extra pointer
+		Exp * e = nullptr;
+		ExpRestList * erl = nullptr;
+		ExpList(Exp * e, ExpRestList * erl) : erl(erl) {
+			erl[0] = e;
+		}
 		ExpList(Exp * e) : e(e) {} 
 		void traverse();
 		void setTable(TableNode * t);
@@ -838,15 +842,15 @@ class ExpList : public TreeNode {
 
 class Ident : public TreeNode {
 	public:
-		string * id = NULL;
+		string * id = nullptr;
 		Ident(string * id) : id(id) {}
 		void traverse();
 };
 
 class StringLiteral : public TreeNode {
 	public:
-		string * str = NULL;
-		string * label = NULL;
+		string * str = nullptr;
+		string * label = nullptr;
 		StringLiteral(string * str) : str(str) {}
 		void traverse();
 #ifdef ASSEM
