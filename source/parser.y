@@ -41,7 +41,7 @@ using namespace std;
 	ExpRestList * erl;
 	Exp * er;
 	IntLiteral * in_l;
-	BoolLiteral * b_l;
+	//BoolLiteral * b_l;
 	StringLiteral * st_l;
 	Ident * id;
 }
@@ -85,16 +85,17 @@ string * typeStringHolder = nullptr;
 %type<el>   exp_list
 %type<erl>  exp_rest_list
 %type<er>   exp_rest
-%type<in_l> INTEGER_LITERAL
-%type<st_l> STRING_LITERAL
-%type<id>   ID
+
+%token<in_l> INTEGER_LITERAL
+%token<st_l> STRING_LITERAL
+%token<id>   ID
 
 %token THIS NEW EXTENDS RETURN LENGTH
 %token PRINT_STATE PRINT_STATE_LN IF ELSE WHILE STRING
 %token CLASS MAIN STATIC VOID PUBLIC
 %token SEMI COMMA NOT PLUS MINUS EQUAL TRUE FALSE DOT
 %token O_PAREN C_PAREN O_BR C_BR O_SQ C_SQ 
-%token STRING_LITERAL INTEGER_LITERAL ID INT BOOL 
+%token INT BOOL 
 %token AND OR G_EQ L_EQ EQEQ N_EQ GREAT LESS MUL DIV
 
 %%
