@@ -36,9 +36,9 @@ void Program::traverse() {
 	m->traverse();
 	if (c) { c->traverse(); }
 	PRINTDEBUGTREE("Program");
+	if (programTypeError) abort();
 }
 void Program::evaluate() {
-	this->traverse();
 	if (programTypeError) return;
 	m->evaluate();
 }

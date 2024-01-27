@@ -110,16 +110,14 @@ program  :
 			(*c)->lowestT->parent = rootScope;
 		}
 		$2->lowestT = rootScope; // class_decl scope is root scope
-		//programRoot->traverse();
-		//if (!programTypeError) { programRoot->evaluate(); }
+		programRoot->traverse();
 	}
 	| main_class { 
 		programRoot = new Program($1, NULL); 
 		rootScope = new TableNode(NULL);
 		programRoot->lowestT = rootScope;
 		$1->lowestT->parent = rootScope; // main_scope->root
-		//programRoot->traverse();
-		//if (!programTypeError) { programRoot->evaluate(); }
+		programRoot->traverse();
 	}
 	;
 
