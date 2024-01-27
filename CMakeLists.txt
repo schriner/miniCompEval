@@ -46,7 +46,11 @@ add_test(NAME ${TEST_DIR}/ParseLoop COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/
 add_test(NAME ${TEST_DIR}/ParseArray COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/array.java)
 add_test(NAME ${TEST_DIR}/ParseNumber COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/number.java)
 add_test(NAME ${TEST_DIR}/ParseSimple COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/simple.java)
-#add_test(NAME ${TEST_DIR}/VariableInMain COMMAND mjavac "-p" ${TEST_DIR}/ParserError/loopCheck.java)
+
+add_test(NAME ${TEST_DIR}/VariableInMain COMMAND mjavac "-p" ${TEST_DIR}/ParserError/loopCheck.java)
+set (passRegex "^${CMAKE_CURRENT_BINARY_DIR}/mjavac: syntax error at token: int\n${CMAKE_CURRENT_BINARY_DIR}/mjavac: ${TEST_DIR}/ParserError/loopCheck.java:5\n${CMAKE_CURRENT_BINARY_DIR}/:                 int a;\n")
+set_property (TEST ${TEST_DIR}/VariableInMain 
+	              PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
 if(PNG)
 	add_custom_command(
