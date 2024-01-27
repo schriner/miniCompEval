@@ -48,6 +48,9 @@ using namespace std;
 
 %{
 
+#include <unistd.h>
+#include <stdio.h>
+
 int yylex();
 void yyerror(const char *s);	
 void yyrestart(FILE * fp);
@@ -505,11 +508,27 @@ exp_rest :
 
 %%
 
+void yylineerror() {
+	extern char * yyfilename;
+	extern char * exe;
+	FILE * f = fopen(yyfilename, "r");
+	char buf[256] = "";
+	for (auto i = 0; i < yylineno; i++) {
+		fgets(buf, 256, f);
+	}
+	buf[255] = '\0';
+  fprintf(stderr, "%s: %s", exe, buf);
+	fclose(f);
+
+}
+
 /* Declare yyerror */
 void yyerror (char const *s) {
 	extern int yylineno;
 	extern char * yytext;
 	extern char * yyfilename;
+	extern char * exe;
 	// TODO(ss) report the line
-  fprintf (stderr, "%s at token: %s\nLine: %d, File: %s\n", s, yytext, yylineno, yyfilename);
+  fprintf (stderr, "%s: %s at token: %s\n%s: %s:%d\n", exe, s, yytext, exe, yyfilename, yylineno);
+	yylineerror();
 }

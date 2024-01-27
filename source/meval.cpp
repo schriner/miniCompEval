@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <fstream>
 #include <string>
-#include <cassert>
 
 #include "TreeNode.hpp"
 
@@ -17,11 +16,13 @@ Program * programRoot = nullptr;
 TableNode * rootScope = nullptr;
 bool programTypeError = false;
 char * yyfilename;
+char * exe;
 
 /* Main */
 int main( int argc, char** argv ) {
 	extern FILE * yyin;
 	streambuf * old;
+	exe = argv[0];
 
 	// Pass fp to yy
 	if (argc == 4 && !string("-o").compare(argv[1])
