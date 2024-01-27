@@ -73,6 +73,9 @@ MethodDeclaration    ::=   "public" Type Identifier "(" ( Type Identifier ( "," 
 ```
 
 ### Type and Syntax Violation Reporting
+
+Sample Output:
+
 ```
 ./build/mjavac: syntax error at token: int
 ./build/mjavac: test/ParserError/loopCheck.java:5
