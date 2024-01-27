@@ -528,7 +528,6 @@ void yyerror (char const *s) {
 	extern char * yytext;
 	extern char * yyfilename;
 	extern char * exe;
-	// TODO(ss) report the line
   fprintf (stderr, "%s: %s at token: %s\n%s: %s:%d\n", exe, s, yytext, exe, yyfilename, yylineno);
 	yylineerror();
 }
