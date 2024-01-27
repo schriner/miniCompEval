@@ -46,7 +46,6 @@ class Exp;
 class Object;
 class ExpList;
 class ExpRestList;
-class ExpRest;
 class Ident;
 class IntLiteral;
 class StringLiteral;
@@ -70,10 +69,16 @@ class Program : public TreeNode {
 	public:
 		MainClass * m;
 		ClassDeclList * c;
+#ifdef ASSEM
 		vector<string * > * dataSection;
 		vector<string * > * textSection;
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c), dataSection(NULL), textSection(NULL) {}
+#endif
+#ifndef ASSEM
+		Program (MainClass * m, ClassDeclList * c)
+			: m(m), c(c) {}
+#endif
 		void traverse(); 
 		void evaluate();
 #ifdef ASSEM
@@ -162,6 +167,7 @@ class VarDecl : public TreeNode {
 		VarDecl(Type * t, Ident * i) : t(t), i(i) {} 
 		void traverse();
 		void setTable(TableNode * ta);
+		// TODO(ss): void evaluate();
 #ifdef ASSEM
 		void assem(map<string, string*> *, map<string, string*> *);
 #endif
@@ -424,6 +430,7 @@ class Assign : public Statement {
 		Ident * i = NULL;
 		Exp * e = NULL;
 		Assign(Ident * i, Exp * e) : i(i), e(e) {}
+		//TODO(ss): void evaluate();
 		void traverse();
 		void setTable(TableNode * t);
 #ifdef ASSEM
@@ -736,6 +743,7 @@ class ExpObject : public Exp {
 		ExpObject(Object * o) : o(o) {}
 		void traverse();
 		void setTable(TableNode * t);
+		//TODO(ss): int evaluate();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #endif
@@ -770,6 +778,7 @@ class IdObj : public Object {
 		IdObj(Ident * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
+		//TODO: void evaluate();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #endif
@@ -786,7 +795,7 @@ class NewIdObj : public Object {
 		NewIdObj(Ident * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
+		//TODO: void evaluate();
 };
 class NewTypeObj : public Object {
 	public:
@@ -795,6 +804,7 @@ class NewTypeObj : public Object {
 		NewTypeObj(PrimeType * p, Index * i) : p(p), i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
+		void evaluate();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #endif
@@ -804,16 +814,17 @@ class NewTypeObj : public Object {
 /* list of ",exp" ",exp"..... */
 class ExpRestList : public TreeNode {
 	public:
-		vector<ExpRest * > * erVector = NULL;
-		ExpRestList(ExpRest * e) {
-			erVector = new vector<ExpRest * >;
+		vector<Exp * > * erVector = NULL;
+		ExpRestList(Exp * e) {
+			erVector = new vector<Exp * >;
 			erVector->push_back(e);
 		}
-		void append(ExpRest * e) {
+		void append(Exp * e) {
 			erVector->push_back(e);
 		}
 		void traverse();
 		void setTable(TableNode * t);
+		// TODO: void evaluate();
 };
 
 /* ExpRestList can be NULL */
@@ -822,16 +833,10 @@ class ExpList : public TreeNode {
 		Exp * e = NULL;
 		ExpRestList * erl = NULL;
 		ExpList(Exp * e, ExpRestList * erl) : e(e), erl(erl) {} 
+		ExpList(Exp * e) : e(e) {} 
 		void traverse();
 		void setTable(TableNode * t);
-};
-
-class ExpRest : public TreeNode {
-	public:
-		Exp * e = NULL;
-		ExpRest(Exp * e) : e(e) {}
-		void traverse();
-		void setTable(TableNode * t);
+		// TODO: void evaluate();
 };
 
 class Ident : public TreeNode {

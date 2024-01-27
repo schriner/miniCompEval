@@ -10,7 +10,6 @@
 %code requires
 {
 #include <string>
-//#include "TableNode.hpp"
 #include "TreeNode.hpp"
 
 using namespace std;
@@ -40,7 +39,7 @@ using namespace std;
 	Object * obj; 
 	ExpList * el;
 	ExpRestList * erl;
-	ExpRest * er;
+	Exp * er;
 	IntLiteral * in_l;
 	BoolLiteral * b_l;
 	StringLiteral * st_l;
@@ -500,7 +499,8 @@ exp_list :
 	;
 
 exp_rest : 
-	COMMA full_exp { $$ = new ExpRest( $2 ); }
+	COMMA full_exp { $$ = $2 ; }
+	//COMMA full_exp { $$ = new ExpRest( $2 ); }
 	;
 
 %%
@@ -510,6 +510,4 @@ void yyerror (char const *s) {
 	extern int yylineno;
 	extern char * yytext;
   fprintf (stderr, "%s in line %d\n", s, yylineno);
-  // fprintf (stderr, "Syntax errors in %d\n", yylineno);
-  // fprintf (stderr, "%s in line %d\n", yytext, yylineno);
 }

@@ -15,7 +15,6 @@
 #include <fstream>
 
 #include "TreeNode.hpp"
-//#include "util.hpp"
 
 using namespace std;
 
@@ -39,6 +38,8 @@ void Program::traverse() {
 	PRINTDEBUGTREE("Program");
 }
 void Program::evaluate() {
+	this->traverse();
+	if (programTypeError) return;
 	m->evaluate();
 }
 
@@ -60,6 +61,8 @@ void ClassDeclList::traverse() {
 	}
 	PRINTDEBUGTREE("ClassDeclList");
 }
+//TODO(ss): void ClassDeclList::evaluate() {
+//}
 
 // ClassDeclSimple //
 void ClassDeclSimple::traverse() {
@@ -69,6 +72,8 @@ void ClassDeclSimple::traverse() {
 	if (m) { m->traverse(); }
 	PRINTDEBUGTREE("ClassDeclSimple");
 }
+//TODO(ss): void ClassDecl::evaluate() {
+//}
 
 // ClassDeclExtends //
 void ClassDeclExtends::traverse() {
@@ -79,6 +84,8 @@ void ClassDeclExtends::traverse() {
 	if (m) { m->traverse(); }
 	PRINTDEBUGTREE("ClassDeclExtends");
 }
+//TODO(ss): void ClassDecl::evaluate() {
+//}
 
 // VarDeclList //
 void VarDeclList::traverse() {
@@ -103,7 +110,6 @@ void VarDecl::setTable(TableNode * ta){
 	t->setTable(ta);
 	i->lowestT = ta;
 	if (data) { 
-		//fprintf(stderr, "%s\n", i->id->c_str());
 		if ( ta->table->find( string(*(i->id)) ) == ta->table->end() ) {
 			(*ta->table)[ string(*(i->id)) ] = data; 
 		} else {
@@ -111,6 +117,10 @@ void VarDecl::setTable(TableNode * ta){
 		}
 	}
 }
+//TODO(ss) void VarDecl::evaluate() {
+// Account For type
+//}
+
 // TableNode - YES I should have a different file for this// 
 void TableNode::reportBadVarDecl () {
 	for (auto v = redecVarDecl->begin(); v < redecVarDecl->end(); v++) {
@@ -386,6 +396,10 @@ void Assign::setTable(TableNode * t) {
 	i->lowestT = t;
 	e->setTable(t);
 }
+//TODO(ss)void Assign::evaluate() {
+//  TypeCheck
+//	cout << *(s->str);
+//}
 
 // IndexAssign //
 void IndexAssign::traverse() {
@@ -918,16 +932,6 @@ void ExpList::traverse() {
 }
 void ExpList::setTable(TableNode * t){
 	if (erl) { erl->setTable(t); }
-	lowestT = t;
-	e->setTable(t);
-}
-
-// ExpRest //
-void ExpRest::traverse() {
-	e->traverse();
-	PRINTDEBUGTREE("ExpRest");
-} 
-void ExpRest::setTable(TableNode * t){
 	lowestT = t;
 	e->setTable(t);
 }
