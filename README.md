@@ -109,4 +109,8 @@ Used to create a tree representation of the grammar specification ([tree.png](do
     ```
     meval [-o <output_file>] <inputfile>.java
     ```
-## TODO: Test Functionality
+## Test Functionality
+From within the build directory:
+```
+ctest
+```

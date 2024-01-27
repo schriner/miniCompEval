@@ -79,6 +79,7 @@ class TreeNode {
 			buf[255] = '\0';
 			fprintf(stderr, "%s: %s", exe, buf);
 			fclose(f);
+			abort();
 		}
 };
 
@@ -849,7 +850,7 @@ class ExpList : public TreeNode {
 		Exp * e = nullptr;
 		ExpRestList * erl = nullptr;
 		ExpList(Exp * e, ExpRestList * erl) : erl(erl) {
-			erl[0] = e;
+			(*erl->erVector)[0] = e;
 		}
 		ExpList(Exp * e) : e(e) {} 
 		void traverse();
