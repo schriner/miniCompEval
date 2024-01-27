@@ -509,5 +509,7 @@ exp_rest :
 void yyerror (char const *s) {
 	extern int yylineno;
 	extern char * yytext;
-  fprintf (stderr, "%s in line %d\n", s, yylineno);
+	extern char * yyfilename;
+	// TODO(ss) report the line
+  fprintf (stderr, "%s at token: %s\nLine: %d, File: %s\n", s, yytext, yylineno, yyfilename);
 }

@@ -16,6 +16,7 @@ using namespace std;
 Program * programRoot = nullptr;
 TableNode * rootScope = nullptr;
 bool programTypeError = false;
+char * yyfilename;
 
 /* Main */
 int main( int argc, char** argv ) {
@@ -30,9 +31,11 @@ int main( int argc, char** argv ) {
 		ofstream file(argv[2], fstream::trunc);
 		old = cout.rdbuf(file.rdbuf());
 		yyin = fopen(argv[3], "r");
+		yyfilename = argv[3];
 
 	} else if (argc == 2 && string(argv[1]).find(".java") != string::npos) {
 		yyin = fopen(argv[1], "r");
+		yyfilename = argv[1];
 		
 	} else {
 		PARSING_ERROR("invalid argument format");
