@@ -7,3 +7,7 @@ build*
 parse
 CMakeCache.txt
 test/*/*.s
+.project
+.cproject
+.idea
+.settings/
