@@ -483,8 +483,9 @@ class ReturnStatement : public Statement {
 		void setTable(TableNode * t);
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
-		// TODO: void evaluate();
 };
 /* Abstract Class Statement End */
 

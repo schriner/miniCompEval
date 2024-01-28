@@ -22,14 +22,24 @@ void MainClass::evaluate() {
 }
 
 //TODO(ss): void ClassDeclList::evaluate() {}
-
 //TODO(ss): void ClassDecl::evaluate() {}
 
 //TODO(ss): void ClassDeclExtends::evaluate() {}
 
-//TODO(ss): void VarDecl::evaluate() {
-// Account For type
-//}
+//TODO(ss): void VarDeclList::evaluate() {}
+//TODO(ss): void VarDecl::evaluate() { Account for type }
+
+//TODO(ss): void MethodDecl::evaluate() {}
+//TODO(ss): void MethodDeclList::evaluate() {}
+
+//TODO(ss): void FormalList::evaluate() {}
+//TODO(ss): void FormalRestList::evaluate() {}
+//TODO(ss): void FormalRest::evaluate() {}
+
+//TODO(ss): void IntType::evaluate() {}
+//TODO(ss): void BoolType::evaluate() {}
+//TODO(ss): void IdentType::evaluate() {}
+//TODO(ss)(Array): void TypeIndexList::evaluate() {}
 
 void BlockStatements::evaluate() {
 	if (s) { s->evaluate(); }
@@ -65,14 +75,14 @@ void PrintString::evaluate() {
 	cout << *(s->str);
 }
 
-//TODO(ss)void Assign::evaluate() {
-//  TypeCheck
-//	cout << *(s->str);
-//}
+//TODO(ss)void Assign::evaluate() { /*  TypeCheck */ cout << *(s->str); }
 
-//TODO(ss)void IndexAssign::evaluate() {}
+//TODO(ss)(Array)void IndexAssign::evaluate() {}
 
-//TODO(ss) void ReturnStatement::evaluate(TableNode * t) {}
+void ReturnStatement::evaluate() {
+	e->evaluate();
+	//TODO(ss) Fix table;
+}
 
 void StatementList::evaluate() {
 	for (auto s = sVector->begin(); s < sVector->end(); s++) {
@@ -80,9 +90,8 @@ void StatementList::evaluate() {
 	}
 }
 
-//TODO(ss)void SingleIndex::evaluate() {}
-
-//TODO(ss)void MultipleIndices::evaluate() {}
+//TODO(ss)(Array)void SingleIndex::evaluate() {}
+//TODO(ss)(Array)void MultipleIndices::evaluate() {}
 
 int Or::evaluate() {
 	int r1 = e1->evaluate();
@@ -174,11 +183,9 @@ int ParenExp::evaluate() {
 	return e->evaluate();
 }
 
-//TODO(ss)void ArrayAccess::evaluate() {}
-//TODO(ss)void ArrayAccessLength::evaluate() {}
-
-/* list of "exp" or "exp , exp, ..." */
-//TODO(ss) void ExpList::evaluate() { // add erl or e to table }
+//TODO(ss)(Array)void ArrayAccess::evaluate() {}
+//TODO(ss)(Array)void Length::evaluate() {}
+//TODO(ss)(Array)void ArrayAccessLength::evaluate() {}
 
 int LitInt::evaluate() {
 	return i->i;
@@ -191,5 +198,25 @@ int True::evaluate() {
 int False::evaluate() {
 	return 0;
 }
+
+//TODO(ss)void ExpObject::evaluate() {}
+int ObjectMethodCall::evaluate() {
+	// look up the method
+	// place the result somewhere
+	if (dynamic_cast<NewTypeObj>(o)) {
+		// look up the method in the table and traverse
+	}
+	return 0;
+}
+//TODO(ss)void IdObj::evaluate() {}
+//TODO(ss)void ThisObj::evaluate() {}
+int NewIdObj::evaluate() {
+	// create an obj and add it to a table or return the addr
+	return 0;
+}
+//TODO(ss)void NewTypeObj::evaluate() {}
+
+/* list of "exp" or "exp , exp, ..." */
+//TODO(ss) void ExpList::evaluate() { // add erl or e to table }
 
 #endif
