@@ -21,6 +21,15 @@ set_property (TEST EvalSimple
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
+add_test(NAME EvalLoop COMMAND meval ${TEST_DIR}/Interpreter/loop.java)
+set (passRegex
+	"Factorial of 10 is:3628800"
+)
+set_property (TEST EvalLoop 
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+
 add_test(NAME EvalMultiplePrint COMMAND meval ${TEST_DIR}/Compiler/multiplePrint.java)
 set (passRegex
   "The answer\nto the meaning\nof life\nis:\n42\n"
