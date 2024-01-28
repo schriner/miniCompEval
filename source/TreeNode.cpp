@@ -38,10 +38,6 @@ void Program::traverse() {
 	PRINTDEBUGTREE("Program");
 	if (programTypeError) abort();
 }
-void Program::evaluate() {
-	if (programTypeError) return;
-	m->evaluate();
-}
 
 // MainClass //
 void MainClass::traverse() {
@@ -49,9 +45,6 @@ void MainClass::traverse() {
 	i2->traverse();
 	s->traverse();
 	PRINTDEBUGTREE("MainClass");
-}
-void MainClass::evaluate() {
-	s->evaluate();
 }
 
 // ClassDeclList //
@@ -61,8 +54,6 @@ void ClassDeclList::traverse() {
 	}
 	PRINTDEBUGTREE("ClassDeclList");
 }
-//TODO(ss): void ClassDeclList::evaluate() {
-//}
 
 // ClassDeclSimple //
 void ClassDeclSimple::traverse() {
@@ -72,8 +63,6 @@ void ClassDeclSimple::traverse() {
 	if (m) { m->traverse(); }
 	PRINTDEBUGTREE("ClassDeclSimple");
 }
-//TODO(ss): void ClassDecl::evaluate() {
-//}
 
 // ClassDeclExtends //
 void ClassDeclExtends::traverse() {
@@ -84,8 +73,7 @@ void ClassDeclExtends::traverse() {
 	if (m) { m->traverse(); }
 	PRINTDEBUGTREE("ClassDeclExtends");
 }
-//TODO(ss): void ClassDecl::evaluate() {
-//}
+
 
 // VarDeclList //
 void VarDeclList::traverse() {
@@ -117,9 +105,6 @@ void VarDecl::setTable(TableNode * ta){
 		}
 	}
 }
-//TODO(ss) void VarDecl::evaluate() {
-// Account For type
-//}
 
 // TableNode - YES I should have a different file for this// 
 void TableNode::reportBadVarDecl () {
@@ -258,9 +243,6 @@ void BlockStatements::setTable(TableNode * t) {
 	lowestT = t;
 	if (s) { s->setTableNodes(t); }
 }
-void BlockStatements::evaluate() {
-	if (s) { s->evaluate(); }
-}
 
 // IfStatement //
 void IfStatement::traverse() {
@@ -278,13 +260,6 @@ void IfStatement::setTable(TableNode * t) {
 	s_if->setTable(t);
 	s_el->setTable(t);
 }
-void IfStatement::evaluate() {
-	if ( e->evaluate() ) {
-		s_if->evaluate();
-	} else {
-		s_el->evaluate();
-	}
-}
 
 // WhileStatement //
 void WhileStatement::traverse() {
@@ -300,11 +275,6 @@ void WhileStatement::setTable(TableNode * t) {
 	e->setTable(t); 
 	s->setTable(t);
 }
-void WhileStatement::evaluate() {
-	while ( e->evaluate() ) {
-		s->evaluate();
-	}
-}
 
 // PrintLineExp //
 void PrintLineExp::traverse() {
@@ -318,9 +288,6 @@ void PrintLineExp::setTable(TableNode * t) {
 	lowestT = t;
 	e->setTable(t);
 }
-void PrintLineExp::evaluate () {
-	cout << e->evaluate() << endl;
-}
 
 // PrintLineString //
 void PrintLineString::traverse() {
@@ -330,9 +297,6 @@ void PrintLineString::traverse() {
 void PrintLineString::setTable(TableNode * t) {
 	lowestT = t;
 	s->lowestT = t;
-}
-void PrintLineString::evaluate() {
-	cout << *(s->str) << endl;
 }
 
 // PrintExp //
@@ -347,9 +311,6 @@ void PrintExp::setTable(TableNode * t) {
 	lowestT = t;
 	e->setTable(t);
 }
-void PrintExp::evaluate () {
-	cout << e->evaluate() << endl;
-}
 
 // PrintString //
 void PrintString::traverse() {
@@ -359,9 +320,6 @@ void PrintString::traverse() {
 void PrintString::setTable(TableNode * t) {
 	lowestT = t;
 	s->lowestT = t;
-}
-void PrintString::evaluate() {
-	cout << *(s->str);
 }
 
 // Assign //
@@ -396,10 +354,6 @@ void Assign::setTable(TableNode * t) {
 	i->lowestT = t;
 	e->setTable(t);
 }
-//TODO(ss)void Assign::evaluate() {
-//  TypeCheck
-//	cout << *(s->str);
-//}
 
 // IndexAssign //
 void IndexAssign::traverse() {
@@ -445,11 +399,6 @@ void StatementList::setTableNodes(TableNode * n) {
 	for (auto s = sVector->begin(); s < sVector->end(); s++) {
 		//(*s)->lowestT = n;
 		(*s)->setTable(n);
-	}
-}
-void StatementList::evaluate() {
-	for (auto s = sVector->begin(); s < sVector->end(); s++) {
-		(*s)->evaluate();
 	}
 }
 
@@ -504,11 +453,6 @@ void Or::traverse() {
 	PRINTDEBUGTREE("Or");
 	updateExpResult(b_res);
 }
-int Or::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 || r2;
-}
 
 // And //
 void And::traverse() {
@@ -520,11 +464,6 @@ void And::traverse() {
 	if (checkExpResult(b_res)) { expErr = true; }
 	PRINTDEBUGTREE("And");
 	updateExpResult(b_res);
-}
-int And::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 && r2;
 }
 
 // Equal //
@@ -538,11 +477,6 @@ void Equal::traverse(){
 	PRINTDEBUGTREE("Equal");
 	updateExpResult(b_res);
 }
-int Equal::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 == r2;
-}
 
 // NotEqual //
 void NotEqual::traverse() {
@@ -554,11 +488,6 @@ void NotEqual::traverse() {
 	if (checkExpResult(b_res)) { expErr = true; }
 	PRINTDEBUGTREE("NotEqual");
 	updateExpResult(b_res);
-}
-int NotEqual::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 != r2;
 }
 
 // Lesser //
@@ -572,11 +501,6 @@ void Lesser::traverse() {
 	PRINTDEBUGTREE("Lesser");
 	updateExpResult(b_res);
 }
-int Lesser::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 < r2;
-}
 
 // Greater //
 void Greater::traverse() {
@@ -588,11 +512,6 @@ void Greater::traverse() {
 	if (checkExpResult(i_res)) { expErr = true; }
 	PRINTDEBUGTREE("Greater");
 	updateExpResult(b_res);
-}
-int Greater::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 > r2;
 }
 
 // LessEqual //
@@ -606,11 +525,6 @@ void LessEqual::traverse() {
 	PRINTDEBUGTREE("LessEqual");
 	updateExpResult(b_res);
 }
-int LessEqual::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 <= r2;
-}
 
 // GreatEqual //
 void GreatEqual::traverse() {
@@ -622,11 +536,6 @@ void GreatEqual::traverse() {
 	if (checkExpResult(i_res)) { expErr = true; }
 	PRINTDEBUGTREE("GreatEqual");	
 	updateExpResult(b_res);
-}
-int GreatEqual::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 >= r2;
 }
 
 // Add //
@@ -640,11 +549,6 @@ void Add::traverse() {
 	PRINTDEBUGTREE("Add");
 	updateExpResult(i_res);
 }
-int Add::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 + r2;
-}
 
 // Subtract //
 void Subtract::traverse() {
@@ -656,11 +560,6 @@ void Subtract::traverse() {
 	if (checkExpResult(i_res)) { expErr = true; }
 	PRINTDEBUGTREE("Subtract");
 	updateExpResult(i_res);
-}
-int Subtract::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 - r2;
 }
 
 // Divide //
@@ -674,11 +573,6 @@ void Divide::traverse() {
 	PRINTDEBUGTREE("Divide");
 	updateExpResult(i_res);
 }
-int Divide::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 / r2;
-}
 
 // Multiply //
 void Multiply::traverse() {
@@ -691,11 +585,6 @@ void Multiply::traverse() {
 	PRINTDEBUGTREE("Multiply");
 	updateExpResult(i_res);
 }
-int Multiply::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 * r2;
-}
 
 // Not //
 void Not::traverse() {
@@ -704,9 +593,6 @@ void Not::traverse() {
 	if (checkExpResult(b_res)) { expErr = true; }
 	PRINTDEBUGTREE("Not");
 	updateExpResult(b_res);
-}
-int Not::evaluate() {
-	return !(e->evaluate());
 }
 
 // Pos //
@@ -717,10 +603,6 @@ void Pos::traverse() {
 	PRINTDEBUGTREE("Pos");
 	updateExpResult(i_res);
 }
-int Pos::evaluate() {
-	// making something positive does absolutely nothing 
-	return e->evaluate();
-}
 
 // Neg //
 void Neg::traverse() {
@@ -730,19 +612,12 @@ void Neg::traverse() {
 	PRINTDEBUGTREE("Neg");
 	updateExpResult(i_res);
 }
-int Neg::evaluate() {
-	return -(e->evaluate());
-}
 
 // ParenExp //
 void ParenExp::traverse() {
 	if (expErr) { return; }
 	e->traverse();
 	PRINTDEBUGTREE("ParenExp");
-}
-int ParenExp::evaluate() {
-	//fprintf(stderr, "ParenExp\n");
-	return e->evaluate();
 }
 
 // ArrayAccess //
@@ -797,9 +672,6 @@ void LitInt::setTable(TableNode * t) {
 	//fprintf(stderr, "SETTING LitInt");
 	i->lowestT = t;
 }
-int LitInt::evaluate() {
-	return i->i;
-}
 
 // True //
 void True::traverse(){
@@ -810,9 +682,6 @@ void True::traverse(){
 void True::setTable(TableNode * t) {
 	lowestT = t;
 }
-int True::evaluate() {
-	return 1;
-}
 
 // False //
 void False::traverse(){
@@ -822,9 +691,6 @@ void False::traverse(){
 }
 void False::setTable(TableNode * t) {
 	lowestT = t;
-}
-int False::evaluate() {
-	return 0;
 }
 
 // ExpObject //

@@ -96,9 +96,9 @@ class Program : public TreeNode {
 #else
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c) {}
+		void evaluate();
 #endif
 		void traverse(); 
-		void evaluate();
 };
 
 class MainClass : public TreeNode {
@@ -110,9 +110,10 @@ class MainClass : public TreeNode {
 		MainClass (Ident * i1, Ident * i2, Statement * s)
 			: i1(i1), i2(i2), s(s) {}
 		void traverse();
-		void evaluate();
 #ifdef ASSEM
 		void assem();
+#else
+		void evaluate();
 #endif
 };
 
@@ -343,13 +344,14 @@ class TypeIndexList : public Type {
 class Statement : public TreeNode { 
 	public:
 		virtual void setTable(TableNode * t) = 0;
-		virtual void evaluate() {
-			cerr << "\nUnimplemented Statement in interpreter" << endl;
-		}
 #ifdef ASSEM
 		virtual void assem(string * stmt_str, map<string, string*> *) = 0; //{
 //			cerr << "\nUnimplemented Statement in assemble" << endl;
 //		}
+#else
+		virtual void evaluate() {
+			cerr << "\nUnimplemented Statement in interpreter" << endl;
+		}
 #endif
 };
 class BlockStatements : public Statement {
@@ -359,9 +361,10 @@ class BlockStatements : public Statement {
 		BlockStatements(StatementList * s) : s(s) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 class IfStatement : public Statement {
@@ -373,9 +376,10 @@ class IfStatement : public Statement {
 			: e(e), s_if(s_if), s_el(s_el) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 class WhileStatement : public Statement {
@@ -386,9 +390,10 @@ class WhileStatement : public Statement {
 		WhileStatement(Exp * e, Statement * s) : e(e), s(s) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 class PrintLineExp : public Statement {
@@ -398,9 +403,10 @@ class PrintLineExp : public Statement {
 		PrintLineExp(Exp * e) : e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 class PrintLineString : public Statement {
@@ -410,9 +416,10 @@ class PrintLineString : public Statement {
 		PrintLineString (StringLiteral * s) : s(s) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 class PrintExp : public Statement {
@@ -422,9 +429,10 @@ class PrintExp : public Statement {
 		PrintExp (Exp * e) : e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 class PrintString : public Statement {
@@ -434,9 +442,10 @@ class PrintString : public Statement {
 		PrintString (StringLiteral * s) : s(s) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 class Assign : public Statement {
@@ -492,9 +501,10 @@ class StatementList : public TreeNode {
 		}
 		void setTableNodes(TableNode * n);
 		void traverse();
-		void evaluate();
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 
@@ -526,14 +536,15 @@ class Exp : public TreeNode {
 		virtual void setTable(TableNode * t) {
 			cerr << "Set Table Undefined" << endl;
 		}
+#ifdef ASSEM
+		virtual void assem(string * exp_str, string * branchLabel) {
+			*exp_str = *exp_str + "\n\tError(Debug):Next Assem expr unimplemented ";
+		} 
+#else
 		// for bool values evaluate stuff to 0 and 1
 		virtual int evaluate() {
 			cerr << endl << "\tError: Expr function not implemented" << endl;
 			return 1;
-		} 
-#ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel) {
-			*exp_str = *exp_str + "\n\tError(Debug):Next Assem expr unimplemented ";
 		} 
 #endif
 }; 
@@ -550,108 +561,120 @@ class Or : public BinExp {
 	public:
 		Or(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
+#else
+		int evaluate(); 
 #endif
 };
 class And : public BinExp {
 	public:
 		And(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
+#else
+		int evaluate(); 
 #endif
 };
 class Equal : public BinExp {
 	public:
 		Equal(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class NotEqual : public BinExp {
 	public:
 		NotEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class Lesser : public BinExp {
 	public:
 		Lesser(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class Greater : public BinExp {
 	public:
 		Greater(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class LessEqual : public BinExp {
 	public:
 		LessEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class GreatEqual : public BinExp {
 	public:
 		GreatEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class Add : public BinExp {
 	public:
 		Add(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 	  void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class Subtract : public BinExp {
 	public:
 		Subtract(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class Divide : public BinExp {
 	public:
 		Divide(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class Multiply : public BinExp {
 	public:
 		Multiply(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };    // End Binary Op
 
@@ -667,27 +690,30 @@ class Not : public UnaryExp {
 	public:
 		Not(Exp * e) : UnaryExp(e) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class Pos : public UnaryExp {
 	public:
 		Pos(Exp * e) : UnaryExp(e) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class Neg : public UnaryExp {
 	public: 
 		Neg(Exp * e) : UnaryExp(e) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };    // End Unary Ops
 
@@ -695,9 +721,10 @@ class ParenExp : public UnaryExp {
 	public: // For: ( e )
 		ParenExp(Exp * e) : UnaryExp(e) {}
 		void traverse();
-		int evaluate(); 
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class ArrayAccess : public Exp {
@@ -729,27 +756,30 @@ class LitInt : public Exp {
 		LitInt(IntLiteral * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
-		int evaluate(); 
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel);
+#else
+		int evaluate(); 
 #endif
 };
 class True : public Exp {
 	public:
 		void traverse();
 		void setTable(TableNode * t);
-		int evaluate(); 
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class False : public Exp {
 	public:
 		void traverse();
 		void setTable(TableNode * t);
-		int evaluate(); 
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		int evaluate(); 
 #endif
 };
 class ExpObject : public Exp {
@@ -758,9 +788,10 @@ class ExpObject : public Exp {
 		ExpObject(Object * o) : o(o) {}
 		void traverse();
 		void setTable(TableNode * t);
-		//TODO(ss): int evaluate();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		//TODO(ss): int evaluate();
 #endif
 };
 class ObjectMethodCall : public Exp {
@@ -771,9 +802,10 @@ class ObjectMethodCall : public Exp {
 		ObjectMethodCall(Object * o, Ident * i, ExpList * e) : o(o), i(i), e(e) {}
 		void traverse();
 		void setTable(TableNode * t);
-		//TODO(ss): int evaluate();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		//TODO(ss): int evaluate();
 #endif
 };
 /* End Expression Abstract Classes */
@@ -794,9 +826,10 @@ class IdObj : public Object {
 		IdObj(Ident * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
-		//TODO: void evaluate();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		//TODO: void evaluate();
 #endif
 };
 class ThisObj : public Object {
@@ -820,9 +853,10 @@ class NewTypeObj : public Object {
 		NewTypeObj(PrimeType * p, Index * i) : p(p), i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
-		void evaluate();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
+#else
+		void evaluate();
 #endif
 };
 /* End Abstract Class Object */
