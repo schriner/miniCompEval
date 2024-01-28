@@ -1,4 +1,11 @@
 
+/*
+ * miniCompEval
+ * Sonya Schriner
+ * File: TreeNode.cpp
+ *
+ */
+
 #ifdef ASSEM
 
 #include <stdio.h>

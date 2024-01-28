@@ -1,7 +1,7 @@
 
 /*
  *
- * CS352: Project 2
+ * miniCompEval
  * Sonya Schriner
  * File: TableNode.hpp
  *

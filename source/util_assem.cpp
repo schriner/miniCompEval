@@ -1,4 +1,11 @@
 
+/*
+ * miniCompEval
+ * Sonya Schriner
+ * File: TreeNode.cpp
+ *
+ */
+
 #include "TreeNode.hpp"
 
 using namespace std;

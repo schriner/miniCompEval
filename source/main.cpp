@@ -1,4 +1,11 @@
 
+/*
+ * miniCompEval
+ * Sonya Schriner
+ * File: TreeNode.cpp
+ *
+ */
+
 #include <stdio.h>
 #include <string>
 #include <fstream>

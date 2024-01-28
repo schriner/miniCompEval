@@ -4,7 +4,7 @@
 
 /*
  *
- * CS352: Project 3 
+ * miniCompEval 
  * Sonya Schriner
  * File: TreeNode.hpp
  *
