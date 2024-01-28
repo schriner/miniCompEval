@@ -27,7 +27,7 @@ void MainClass::evaluate() {
 
 //TODO(ss): void ClassDeclExtends::evaluate() {}
 
-//TODO(ss) void VarDecl::evaluate() {
+//TODO(ss): void VarDecl::evaluate() {
 // Account For type
 //}
 
@@ -70,11 +70,19 @@ void PrintString::evaluate() {
 //	cout << *(s->str);
 //}
 
+//TODO(ss)void IndexAssign::evaluate() {}
+
+//TODO(ss) void ReturnStatement::evaluate(TableNode * t) {}
+
 void StatementList::evaluate() {
 	for (auto s = sVector->begin(); s < sVector->end(); s++) {
 		(*s)->evaluate();
 	}
 }
+
+//TODO(ss)void SingleIndex::evaluate() {}
+
+//TODO(ss)void MultipleIndices::evaluate() {}
 
 int Or::evaluate() {
 	int r1 = e1->evaluate();
@@ -165,6 +173,12 @@ int ParenExp::evaluate() {
 	//fprintf(stderr, "ParenExp\n");
 	return e->evaluate();
 }
+
+//TODO(ss)void ArrayAccess::evaluate() {}
+//TODO(ss)void ArrayAccessLength::evaluate() {}
+
+/* list of "exp" or "exp , exp, ..." */
+//TODO(ss) void ExpList::evaluate() { // add erl or e to table }
 
 int LitInt::evaluate() {
 	return i->i;

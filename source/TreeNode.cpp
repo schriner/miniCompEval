@@ -776,28 +776,22 @@ void NewTypeObj::setTable(TableNode * t) {
 	i->setTable(t);
 }
 
-// ExpRestList //
-void ExpRestList::traverse() {
-	for (auto e = erVector->begin(); e < erVector->end(); e++) {
-		(*e)->traverse();
-	}
-	PRINTDEBUGTREE("ExpRestList");
-}
-void ExpRestList::setTable(TableNode * t){
-	lowestT = t;
-	for (auto e = erVector->begin(); e < erVector->end(); e++) {
-		(*e)->setTable(t);
-	}
-}
-
 // ExpList //
 void ExpList::traverse() {
-	e->traverse();
-	if (erl) { erl->traverse(); }
+	if (e) e->traverse();
+	if (erlVector) { 
+		for (auto e = erlVector->begin(); e < erlVector->end(); e++) {
+			(*e)->traverse();
+		}
+	}
 	PRINTDEBUGTREE("ExpList");
 }
 void ExpList::setTable(TableNode * t){
-	if (erl) { erl->setTable(t); }
+	if (erlVector) { 
+		for (auto e = erlVector->begin(); e < erlVector->end(); e++) {
+			(*e)->setTable(t);
+		}
+	}
 	lowestT = t;
 	if (e) e->setTable(t);
 }

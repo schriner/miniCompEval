@@ -533,6 +533,7 @@ class MultipleIndices : public Index {
 /* Start Expression Abstract Classes */
 class Exp : public TreeNode {
 	public:
+		virtual ~Exp() = default;
 		virtual void setTable(TableNode * t) {
 			cerr << "Set Table Undefined" << endl;
 		}
@@ -869,12 +870,11 @@ class ExpRestList : public TreeNode {
 			erVector = new vector<Exp * >(1, nullptr);
 			erVector->push_back(e);
 		}
+		void traverse() {} 
 		void append(Exp * e) {
 			erVector->push_back(e);
 		}
-		void traverse();
-		void setTable(TableNode * t);
-		// TODO: void evaluate();
+		~ExpRestList() {}
 };
 
 /* ExpRestList can be nullptr */
@@ -882,14 +882,25 @@ class ExpList : public TreeNode {
 	public:
 		// Union and dynamic cast to eliminate extra pointer
 		Exp * e = nullptr;
-		ExpRestList * erl = nullptr;
-		ExpList(Exp * e, ExpRestList * erl) : erl(erl) {
-			(*erl->erVector)[0] = e;
+		vector<Exp * > * erlVector = nullptr;
+		ExpList(Exp * e, ExpRestList * erl) : erlVector(erl->erVector) {
+			(*erlVector)[0] = e;
 		}
 		ExpList(Exp * e) : e(e) {} 
 		void traverse();
 		void setTable(TableNode * t);
 		// TODO: void evaluate();
+		~ExpList() {
+			if (erlVector) {
+				for (auto exp = erlVector->begin(); exp < erlVector->end(); exp++) {
+					delete *exp;
+				}
+				delete erlVector;
+			}
+			if (e) {
+				delete e;
+			}
+		}
 };
 
 class Ident : public TreeNode {
