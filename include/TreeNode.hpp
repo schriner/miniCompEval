@@ -89,12 +89,16 @@ class Program : public TreeNode {
 #ifdef ASSEM
 		vector<string * > * dataSection;
 		vector<string * > * textSection;
+		Program (MainClass * m)
+			: m(m), c(nullptr), dataSection(nullptr), textSection(nullptr) {}
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c), dataSection(nullptr), textSection(nullptr) {}
 		void assem();
 #else
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c) {}
+		Program (MainClass * m)
+			: m(m), c(nullptr) {}
 		void evaluate();
 #endif
 		void traverse(); 
@@ -132,6 +136,8 @@ class ClassDeclList : public TreeNode {
 		void traverse();
 #ifdef ASSEM
 		void assem();
+#else
+		void evaluate();
 #endif
 };
 
@@ -140,6 +146,10 @@ class ClassDecl : public TreeNode {
 	public:
 #ifdef ASSEM
 		virtual void assem() = 0;
+#else 
+		virtual void evaluate () {
+			cerr << "Class Decl Evaluate Unimplemented\n";
+		}
 #endif
 };
 class ClassDeclSimple : public ClassDecl {
@@ -158,6 +168,8 @@ class ClassDeclSimple : public ClassDecl {
 		void traverse();
 #ifdef ASSEM
 		virtual void assem();
+#else
+		void evaluate();
 #endif
 };
 class ClassDeclExtends : public ClassDecl {
@@ -170,6 +182,7 @@ class ClassDeclExtends : public ClassDecl {
 		void traverse();
 #ifdef ASSEM
 		virtual void assem();
+#else
 #endif
 };
 /* Abstract class ClassDecl End */
@@ -185,6 +198,8 @@ class VarDecl : public TreeNode {
 		// TODO(ss): void evaluate();
 #ifdef ASSEM
 		void assem(map<string, string*> *, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 
@@ -207,6 +222,8 @@ class VarDeclList : public TreeNode {
 		void traverse();
 #ifdef ASSEM
 		void assem(map<string, string*> *, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 
@@ -230,6 +247,8 @@ class MethodDecl : public TreeNode {
 		void traverse();
 #ifdef ASSEM
 		void assem(string * objName);
+#else
+		void evaluate();
 #endif
 };
 
@@ -247,6 +266,8 @@ class MethodDeclList : public TreeNode {
 		void traverse();
 #ifdef ASSEM
 		virtual void assem(string * objName);
+#else
+		void evaluate();
 #endif
 };
 
@@ -344,9 +365,9 @@ class Statement : public TreeNode {
 	public:
 		virtual void setTable(TableNode * t) = 0;
 #ifdef ASSEM
-		virtual void assem(string * stmt_str, map<string, string*> *) = 0; //{
-//			cerr << "\nUnimplemented Statement in assemble" << endl;
-//		}
+		virtual void assem(string * stmt_str, map<string, string*> *) {
+			cerr << "\nUnimplemented Statement in assemble" << endl;
+		}
 #else
 		virtual void evaluate() {
 			cerr << "\nUnimplemented Statement in interpreter" << endl;
@@ -453,13 +474,13 @@ class Assign : public Statement {
 		Ident * i = nullptr;
 		Exp * e = nullptr;
 		Assign(Ident * i, Exp * e) : i(i), e(e) {}
-		//TODO(ss): void evaluate();
 		void traverse();
 		void setTable(TableNode * t);
 #ifdef ASSEM
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
-		// TODO: void evaluate();
 };
 class IndexAssign : public Statement {
 	// For: i ind = e
@@ -806,7 +827,7 @@ class ObjectMethodCall : public Exp {
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		//TODO(ss): int evaluate();
+		int evaluate();
 #endif
 };
 /* End Expression Abstract Classes */
@@ -845,7 +866,10 @@ class NewIdObj : public Object {
 		NewIdObj(Ident * i) : i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
-		//TODO: void evaluate();
+#ifdef ASSEM
+#else
+		void evaluate();
+#endif
 };
 class NewTypeObj : public Object {
 	public:

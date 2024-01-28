@@ -14,23 +14,40 @@ using namespace std;
 
 void Program::evaluate() {
 	  if (programTypeError) return;
-		  m->evaluate();
+		if (c) c->evaluate();
+		m->evaluate();
 }
 
 void MainClass::evaluate() {
 	  s->evaluate();
 }
 
-//TODO(ss): void ClassDeclList::evaluate() {}
-//TODO(ss): void ClassDecl::evaluate() {}
+void ClassDeclList::evaluate() {
+	if (!cdVector) return;
+	for (auto c : *cdVector) {
+		c->evaluate();
+	}
+}
+void ClassDeclSimple::evaluate() {
+	// add v and method decl to table 
+	cerr << "TODO\n";
+}
 
 //TODO(ss): void ClassDeclExtends::evaluate() {}
 
-//TODO(ss): void VarDeclList::evaluate() {}
-//TODO(ss): void VarDecl::evaluate() { Account for type }
+void VarDeclList::evaluate() {
+	cerr << "TODO: VarDeclList\n";
+}
+void VarDecl::evaluate() { 
+	cerr << "TODO: VarDeclList\n";
+}
 
-//TODO(ss): void MethodDecl::evaluate() {}
-//TODO(ss): void MethodDeclList::evaluate() {}
+void MethodDecl::evaluate() {
+	cerr << "TODO: MethodDecl\n";
+}
+void MethodDeclList::evaluate() {
+	cerr << "TODO: MethodDeclList\n";
+}
 
 //TODO(ss): void FormalList::evaluate() {}
 //TODO(ss): void FormalRestList::evaluate() {}
@@ -75,7 +92,10 @@ void PrintString::evaluate() {
 	cout << *(s->str);
 }
 
-//TODO(ss)void Assign::evaluate() { /*  TypeCheck */ cout << *(s->str); }
+void Assign::evaluate() { 
+  //TODO(ss)
+	/*  TypeCheck */ cerr << *(i->id) << endl; 
+}
 
 //TODO(ss)(Array)void IndexAssign::evaluate() {}
 
@@ -203,16 +223,15 @@ int False::evaluate() {
 int ObjectMethodCall::evaluate() {
 	// look up the method
 	// place the result somewhere
-	if (dynamic_cast<NewTypeObj>(o)) {
+	if (dynamic_cast<NewIdObj *>(o)) {
 		// look up the method in the table and traverse
 	}
 	return 0;
 }
 //TODO(ss)void IdObj::evaluate() {}
 //TODO(ss)void ThisObj::evaluate() {}
-int NewIdObj::evaluate() {
-	// create an obj and add it to a table or return the addr
-	return 0;
+void NewIdObj::evaluate() {
+	// TODO(ss) create an obj and add it to a table or return the addr
 }
 //TODO(ss)void NewTypeObj::evaluate() {}
 
