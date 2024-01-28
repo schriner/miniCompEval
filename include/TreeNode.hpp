@@ -52,7 +52,6 @@ class Index;
 class Exp;
 class Object;
 class ExpList;
-class ExpRestList;
 class Ident;
 class IntLiteral;
 class StringLiteral;
@@ -862,28 +861,14 @@ class NewTypeObj : public Object {
 };
 /* End Abstract Class Object */
 
-/* list of ",exp" ",exp"..... */
-class ExpRestList : public TreeNode {
-	public:
-		vector<Exp * > * erVector = nullptr;
-		ExpRestList(Exp * e) {
-			erVector = new vector<Exp * >(1, nullptr);
-			erVector->push_back(e);
-		}
-		void traverse() {} 
-		void append(Exp * e) {
-			erVector->push_back(e);
-		}
-		~ExpRestList() {}
-};
-
 /* ExpRestList can be nullptr */
+/* erl: list of ",exp" ",exp"..... */
 class ExpList : public TreeNode { 
 	public:
 		// Union and dynamic cast to eliminate extra pointer
 		Exp * e = nullptr;
 		vector<Exp * > * erlVector = nullptr;
-		ExpList(Exp * e, ExpRestList * erl) : erlVector(erl->erVector) {
+		ExpList(Exp * e, vector<Exp * > * erl) : erlVector(erl) {
 			(*erlVector)[0] = e;
 		}
 		ExpList(Exp * e) : e(e) {} 

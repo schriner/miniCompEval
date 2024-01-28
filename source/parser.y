@@ -38,7 +38,7 @@ using namespace std;
 	Exp * e;
 	Object * obj; 
 	ExpList * el;
-	ExpRestList * erl;
+	vector<Exp * > * erl;
 	Exp * er;
 	IntLiteral * in_l;
 	//BoolLiteral * b_l;
@@ -493,12 +493,12 @@ object :
 	;
 
 exp_rest_list : /* Eliminate exp_rest* */
-	exp_rest_list exp_rest { $1->append( $2 ); }
-	| exp_rest { $$ = new ExpRestList( $1 ); }
+	exp_rest_list exp_rest { $1->push_back( $2 ); }
+	| exp_rest { $$ = new vector<Exp * > {nullptr, $1 }; }
 	;
 
 exp_list : 
-	full_exp exp_rest_list { $$ = new ExpList( $1, $2 ); delete $2; }
+	full_exp exp_rest_list { $$ = new ExpList( $1, $2 ); }
 	| full_exp { $$ = new ExpList( $1 ); }
 	;
 
