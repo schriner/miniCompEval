@@ -27,6 +27,7 @@ include_directories(include)
 include_directories(${AUTOGEN_FLEXBISON})
 
 set(mjavac_sources
+	"EvalNode.cpp"
 	"TreeNode.cpp"
 	"AssemNode.cpp"
 	"util_eval.cpp"
