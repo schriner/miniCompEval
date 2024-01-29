@@ -10,6 +10,8 @@
 
 #include "TreeNode.hpp"
 
+// TODO(ss): Move Type checking within this file during interpretation
+
 using namespace std;
 
 extern Program * programRoot;

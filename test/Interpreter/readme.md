@@ -5,8 +5,12 @@
 5. `basicIf.java`: Tests multiple if statements within main without a method call.
 6. `number.java`: Tests complicated computation (n choose k, greatest common divisor). It requires method invocation with arguments to be implemented.
 7. `HanoiDemo.java`: Tests recursive method call. Requires implementation of `this`. 
-8. `multiplePrint`: Tests printing and expresion functionality within main().
-9. `multiplePrintNumber`: Tests printing and expresion functionality within main().
-10. `multiplePrintWAdd`: Tests printing and expresion functionality within main().
+8. `multiplePrint.java`: Tests printing and expresion functionality within main().
+9. `multiplePrintNumber.java`: Tests printing and expresion functionality within main().
+10. `multiplePrintWAdd.java`: Tests printing and expresion functionality within main().
+
+11. `TODO:` `graphTraversal.java`: Test multiple classes, class instance variables, and arrays of class variables.
+12. `TODO:` Multidimensional arrays of bool or int type
+13. `TODO:` Class Extends 
 
 TODO(ss): Automate Testing within this dir with javac output
