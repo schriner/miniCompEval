@@ -101,22 +101,22 @@ Grammar specification from bison statefully
 
 Used to create a tree representation of the grammar specification ([tree.png](doc/tree.png)).
 
-### mjavac: Compiler to ARM 32 bit assembly 
-From the build directory: 
-
-    ```
-    mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
-    ```
-
 ### meval:  Interpreter
 From the build directory: 
 
     ```
     meval [-o <output_file>] <inputfile>.java
     ```
-Functionality is tested for the files contained within: `test/Interpreter`
+Functionality is tested for the files contained within: [`test/Interpreter`](test/Interpreter)
 * class method calls, recursion, and arrays are supported
 * class variable delarations and keyword `extends` are unimplemented.
+
+### mjavac: Compiler to ARM 32 bit assembly 
+From the build directory: 
+
+    ```
+    mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
+    ```
 
 ## Test Functionality
 From within the build directory:
