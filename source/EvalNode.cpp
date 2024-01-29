@@ -123,7 +123,7 @@ void PrintLineString::evaluate() {
 }
 
 void PrintExp::evaluate () {
-	cout << e->evaluate() << endl;
+	cout << e->evaluate();
 }
 
 void PrintString::evaluate() {
