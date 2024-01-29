@@ -55,14 +55,12 @@ int MethodDecl::evaluate() {
 	programRoot->return_reg = 0;
 	map<string, int> variable; // assume no complex types
 	programRoot->scope_stack.push_back(&variable);
-	cerr << endl;
 	for (auto var : *v->vdVector) {
 		variable[*var->i->id] = 0;
-		//cerr << *var->i->id << endl;
 	}
 	s->evaluate();
-	//cerr << "TODO: MethodDecl\n";
 	if (programRoot->return_reg) return programRoot->return_reg;
+
 	programRoot->return_reg = e->evaluate();
 	programRoot->scope_stack.pop_back();
 	return programRoot->return_reg;
@@ -118,7 +116,7 @@ void Assign::evaluate() {
 	(*programRoot->scope_stack.back())[*i->id] = e->evaluate();
   //TODO(ss)
 	/*  TypeCheck */ 
-	//cerr << *(i->id) << " " << (*programRoot->scope_stack.back())[*i->id] << endl; 
+	/*  Instance variables */ 
 }
 
 //TODO(ss)(Array)void IndexAssign::evaluate() {}
@@ -128,7 +126,6 @@ void ReturnStatement::evaluate() {
 	if (!e) { programRoot->return_reg = 100; return; }
 	cerr << e->evaluate() << "ReturnStatement\n" << endl;
 	programRoot->return_reg = e->evaluate();
-	//TODO(ss) Fix table;
 }
 
 void StatementList::evaluate() {
