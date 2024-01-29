@@ -30,6 +30,16 @@ set_property (TEST EvalLoop
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
+add_test(NAME EvalNumber COMMAND meval ${TEST_DIR}/Interpreter/number.java)
+set (passRegex
+	"10 choose 4 is \n210\nGCD of 84, 132 is \n12\n"
+)
+set_property (TEST EvalNumber
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+
+
 add_test(NAME EvalMultiplePrint COMMAND meval ${TEST_DIR}/Compiler/multiplePrint.java)
 set (passRegex
   "The answer\nto the meaning\nof life\nis:\n42\n"
