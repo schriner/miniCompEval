@@ -99,6 +99,7 @@ class Program : public TreeNode {
 			: m(m), c(c) {}
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
+		map<string, ClassDecl *> class_table;
 		void evaluate();
 #endif
 		void traverse(); 

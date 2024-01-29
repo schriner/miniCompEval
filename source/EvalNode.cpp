@@ -1,4 +1,6 @@
 
+#ifndef ASSEM
+
 /*
  * miniCompEval
  * Sonya Schriner
@@ -10,7 +12,7 @@
 
 using namespace std;
 
-#ifndef ASSEM
+extern Program * programRoot;
 
 void Program::evaluate() {
 	  if (programTypeError) return;
@@ -30,7 +32,8 @@ void ClassDeclList::evaluate() {
 }
 void ClassDeclSimple::evaluate() {
 	// add v and method decl to table 
-	cerr << "TODO\n";
+	programRoot->class_table[*i->id] = this;
+	cerr << "TODO Var Decl\n";
 }
 
 //TODO(ss): void ClassDeclExtends::evaluate() {}
@@ -225,6 +228,10 @@ int ObjectMethodCall::evaluate() {
 	// place the result somewhere
 	if (dynamic_cast<NewIdObj *>(o)) {
 		// look up the method in the table and traverse
+		// todo arguments 
+		ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
+		cerr << *(dynamic_cast<NewIdObj *>(o)->i)->id << endl;
+		// call the method and evaluate
 	}
 	return 0;
 }
