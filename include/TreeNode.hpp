@@ -74,7 +74,7 @@ class TreeNode {
 			}
 			buf[255] = '\0';
 			fprintf(stderr, "%s: %s", exe, buf);
-			fclose(f);oid reportLine() {
+			fclose(f);
 		}
 		void reportError() {
 			programTypeError = true;
