@@ -55,11 +55,26 @@ int MethodDecl::evaluate() {
 	programRoot->return_reg = 0;
 	map<string, int> variable; // assume no complex types
 	programRoot->scope_stack.push_back(&variable);
+
+	if (f && programRoot->arg_stack
+			&& programRoot->arg_stack->e && f->t && f->i) {
+			variable[*f->i->id] = programRoot->arg_stack->e->evaluate(); 
+	}
+	if (f && programRoot->arg_stack->erlVector && f->frVector) {
+		auto i = 0;
+		for (auto param : *f->frVector) {
+			variable[*param->i->id] = (*programRoot->arg_stack->erlVector)[i++]->evaluate();
+		}
+	}
 	for (auto var : *v->vdVector) {
 		variable[*var->i->id] = 0;
 	}
+	
 	s->evaluate();
-	if (programRoot->return_reg) return programRoot->return_reg;
+	if (programRoot->return_reg) {
+		programRoot->arg_stack = nullptr;
+		return programRoot->return_reg;
+	}
 
 	programRoot->return_reg = e->evaluate();
 	programRoot->scope_stack.pop_back();
@@ -70,7 +85,6 @@ void MethodDeclList::evaluate() {
 }
 
 //TODO(ss): void FormalList::evaluate() {}
-//TODO(ss): void FormalRestList::evaluate() {}
 //TODO(ss): void FormalRest::evaluate() {}
 
 //TODO(ss): void IntType::evaluate() {}
@@ -131,7 +145,7 @@ void ReturnStatement::evaluate() {
 void StatementList::evaluate() {
 	for (auto s = sVector->begin(); s != sVector->end(); s++) {
 		(*s)->evaluate();
-		if (programRoot->return_reg) { return; }
+		if (dynamic_cast<ReturnStatement *>(*s)) { return; }
 	}
 }
 
@@ -256,14 +270,22 @@ int ExpObject::evaluate() {
 int ObjectMethodCall::evaluate() {
 	// look up the method
 	// place the result somewhere
+	programRoot->arg_stack = nullptr;
+	if (e) programRoot->arg_stack = e;
 	if (dynamic_cast<NewIdObj *>(o)) {
 		// look up the method in the table and traverse
 		// todo arguments 
 		// var decl for a class
 		ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
-		return cl->method_table[*i->id]->evaluate();
 		//cerr << *i->id << ":" << *(dynamic_cast<NewIdObj *>(o)->i)->id << endl;
+		return cl->method_table[*i->id]->evaluate();
 		// call the method and evaluate
+	} else if (dynamic_cast<IdObj *>(o)){
+		cerr << "Err: Trying to make a method call with IdObj\n";
+	} else if (dynamic_cast<ThisObj *>(o)){
+		cerr << "Err: Trying to make a method call with ThisObj\n";
+	} else if (dynamic_cast<NewTypeObj *>(o)){
+		cerr << "Err: Trying to make a method call with NewTypeObj\n";
 	}
 	return 0;
 }

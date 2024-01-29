@@ -101,6 +101,7 @@ class Program : public TreeNode {
 			: m(m), c(nullptr) {}
 		map<string, ClassDecl *> class_table;
 		vector<map<string, int> *> scope_stack; // something like a sym table
+		ExpList * arg_stack = nullptr;
 		int return_reg;
 		void evaluate();
 #endif
@@ -275,36 +276,23 @@ class MethodDeclList : public TreeNode {
 #endif
 };
 
-class FormalList : public TreeNode {
-	public:
-		Type * t = nullptr;
-		Ident * i = nullptr;
-		FormalRestList * f = nullptr;
-		FormalList(Type * t, Ident * i, FormalRestList * f)
-			: t(t), i(i), f(f) {}
-		void traverse();
-		void setTable(TableNode * t);
-};
-
-class FormalRestList : public TreeNode {
-	public:
-		vector<FormalRest * > * frVector = nullptr;
-		FormalRestList(FormalRest * f) {
-			frVector = new vector<FormalRest * >;
-			frVector->push_back(f);
-		}
-		void append(FormalRest * f) {
-			frVector->push_back(f);
-		}
-		void traverse();
-		void setTable(TableNode * t);
-};
-
 class FormalRest : public TreeNode {
 	public:
 		Type * t = nullptr;
 		Ident * i = nullptr;
 		FormalRest(Type * t, Ident * i) : t(t), i(i) {}
+		void traverse();
+		void setTable(TableNode * t);
+};
+
+class FormalList : public TreeNode {
+	public:
+		Type * t = nullptr;
+		Ident * i = nullptr;
+		vector<FormalRest * > * frVector = nullptr;
+		FormalList(Type * t, Ident * i, vector<FormalRest * > * frVector)
+			: frVector(frVector) { (*frVector)[0] = new FormalRest(t, i); }
+		FormalList(Type * t, Ident * i)	: t(t), i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
 };

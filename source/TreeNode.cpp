@@ -153,33 +153,23 @@ void MethodDeclList::setTableParentNodes(TableNode * p) {
 void FormalList::traverse() {
 	t->traverse();
 	i->traverse();
-	if (f) { f->traverse(); }
+	if (frVector) { 
+		for (auto f = frVector->begin(); f < frVector->end(); f++) {
+			(*f)->traverse();
+		}
+	}
 	PRINTDEBUGTREE("FormalList");
 }
 void FormalList::setTable(TableNode * ta){
 	lowestT = ta;
-	t->setTable(ta);
-	i->lowestT = ta;
-	if (f) { f->setTable(ta); }
-}
-// FormalRestList //
-void FormalRestList::traverse() {
-	for (auto f = frVector->begin(); f < frVector->end(); f++) {
-		(*f)->traverse();
+	if(t && i) {
+		t->setTable(ta);
+		i->lowestT = ta;
 	}
-	PRINTDEBUGTREE("FormalRestList");
-}
-void FormalRestList::setTable(TableNode * ta){
-	lowestT = ta;
-	for (auto f = frVector->begin(); f < frVector->end(); f++) {
-		(*f)->setTable(ta);
-		/*if ((*f)->data) {
-			if ( ta->table->find( string(*((*f)->i->id)) ) == ta->table->end() ) {
-				(*ta->table)[string(*((*f)->i->id))] = data;
-			} else {   
-				//ta->appendBadVarDecl(*f);
-			}
-		}*/
+	if (frVector) {
+		for (auto f = frVector->begin(); f < frVector->end(); f++) {
+			(*f)->setTable(ta);
+		}
 	}
 }
 // FormalRest //

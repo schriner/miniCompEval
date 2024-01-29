@@ -27,7 +27,7 @@ using namespace std;
 	MethodDeclList * mdl;
 	MethodDecl * md;
 	FormalList * fl;
-	FormalRestList * frl;
+	vector<FormalRest * > * frl;
 	FormalRest * fr;
 	PrimeType * prt;
 	Type * type;
@@ -351,14 +351,14 @@ formal_list :
 		$$->data = new RefVar($2->id, typeStringHolder, nullptr);
 	}
 	| type ID { 
-		$$ = new FormalList( $1, $2, nullptr ); 
+		$$ = new FormalList( $1, $2 ); 
 		$$->data = new RefVar($2->id, typeStringHolder, nullptr);
 	}
 	;
 
 formal_rest_list : /* Eliminate formal_rest* */
-	formal_rest_list formal_rest { $1->append( $2 ); }
-	| formal_rest /* empty rule */ { $$ = new FormalRestList( $1 ); }
+	formal_rest_list formal_rest { $1->push_back( $2 ); }
+	| formal_rest /* empty rule */ { $$ = new vector<FormalRest * >{nullptr, $1}; }
 	;
 
 formal_rest :
