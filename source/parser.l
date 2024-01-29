@@ -39,7 +39,33 @@ B_COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 {STRING} { 
 	PRINTDEBUG(yytext);
 	string temp(yytext + 1, strlen(yytext) - 2);
-	yylval.st_l = new StringLiteral( new string(temp) ); 
+	string fin("");
+	for (int i = 0; i < temp.length(); i++) {
+		if (temp[i] == '\\' && (i + 1 < temp.length()) ) {
+			i++;
+			if (temp[i] == 'n') {
+				fin.push_back('\n');
+			} else if (temp[i] == 'b') {
+				fin.push_back('\b');
+			} else if (temp[i] == 't') {
+				fin.push_back('\t');
+			} else if (temp[i] == 'r') {
+				fin.push_back('\r');
+			} else if (temp[i] == 'f') {
+				fin.push_back('\f');
+			} else if (temp[i] == '\'') {
+				fin.push_back('\'');
+			} else if (temp[i] == '\"') {
+				fin.push_back('\"');
+			} else if (temp[i] == '\\') {
+				fin.push_back('\\');
+			}
+		} else {
+			fin.push_back(temp[i]);
+		}
+	}
+	yylval.st_l = new StringLiteral( new string(fin) ); 
+	//yylval.st_l = new StringLiteral( new string(temp) ); 
 	return STRING_LITERAL; 
 }
 {INT} { PRINTDEBUG(yytext); yylval.in_l = new IntLiteral( atoi(yytext) ); return INTEGER_LITERAL; }

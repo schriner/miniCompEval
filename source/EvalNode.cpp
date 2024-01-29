@@ -54,15 +54,34 @@ int MethodDecl::evaluate() {
 	// Used during an actual method call
 	programRoot->return_reg = 0;
 	map<string, int> variable; // assume no complex types
+
+	if (f && programRoot->arg_stack
+			&& programRoot->arg_stack->e && f->t && f->i) {
+			variable[*f->i->id] = programRoot->arg_stack->e->evaluate(); 
+	}
+	if (f && programRoot->arg_stack->erlVector && f->frVector) {
+		auto i_erl = 0;
+		for (auto param : *f->frVector) {
+			//cerr << *param->i->id << " : ";
+			variable[*param->i->id] = (*programRoot->arg_stack->erlVector)[i_erl++]->evaluate();
+			//cerr << variable[*param->i->id] << endl;
+		}
+	}
 	programRoot->scope_stack.push_back(&variable);
 	for (auto var : *v->vdVector) {
 		variable[*var->i->id] = 0;
 	}
+	
 	s->evaluate();
-	if (programRoot->return_reg) return programRoot->return_reg;
+	if (programRoot->return_reg) {
+		programRoot->arg_stack = nullptr;
+		programRoot->scope_stack.pop_back();
+		return programRoot->return_reg;
+	}
 
 	programRoot->return_reg = e->evaluate();
 	programRoot->scope_stack.pop_back();
+	programRoot->call_stack.pop_back();
 	return programRoot->return_reg;
 }
 void MethodDeclList::evaluate() {
@@ -70,7 +89,6 @@ void MethodDeclList::evaluate() {
 }
 
 //TODO(ss): void FormalList::evaluate() {}
-//TODO(ss): void FormalRestList::evaluate() {}
 //TODO(ss): void FormalRest::evaluate() {}
 
 //TODO(ss): void IntType::evaluate() {}
@@ -105,7 +123,7 @@ void PrintLineString::evaluate() {
 }
 
 void PrintExp::evaluate () {
-	cout << e->evaluate() << endl;
+	cout << e->evaluate();
 }
 
 void PrintString::evaluate() {
@@ -131,7 +149,7 @@ void ReturnStatement::evaluate() {
 void StatementList::evaluate() {
 	for (auto s = sVector->begin(); s != sVector->end(); s++) {
 		(*s)->evaluate();
-		if (programRoot->return_reg) { return; }
+		if (dynamic_cast<ReturnStatement *>(*s)) { return; }
 	}
 }
 
@@ -249,6 +267,14 @@ int ExpObject::evaluate() {
 		//cerr << "ExpObject " << *id->i->id;
 		//cerr << (*programRoot->scope_stack.back())[*id->i->id] << endl;
 		return (*programRoot->scope_stack.back())[*id->i->id];
+	} else if (dynamic_cast<NewIdObj *>(o)) {
+		cerr << "Err: Trying to evaluate and obj with NewIdObj\n";
+	} else if (dynamic_cast<ThisObj *>(o)) {
+		cerr << "Err: Trying to evaluate and obj with ThisObj\n";
+	} else if (dynamic_cast<NewTypeObj *>(o)) {
+		cerr << "Err: Trying to evaluate and obj with NewTypeObj\n";
+	} else {
+		cerr << "ExpObject" << endl;
 	}
 	return 11;
 }
@@ -256,15 +282,33 @@ int ExpObject::evaluate() {
 int ObjectMethodCall::evaluate() {
 	// look up the method
 	// place the result somewhere
+	programRoot->arg_stack = nullptr;
+	if (e) programRoot->arg_stack = e;
 	if (dynamic_cast<NewIdObj *>(o)) {
 		// look up the method in the table and traverse
-		// todo arguments 
 		// var decl for a class
+		programRoot->call_stack.push_back((dynamic_cast<NewIdObj *>(o)->i)->id); // push classname
 		ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
-		return cl->method_table[*i->id]->evaluate();
 		//cerr << *i->id << ":" << *(dynamic_cast<NewIdObj *>(o)->i)->id << endl;
-		// call the method and evaluate
+		return cl->method_table[*i->id]->evaluate();
+	
+	} else if (dynamic_cast<IdObj *>(o)){
+		cerr << "Err: Trying to make a method call with IdObj\n";
+	
+	} else if (dynamic_cast<ThisObj *>(o)){
+		programRoot->call_stack.push_back((programRoot->call_stack.back()));
+		ClassDecl * cl = programRoot->class_table[*(programRoot->call_stack.back())];
+		//cerr << "This: " << *(programRoot->call_stack.back()) << " " << *i->id << endl;
+		return cl->method_table[*i->id]->evaluate();
+
+		//cerr << "Err: Trying to make a method call with ThisObj\n";
+		//ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
+	} else if (dynamic_cast<NewTypeObj *>(o)){
+		cerr << "Err: Trying to make a method call with NewTypeObj\n";
+	} else {
+		cerr << "Methodcall" << endl;
 	}
+
 	return 0;
 }
 //TODO(ss)void IdObj::evaluate() {}

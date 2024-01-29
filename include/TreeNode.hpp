@@ -65,6 +65,17 @@ class TreeNode {
 		Data * data = nullptr; 
 		int lineRecord = -1;
 		virtual void traverse() = 0; 
+		void reportLine() {
+			fprintf(stderr, "%s: Report Line: %d\n", exe, lineRecord);
+			FILE * f = fopen(yyfilename, "r");
+			char buf[256] = "";
+			for (auto i = 0; i < lineRecord; i++) {
+				fgets(buf, 256, f);
+			}
+			buf[255] = '\0';
+			fprintf(stderr, "%s: %s", exe, buf);
+			fclose(f);
+		}
 		void reportError() {
 			programTypeError = true;
 			fprintf(stderr, "%s: Type Violation in Line %d\n", exe, lineRecord);
@@ -100,7 +111,9 @@ class Program : public TreeNode {
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
 		map<string, ClassDecl *> class_table;
+		vector<string *>call_stack; // Fixme(ss) call stack - object with variables
 		vector<map<string, int> *> scope_stack; // something like a sym table
+		ExpList * arg_stack = nullptr;
 		int return_reg;
 		void evaluate();
 #endif
@@ -275,36 +288,23 @@ class MethodDeclList : public TreeNode {
 #endif
 };
 
-class FormalList : public TreeNode {
-	public:
-		Type * t = nullptr;
-		Ident * i = nullptr;
-		FormalRestList * f = nullptr;
-		FormalList(Type * t, Ident * i, FormalRestList * f)
-			: t(t), i(i), f(f) {}
-		void traverse();
-		void setTable(TableNode * t);
-};
-
-class FormalRestList : public TreeNode {
-	public:
-		vector<FormalRest * > * frVector = nullptr;
-		FormalRestList(FormalRest * f) {
-			frVector = new vector<FormalRest * >;
-			frVector->push_back(f);
-		}
-		void append(FormalRest * f) {
-			frVector->push_back(f);
-		}
-		void traverse();
-		void setTable(TableNode * t);
-};
-
 class FormalRest : public TreeNode {
 	public:
 		Type * t = nullptr;
 		Ident * i = nullptr;
 		FormalRest(Type * t, Ident * i) : t(t), i(i) {}
+		void traverse();
+		void setTable(TableNode * t);
+};
+
+class FormalList : public TreeNode {
+	public:
+		Type * t = nullptr;
+		Ident * i = nullptr;
+		vector<FormalRest * > * frVector = nullptr;
+		FormalList(Type * t, Ident * i, vector<FormalRest * > * frVector)
+			: frVector(frVector) { (*frVector)[0] = new FormalRest(t, i); }
+		FormalList(Type * t, Ident * i)	: t(t), i(i) {}
 		void traverse();
 		void setTable(TableNode * t);
 };
