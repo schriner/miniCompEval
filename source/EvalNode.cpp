@@ -62,9 +62,9 @@ int MethodDecl::evaluate() {
 	if (f && programRoot->arg_stack->erlVector && f->frVector) {
 		auto i_erl = 0;
 		for (auto param : *f->frVector) {
-			cerr << *param->i->id << " : ";
+			//cerr << *param->i->id << " : ";
 			variable[*param->i->id] = (*programRoot->arg_stack->erlVector)[i_erl++]->evaluate();
-			cerr << variable[*param->i->id] << endl;
+			//cerr << variable[*param->i->id] << endl;
 		}
 	}
 	programRoot->scope_stack.push_back(&variable);
@@ -75,6 +75,7 @@ int MethodDecl::evaluate() {
 	s->evaluate();
 	if (programRoot->return_reg) {
 		programRoot->arg_stack = nullptr;
+		programRoot->scope_stack.pop_back();
 		return programRoot->return_reg;
 	}
 
@@ -295,8 +296,9 @@ int ObjectMethodCall::evaluate() {
 		cerr << "Err: Trying to make a method call with IdObj\n";
 	
 	} else if (dynamic_cast<ThisObj *>(o)){
+		programRoot->call_stack.push_back((programRoot->call_stack.back()));
 		ClassDecl * cl = programRoot->class_table[*(programRoot->call_stack.back())];
-		cerr << *(programRoot->call_stack.back()) << " " << *i->id << endl;
+		//cerr << "This: " << *(programRoot->call_stack.back()) << " " << *i->id << endl;
 		return cl->method_table[*i->id]->evaluate();
 
 		//cerr << "Err: Trying to make a method call with ThisObj\n";
