@@ -53,23 +53,23 @@ void VarDecl::evaluate() {
 int MethodDecl::evaluate() {
 	// Used during an actual method call
 	programRoot->return_reg = 0;
-	map<string, int> variable; // assume no complex types
+	map<string, EXP> variable; // assume no complex types
 
 	if (f && programRoot->arg_stack
 			&& programRoot->arg_stack->e && f->t && f->i) {
-			variable[*f->i->id] = programRoot->arg_stack->e->evaluate(); 
+			variable[*f->i->id] = {programRoot->arg_stack->e->evaluate()}; 
 	}
 	if (f && programRoot->arg_stack->erlVector && f->frVector) {
 		auto i_erl = 0;
 		for (auto param : *f->frVector) {
 			//cerr << *param->i->id << " : ";
-			variable[*param->i->id] = (*programRoot->arg_stack->erlVector)[i_erl++]->evaluate();
+			variable[*param->i->id] = {(*programRoot->arg_stack->erlVector)[i_erl++]->evaluate()};
 			//cerr << variable[*param->i->id] << endl;
 		}
 	}
 	programRoot->scope_stack.push_back(&variable);
 	for (auto var : *v->vdVector) {
-		variable[*var->i->id] = 0;
+		variable[*var->i->id] = {0};
 	}
 	
 	s->evaluate();
@@ -94,7 +94,8 @@ void MethodDeclList::evaluate() {
 //TODO(ss): void IntType::evaluate() {}
 //TODO(ss): void BoolType::evaluate() {}
 //TODO(ss): void IdentType::evaluate() {}
-//TODO(ss)(Array): void TypeIndexList::evaluate() {}
+
+//TODO(ss)(Array):void TypeIndexList::evaluate() {}
 
 void BlockStatements::evaluate() {
 	if (s) { s->evaluate(); }
@@ -131,13 +132,19 @@ void PrintString::evaluate() {
 }
 
 void Assign::evaluate() { 
-	(*programRoot->scope_stack.back())[*i->id] = e->evaluate();
+	(*programRoot->scope_stack.back())[*i->id] = {(e->evaluate())};
   //TODO(ss)
 	/*  TypeCheck */ 
 	/*  Instance variables */ 
 }
 
-//TODO(ss)(Array)void IndexAssign::evaluate() {}
+//TODO(ss)(Array)
+//TODO(ss)(ArrayMulti)
+void IndexAssign::evaluate() {
+	int offset = i->evaluate();
+	cerr << "Array" << *i->id << "Offset: " << offset << endl;
+	(*programRoot->scope_stack.back())[*i->id] = {(e->evaluate())};
+}
 
 void ReturnStatement::evaluate() {
 	cerr <<  "ReturnStatement\n";
@@ -153,8 +160,10 @@ void StatementList::evaluate() {
 	}
 }
 
-//TODO(ss)(Array)void SingleIndex::evaluate() {}
-//TODO(ss)(Array)void MultipleIndices::evaluate() {}
+int SingleIndex::evaluate() {
+	return e->evaluate();
+}
+//TODO(ss)(ArrayMulti)void MultipleIndices::evaluate() {}
 
 int Or::evaluate() {
 	int r1 = e1->evaluate();
@@ -246,9 +255,16 @@ int ParenExp::evaluate() {
 	return e->evaluate();
 }
 
-//TODO(ss)(Array)void ArrayAccess::evaluate() {}
-//TODO(ss)(Array)void Length::evaluate() {}
-//TODO(ss)(Array)void ArrayAccessLength::evaluate() {}
+/*int ArrayAccess::evaluate() {
+	//TODO 
+	return 1000;
+}*/
+//TODO(ss)(Array)
+/*void Length::evaluate() {
+	return 0;
+}*/
+
+//TODO(ss)(ArrayMulti)void ArrayAccessLength::evaluate() {}
 
 int LitInt::evaluate() {
 	return i->i;
@@ -266,7 +282,7 @@ int ExpObject::evaluate() {
 	if (IdObj * id = dynamic_cast<IdObj *>(o)) {
 		//cerr << "ExpObject " << *id->i->id;
 		//cerr << (*programRoot->scope_stack.back())[*id->i->id] << endl;
-		return (*programRoot->scope_stack.back())[*id->i->id];
+		return (*programRoot->scope_stack.back())[*id->i->id].exp;
 	} else if (dynamic_cast<NewIdObj *>(o)) {
 		cerr << "Err: Trying to evaluate and obj with NewIdObj\n";
 	} else if (dynamic_cast<ThisObj *>(o)) {

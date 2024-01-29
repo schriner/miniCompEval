@@ -24,6 +24,7 @@
 #ifdef ASSEM
 #define PRINTLN_EXP "pln"
 #define PRINT_EXP "p"
+#else
 typedef union { 
 	int exp; // bool or int
 	int * exp_single; // bool or int single indx array
@@ -116,7 +117,7 @@ class Program : public TreeNode {
 			: m(m), c(nullptr) {}
 		map<string, ClassDecl *> class_table;
 		vector<string *>call_stack; // Fixme(ss) call stack - object with variables
-		vector<map<string, int> *> scope_stack; // something like a sym table
+		vector<map<string, EXP> *> scope_stack; // something like a sym table
 		ExpList * arg_stack = nullptr;
 		int return_reg;
 		void evaluate();
@@ -562,6 +563,10 @@ class Index : public TreeNode {
 	public:
 #ifdef ASSEM
 		virtual void setTable(TableNode * t) = 0;
+#else
+		virtual int evaluate() {
+			cerr << "Index unimplemented" << endl;
+		}
 #endif
 }; 
 class SingleIndex : public Index {
@@ -571,6 +576,8 @@ class SingleIndex : public Index {
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
+#else
+		int evaluate();
 #endif
 };
 class MultipleIndices : public Index {
@@ -581,6 +588,8 @@ class MultipleIndices : public Index {
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
+#else
+//		int evaluate();
 #endif
 };
 /* End Abstract Class Index */
