@@ -1,4 +1,4 @@
-test/Interpreter/readme.md1. `simple.java`: no method invocation required. Prints string literals and integer expressions.
+1. `simple.java`: no method invocation required. Prints string literals and integer expressions.
 2. `loop.java`: asks for an implementation of method invocation: no parameters, belongs to a class with no instance variables. Computes factorial and prints the result.
 3. `array.java`: Tests array access and do bubble sorting. If interpreted correctly, the sorting should be successful.
 4. `array_print.java`: Tests while loop with the array, array access, bubble sorting, array length, and passing an arrray as an arg. 
