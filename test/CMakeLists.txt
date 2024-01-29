@@ -39,6 +39,14 @@ set_property (TEST EvalNumber
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
+add_test(NAME EvalHanoi COMMAND meval ${TEST_DIR}/Interpreter/HanoiDemo.java)
+set (passRegex
+	"move 1 from 1 to 3\nmove 2 from 1 to 2\nmove 1 from 3 to 2\nmove 3 from 1 to 3\nmove 1 from 2 to 1\nmove 2 from 2 to 3\nmove 1 from 1 to 3\nmove 4 from 1 to 2\nmove 1 from 3 to 2\nmove 2 from 3 to 1\nmove 1 from 2 to 1\nmove 3 from 3 to 2\nmove 1 from 1 to 3\nmove 2 from 1 to 2\nmove 1 from 3 to 2\nmove 5 from 1 to 3\nmove 1 from 2 to 1\nmove 2 from 2 to 3\nmove 1 from 1 to 3\nmove 3 from 2 to 1\nmove 1 from 3 to 2\nmove 2 from 3 to 1\nmove 1 from 2 to 1\nmove 4 from 2 to 3\nmove 1 from 1 to 3\nmove 2 from 1 to 2\nmove 1 from 3 to 2\nmove 3 from 1 to 3\nmove 1 from 2 to 1\nmove 2 from 2 to 3\nmove 1 from 1 to 3\n1"
+)
+set_property (TEST EvalHanoi
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
 
 add_test(NAME EvalMultiplePrint COMMAND meval ${TEST_DIR}/Compiler/multiplePrint.java)
 set (passRegex
