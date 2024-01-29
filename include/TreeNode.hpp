@@ -24,6 +24,10 @@
 #ifdef ASSEM
 #define PRINTLN_EXP "pln"
 #define PRINT_EXP "p"
+typedef union { 
+	int exp; // bool or int
+	int * exp_single; // bool or int single indx array
+} EXP;
 #endif
 
 using namespace std;
@@ -515,6 +519,8 @@ class IndexAssign : public Statement {
 #ifdef ASSEM
 		void setTable(TableNode * t);
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
 #endif
 };
 class ReturnStatement : public Statement {
