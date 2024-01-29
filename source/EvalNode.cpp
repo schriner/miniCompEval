@@ -21,6 +21,7 @@ void Program::evaluate() {
 }
 
 void MainClass::evaluate() {
+		programRoot->return_reg = 0;
 	  s->evaluate();
 }
 
@@ -33,7 +34,11 @@ void ClassDeclList::evaluate() {
 void ClassDeclSimple::evaluate() {
 	// add v and method decl to table 
 	programRoot->class_table[*i->id] = this;
-	cerr << "TODO Var Decl\n";
+	for (auto md : *m->mdVector) {
+		method_table[*md->i->id] = md;
+	}
+	// TODO: var_table for an instance of a class
+	// cerr << "TODO Var Decl\n";
 }
 
 //TODO(ss): void ClassDeclExtends::evaluate() {}
@@ -45,8 +50,22 @@ void VarDecl::evaluate() {
 	cerr << "TODO: VarDeclList\n";
 }
 
-void MethodDecl::evaluate() {
-	cerr << "TODO: MethodDecl\n";
+int MethodDecl::evaluate() {
+	// Used during an actual method call
+	programRoot->return_reg = 0;
+	map<string, int> variable; // assume no complex types
+	programRoot->scope_stack.push_back(&variable);
+	cerr << endl;
+	for (auto var : *v->vdVector) {
+		variable[*var->i->id] = 0;
+		//cerr << *var->i->id << endl;
+	}
+	s->evaluate();
+	//cerr << "TODO: MethodDecl\n";
+	if (programRoot->return_reg) return programRoot->return_reg;
+	programRoot->return_reg = e->evaluate();
+	programRoot->scope_stack.pop_back();
+	return programRoot->return_reg;
 }
 void MethodDeclList::evaluate() {
 	cerr << "TODO: MethodDeclList\n";
@@ -96,20 +115,26 @@ void PrintString::evaluate() {
 }
 
 void Assign::evaluate() { 
+	(*programRoot->scope_stack.back())[*i->id] = e->evaluate();
   //TODO(ss)
-	/*  TypeCheck */ cerr << *(i->id) << endl; 
+	/*  TypeCheck */ 
+	//cerr << *(i->id) << " " << (*programRoot->scope_stack.back())[*i->id] << endl; 
 }
 
 //TODO(ss)(Array)void IndexAssign::evaluate() {}
 
 void ReturnStatement::evaluate() {
-	e->evaluate();
+	cerr <<  "ReturnStatement\n";
+	if (!e) { programRoot->return_reg = 100; return; }
+	cerr << e->evaluate() << "ReturnStatement\n" << endl;
+	programRoot->return_reg = e->evaluate();
 	//TODO(ss) Fix table;
 }
 
 void StatementList::evaluate() {
-	for (auto s = sVector->begin(); s < sVector->end(); s++) {
+	for (auto s = sVector->begin(); s != sVector->end(); s++) {
 		(*s)->evaluate();
+		if (programRoot->return_reg) { return; }
 	}
 }
 
@@ -222,15 +247,25 @@ int False::evaluate() {
 	return 0;
 }
 
-//TODO(ss)void ExpObject::evaluate() {}
+int ExpObject::evaluate() {
+	if (IdObj * id = dynamic_cast<IdObj *>(o)) {
+		//cerr << "ExpObject " << *id->i->id;
+		//cerr << (*programRoot->scope_stack.back())[*id->i->id] << endl;
+		return (*programRoot->scope_stack.back())[*id->i->id];
+	}
+	return 11;
+}
+
 int ObjectMethodCall::evaluate() {
 	// look up the method
 	// place the result somewhere
 	if (dynamic_cast<NewIdObj *>(o)) {
 		// look up the method in the table and traverse
 		// todo arguments 
+		// var decl for a class
 		ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
-		cerr << *(dynamic_cast<NewIdObj *>(o)->i)->id << endl;
+		return cl->method_table[*i->id]->evaluate();
+		//cerr << *i->id << ":" << *(dynamic_cast<NewIdObj *>(o)->i)->id << endl;
 		// call the method and evaluate
 	}
 	return 0;

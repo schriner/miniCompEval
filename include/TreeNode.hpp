@@ -100,6 +100,8 @@ class Program : public TreeNode {
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
 		map<string, ClassDecl *> class_table;
+		vector<map<string, int> *> scope_stack; // something like a sym table
+		int return_reg;
 		void evaluate();
 #endif
 		void traverse(); 
@@ -148,6 +150,7 @@ class ClassDecl : public TreeNode {
 #ifdef ASSEM
 		virtual void assem() = 0;
 #else 
+		map<string, MethodDecl *> method_table;
 		virtual void evaluate () {
 			cerr << "Class Decl Evaluate Unimplemented\n";
 		}
@@ -249,7 +252,7 @@ class MethodDecl : public TreeNode {
 #ifdef ASSEM
 		void assem(string * objName);
 #else
-		void evaluate();
+		int evaluate();
 #endif
 };
 
@@ -814,7 +817,7 @@ class ExpObject : public Exp {
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		//TODO(ss): int evaluate();
+		int evaluate();
 #endif
 };
 class ObjectMethodCall : public Exp {
