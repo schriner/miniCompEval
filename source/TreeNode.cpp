@@ -93,18 +93,7 @@ void VarDecl::traverse() {
 	i->traverse();
 	PRINTDEBUGTREE("VarDecl");
 }
-void VarDecl::setTable(TableNode * ta){
-	lowestT = ta;
-	t->setTable(ta);
-	i->lowestT = ta;
-	if (data) { 
-		if ( ta->table->find( string(*(i->id)) ) == ta->table->end() ) {
-			(*ta->table)[ string(*(i->id)) ] = data; 
-		} else {
-			lowestT->appendBadVarDecl(this);
-		}
-	}
-}
+
 
 // TableNode - YES I should have a different file for this// 
 void TableNode::reportBadVarDecl () {
@@ -136,18 +125,7 @@ void MethodDeclList::traverse() {
 	}
 	PRINTDEBUGTREE("MethodDeclList");
 }
-void MethodDeclList::setTableParentNodes(TableNode * p) {
-	for (auto m = mdVector->begin(); m < mdVector->end(); m++) {
-		(*m)->lowestT->parent = p; 
-		if ((*m)->data) {
-			if ( p->table->find( string(*((*m)->i->id)) ) == p->table->end() ) {
-				(*p->table)[string(*((*m)->i->id))] = data;
-			} else {   
-				p->appendBadMethodDecl(*m);
-			}
-		}
-	}
-}
+
 
 // FormalList //
 void FormalList::traverse() {
@@ -160,78 +138,37 @@ void FormalList::traverse() {
 	}
 	PRINTDEBUGTREE("FormalList");
 }
-void FormalList::setTable(TableNode * ta){
-	lowestT = ta;
-	if(t && i) {
-		t->setTable(ta);
-		i->lowestT = ta;
-	}
-	if (frVector) {
-		for (auto f = frVector->begin(); f < frVector->end(); f++) {
-			(*f)->setTable(ta);
-		}
-	}
-}
+
 // FormalRest //
 void FormalRest::traverse() {
 	t->traverse();
 	i->traverse();
 	PRINTDEBUGTREE("FormalRest");
 }
-void FormalRest::setTable(TableNode * ta){
-	lowestT = ta;
-	t->setTable(ta);
-	i->lowestT = ta;
-}
+
 // IntType //
 void IntType::traverse() {
 	PRINTDEBUGTREE("IntType Leaf");
 }
-void IntType::setTable(TableNode * t){
-	lowestT = t;
-}
 // BoolType //
 void BoolType::traverse() {
 	PRINTDEBUGTREE("BoolType Leaf");
-}
-void BoolType::setTable(TableNode * t){
-	lowestT = t;
 }
 // IdentType //
 void IdentType::traverse() {
 	i->traverse();
 	PRINTDEBUGTREE("IdentType");
 }
-void IdentType::setTable(TableNode * t){
-	lowestT = t;
-}
-// TypePrime //
-void TypePrime::traverse() {
-	p->traverse();
-	PRINTDEBUGTREE("TypePrime");
-}
-void TypePrime::setTable(TableNode * ta){
-	lowestT = ta;
-	p->setTable(ta);
-}
 // TypeIndexList //
 void TypeIndexList::traverse() {
 	t->traverse();
 	PRINTDEBUGTREE("TypeIndexList");
-}
-void TypeIndexList::setTable(TableNode * ta){
-	lowestT = ta;
-	t->setTable(ta);
 }
 
 // BlockStatements //
 void BlockStatements::traverse() {
 	if (s) { s->traverse(); }
 	PRINTDEBUGTREE("BlockStatement");
-}
-void BlockStatements::setTable(TableNode * t) {
-	lowestT = t;
-	if (s) { s->setTableNodes(t); }
 }
 
 // IfStatement //
@@ -244,12 +181,6 @@ void IfStatement::traverse() {
 	s_el->traverse();
 	PRINTDEBUGTREE("IfStatement");
 }
-void IfStatement::setTable(TableNode * t) {
-	lowestT = t;  
-	e->setTable(t);
-	s_if->setTable(t);
-	s_el->setTable(t);
-}
 
 // WhileStatement //
 void WhileStatement::traverse() {
@@ -260,12 +191,6 @@ void WhileStatement::traverse() {
 	s->traverse();
 	PRINTDEBUGTREE("WhileStatement");
 }
-void WhileStatement::setTable(TableNode * t) {
-	lowestT = t;
-	e->setTable(t); 
-	s->setTable(t);
-}
-
 // PrintLineExp //
 void PrintLineExp::traverse() {
 	expErr = false;
@@ -274,19 +199,11 @@ void PrintLineExp::traverse() {
 	expErr = false;
 	PRINTDEBUGTREE("PrintLineExp");
 }
-void PrintLineExp::setTable(TableNode * t) {
-	lowestT = t;
-	e->setTable(t);
-}
 
 // PrintLineString //
 void PrintLineString::traverse() {
 	s->traverse();
 	PRINTDEBUGTREE("PrintLineString");
-}
-void PrintLineString::setTable(TableNode * t) {
-	lowestT = t;
-	s->lowestT = t;
 }
 
 // PrintExp //
@@ -297,19 +214,11 @@ void PrintExp::traverse() {
 	expErr = false;
 	PRINTDEBUGTREE("PrintExp");
 }
-void PrintExp::setTable(TableNode * t) {
-	lowestT = t;
-	e->setTable(t);
-}
 
 // PrintString //
 void PrintString::traverse() {
 	s->traverse();
 	PRINTDEBUGTREE("PrintString");
-}
-void PrintString::setTable(TableNode * t) {
-	lowestT = t;
-	s->lowestT = t;
 }
 
 // Assign //
@@ -339,12 +248,6 @@ void Assign::traverse() {
 	expErr = false;
 	PRINTDEBUGTREE("Assign");
 }
-void Assign::setTable(TableNode * t) {
-	lowestT = t;
-	i->lowestT = t;
-	e->setTable(t);
-}
-
 // IndexAssign //
 void IndexAssign::traverse() {
 	i->traverse();
@@ -355,12 +258,6 @@ void IndexAssign::traverse() {
 	expErr = false;
 	PRINTDEBUGTREE("IndexAssign");
 }
-void IndexAssign::setTable(TableNode * t) {
-	lowestT = t;
-	i->lowestT = t;
-	ind->setTable(t);
-	e->setTable(t);
-}
 
 // ReturnStatement //
 void ReturnStatement::traverse() {
@@ -370,26 +267,12 @@ void ReturnStatement::traverse() {
 	expErr = false;
 	PRINTDEBUGTREE("ReturnStatement");
 }
-void ReturnStatement::setTable(TableNode * t) {
-	lowestT = t;
-	e->setTable(t);
-}
 // StatementList //
 void StatementList::traverse() {
 	for (auto s = sVector->begin(); s < sVector->end(); s++) {
 		(*s)->traverse();
 	}
 	PRINTDEBUGTREE("StatementList");
-}
-void StatementList::setTableNodes(TableNode * n) {
-	// - add code to set the contents of each statement lowestT
-	// - make virtual method for this in each statement
-	// - make function for each statement
-	lowestT = n;
-	for (auto s = sVector->begin(); s < sVector->end(); s++) {
-		//(*s)->lowestT = n;
-		(*s)->setTable(n);
-	}
 }
 
 // SingleIndex //
@@ -399,10 +282,6 @@ void SingleIndex::traverse() {
 	if (expErr) { e->reportError(); }
 	expErr = false;
 	PRINTDEBUGTREE("SingleIndex");
-}
-void SingleIndex::setTable(TableNode * t) {
-	lowestT = t;
-	e->setTable(t);
 }
 
 // MultipleIndices //
@@ -414,23 +293,10 @@ void MultipleIndices::traverse() {
 	expErr = false;
 	PRINTDEBUGTREE("MultipleIndices");
 }
-void MultipleIndices::setTable(TableNode * t) {
-	lowestT = t;
-	ind->setTable(t);
-	e->setTable(t);
-}
 
 // BinExp //
-void BinExp::setTable(TableNode * t) {
-	lowestT = t;
-	e1->setTable(t); e2->setTable(t);
-}
 
 // UnaryExp //
-void UnaryExp::setTable(TableNode * t) {
-	lowestT = t;
-	e->setTable(t);
-}
 
 // Or //
 void Or::traverse() {
@@ -617,12 +483,6 @@ void ArrayAccess::traverse() {
 	ind->traverse();
 	PRINTDEBUGTREE("ArrayAccess");
 }
-void ArrayAccess::setTable(TableNode * t) {
-	if (expErr) { return; }
-	lowestT = t;
-	i->lowestT = t;
-	ind->setTable(t);
-}
 
 // Length //
 void Length::traverse() {
@@ -630,10 +490,6 @@ void Length::traverse() {
 	i->traverse();
 	PRINTDEBUGTREE("Length");
 	updateExpResult(i_res);
-}
-void Length::setTable(TableNode * t) {
-	lowestT = t;
-	i->lowestT = t;
 }
 
 // ArrayAccessLength //
@@ -644,11 +500,6 @@ void ArrayAccessLength::traverse() {
 	PRINTDEBUGTREE("ArrayAccessLength");
 	updateExpResult(i_res);
 }
-void ArrayAccessLength::setTable(TableNode * t) {
-	lowestT = t;
-	i->lowestT = t;
-	ind->setTable(t);
-}
 
 // LitInt //
 void LitInt::traverse() {
@@ -657,11 +508,6 @@ void LitInt::traverse() {
 	PRINTDEBUGTREE("LitInt");
 	updateExpResult(i_res);
 }
-void LitInt::setTable(TableNode * t) {
-	lowestT = t;
-	//fprintf(stderr, "SETTING LitInt");
-	i->lowestT = t;
-}
 
 // True //
 void True::traverse(){
@@ -669,18 +515,12 @@ void True::traverse(){
 	PRINTDEBUGTREE("True Leaf");
 	updateExpResult(b_res);
 }
-void True::setTable(TableNode * t) {
-	lowestT = t;
-}
 
 // False //
 void False::traverse(){
 	if (expErr) { return; }
 	PRINTDEBUGTREE("False Leaf");
 	updateExpResult(b_res);
-}
-void False::setTable(TableNode * t) {
-	lowestT = t;
 }
 
 // ExpObject //
@@ -690,10 +530,6 @@ void ExpObject::traverse(){
 	PRINTDEBUGTREE("ExpObject");
 	//updateExpResult(o_res);
 }
-void ExpObject::setTable(TableNode * t) {
-	lowestT = t;
-	o->setTable(t);
-}
 
 // ObjectMethodCall //
 void ObjectMethodCall::traverse(){
@@ -702,12 +538,6 @@ void ObjectMethodCall::traverse(){
 	i->traverse();
 	if (e) { e->traverse(); }
 	PRINTDEBUGTREE("ObjectMethodCall");
-}
-void ObjectMethodCall::setTable(TableNode * t) {
-	lowestT = t;
-	o->setTable(t);
-	i->lowestT = t;
-	if (e) { e->setTable(t); }
 }
 
 // IdObj //
@@ -728,18 +558,11 @@ void IdObj::traverse() {
 	Data * d = t->table->find(*(i->id))->second;
 	updateExpResult( d->type );
 }
-void IdObj::setTable(TableNode * t) {
-	lowestT = t;
-	i->lowestT = t;
-}
 
 // ThisObj //
 void ThisObj::traverse() {
 	PRINTDEBUGTREE("This LEAF!");
 	updateExpResult(o_res);
-}
-void ThisObj::setTable(TableNode * t) {
-	lowestT = t;
 }
 
 // NewIdObj //
@@ -748,10 +571,6 @@ void NewIdObj::traverse() {
 	updateExpResult(o_res);
 	PRINTDEBUGTREE("NewIdobj");
 }
-void NewIdObj::setTable(TableNode * t) {
-	lowestT = t;
-	i->lowestT = t;
-}
 
 // NewTypeObj //
 void NewTypeObj::traverse() {
@@ -759,11 +578,6 @@ void NewTypeObj::traverse() {
 	i->traverse();
 	PRINTDEBUGTREE("NewTypeObj");
 	updateExpResult(o_res);
-}
-void NewTypeObj::setTable(TableNode * t) {
-	lowestT = t;
-	p->setTable(t);
-	i->setTable(t);
 }
 
 // ExpList //
@@ -776,15 +590,7 @@ void ExpList::traverse() {
 	}
 	PRINTDEBUGTREE("ExpList");
 }
-void ExpList::setTable(TableNode * t){
-	if (erlVector) { 
-		for (auto e = erlVector->begin(); e < erlVector->end(); e++) {
-			(*e)->setTable(t);
-		}
-	}
-	lowestT = t;
-	if (e) e->setTable(t);
-}
+
 
 // Ident //
 void Ident::traverse() {
@@ -801,4 +607,196 @@ void IntLiteral::traverse() {
 	//fprintf(stderr, "At Leaf: %d\n", i);
 }
 
+#ifdef ASSEM
+void VarDecl::setTable(TableNode * ta){
+	lowestT = ta;
+	t->setTable(ta);
+	i->lowestT = ta;
+	if (data) { 
+		if ( ta->table->find( string(*(i->id)) ) == ta->table->end() ) {
+			(*ta->table)[ string(*(i->id)) ] = data; 
+		} else {
+			lowestT->appendBadVarDecl(this);
+		}
+	}
+}
 
+void MethodDeclList::setTableParentNodes(TableNode * p) {
+	for (auto m = mdVector->begin(); m < mdVector->end(); m++) {
+		(*m)->lowestT->parent = p; 
+		if ((*m)->data) {
+			if ( p->table->find( string(*((*m)->i->id)) ) == p->table->end() ) {
+				(*p->table)[string(*((*m)->i->id))] = data;
+			} else {   
+				p->appendBadMethodDecl(*m);
+			}
+		}
+	}
+}
+
+void FormalList::setTable(TableNode * ta){
+	lowestT = ta;
+	if(t && i) {
+		t->setTable(ta);
+		i->lowestT = ta;
+	}
+	if (frVector) {
+		for (auto f = frVector->begin(); f < frVector->end(); f++) {
+			(*f)->setTable(ta);
+		}
+	}
+}
+void FormalRest::setTable(TableNode * ta){
+	lowestT = ta;
+	t->setTable(ta);
+	i->lowestT = ta;
+}
+void IntType::setTable(TableNode * t){
+	lowestT = t;
+}
+void BoolType::setTable(TableNode * t){
+	lowestT = t;
+}
+void IdentType::setTable(TableNode * t){
+	lowestT = t;
+}
+void TypeIndexList::setTable(TableNode * ta){
+	lowestT = ta;
+	t->setTable(ta);
+}
+void BlockStatements::setTable(TableNode * t) {
+	lowestT = t;
+	if (s) { s->setTableNodes(t); }
+}
+void IfStatement::setTable(TableNode * t) {
+	lowestT = t;  
+	e->setTable(t);
+	s_if->setTable(t);
+	s_el->setTable(t);
+}
+void WhileStatement::setTable(TableNode * t) {
+	lowestT = t;
+	e->setTable(t); 
+	s->setTable(t);
+}
+
+void PrintLineExp::setTable(TableNode * t) {
+	lowestT = t;
+	e->setTable(t);
+}
+void PrintLineString::setTable(TableNode * t) {
+	lowestT = t;
+	s->lowestT = t;
+}
+void PrintExp::setTable(TableNode * t) {
+	lowestT = t;
+	e->setTable(t);
+}
+void PrintString::setTable(TableNode * t) {
+	lowestT = t;
+	s->lowestT = t;
+}
+void Assign::setTable(TableNode * t) {
+	lowestT = t;
+	i->lowestT = t;
+	e->setTable(t);
+}
+void IndexAssign::setTable(TableNode * t) {
+	lowestT = t;
+	i->lowestT = t;
+	ind->setTable(t);
+	e->setTable(t);
+}
+void ReturnStatement::setTable(TableNode * t) {
+	lowestT = t;
+	e->setTable(t);
+}
+void StatementList::setTableNodes(TableNode * n) {
+	// - add code to set the contents of each statement lowestT
+	// - make virtual method for this in each statement
+	// - make function for each statement
+	lowestT = n;
+	for (auto s = sVector->begin(); s < sVector->end(); s++) {
+		//(*s)->lowestT = n;
+		(*s)->setTable(n);
+	}
+}
+void SingleIndex::setTable(TableNode * t) {
+	lowestT = t;
+	e->setTable(t);
+}
+void MultipleIndices::setTable(TableNode * t) {
+	lowestT = t;
+	ind->setTable(t);
+	e->setTable(t);
+}
+void BinExp::setTable(TableNode * t) {
+	lowestT = t;
+	e1->setTable(t); e2->setTable(t);
+}
+void UnaryExp::setTable(TableNode * t) {
+	lowestT = t;
+	e->setTable(t);
+}
+void ArrayAccess::setTable(TableNode * t) {
+	if (expErr) { return; }
+	lowestT = t;
+	i->lowestT = t;
+	ind->setTable(t);
+}
+void Length::setTable(TableNode * t) {
+	lowestT = t;
+	i->lowestT = t;
+}
+void ArrayAccessLength::setTable(TableNode * t) {
+	lowestT = t;
+	i->lowestT = t;
+	ind->setTable(t);
+}
+void LitInt::setTable(TableNode * t) {
+	lowestT = t;
+	//fprintf(stderr, "SETTING LitInt");
+	i->lowestT = t;
+}
+void True::setTable(TableNode * t) {
+	lowestT = t;
+}
+void False::setTable(TableNode * t) {
+	lowestT = t;
+}
+void ExpObject::setTable(TableNode * t) {
+	lowestT = t;
+	o->setTable(t);
+}
+void ObjectMethodCall::setTable(TableNode * t) {
+	lowestT = t;
+	o->setTable(t);
+	i->lowestT = t;
+	if (e) { e->setTable(t); }
+}
+void IdObj::setTable(TableNode * t) {
+	lowestT = t;
+	i->lowestT = t;
+}
+void ThisObj::setTable(TableNode * t) {
+	lowestT = t;
+}
+void NewIdObj::setTable(TableNode * t) {
+	lowestT = t;
+	i->lowestT = t;
+}
+void NewTypeObj::setTable(TableNode * t) {
+	lowestT = t;
+	p->setTable(t);
+	i->setTable(t);
+}
+void ExpList::setTable(TableNode * t){
+	if (erlVector) { 
+		for (auto e = erlVector->begin(); e < erlVector->end(); e++) {
+			(*e)->setTable(t);
+		}
+	}
+	lowestT = t;
+	if (e) e->setTable(t);
+}
+#endif

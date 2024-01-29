@@ -61,7 +61,9 @@ int yydebug = 1;
 
 // Root of AST
 extern Program * programRoot; 
+#ifdef ASSEM
 extern TableNode * rootScope; 
+#endif
 extern bool programTypeError;
 string * typeStringHolder = nullptr;
 
@@ -108,6 +110,7 @@ string * typeStringHolder = nullptr;
 program : 
 	main_class class_decl_list { // TODO: add main + decl to table 
 		programRoot = new Program($1, $2);
+#ifdef ASSEM
 		rootScope = new TableNode(nullptr);
 		programRoot->lowestT = rootScope;
 		$1->lowestT->parent = rootScope; // main_scope->root
@@ -116,13 +119,16 @@ program :
 			(*c)->lowestT->parent = rootScope;
 		}
 		$2->lowestT = rootScope; // class_decl scope is root scope
+#endif 
 		//programRoot->traverse();
 	}
 	| main_class { 
 		programRoot = new Program($1, nullptr); 
+#ifdef ASSEM
 		rootScope = new TableNode(nullptr);
 		programRoot->lowestT = rootScope;
 		$1->lowestT->parent = rootScope; // main_scope->root
+#endif
 		//programRoot->traverse();
 	}
 	;
@@ -130,10 +136,12 @@ program :
 main_class : 
 	CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement C_BR C_BR { 
 		$$ = new MainClass($2, $12, $15); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr);
 		$2->lowestT = $$->lowestT;
 		$12->lowestT = $$->lowestT;
 		$15->setTable($$->lowestT);
+#endif
 		// TODO: Add the contents of statement $15 to main scope
 	}
 	;
@@ -146,15 +154,18 @@ class_decl_list : /* Eliminate class_decl*  */
 class_decl : 
 	CLASS ID O_BR var_decl_list method_decl_list C_BR /* with method_decl_list */ { 
 		$$ = new ClassDeclSimple($2, $4, $5); // TODO: Add to class_decl table
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$5->setTableParentNodes($$->lowestT); // set parent table node
 		$4->setTableNodes($$->lowestT); // set table node for var_decl
 		$4->lowestT = $$->lowestT; // set table node for var_decl_list
 		$5->lowestT = $$->lowestT; // set table node for method_decl_list
+#endif
 	}
   | CLASS ID EXTENDS ID O_BR var_decl_list method_decl_list C_BR /* with method_decl_list */ { 
 		$$ = new ClassDeclExtends($2, $4, $6, $7); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->lowestT = $$->lowestT;
@@ -162,48 +173,61 @@ class_decl :
 		$6->setTableNodes($$->lowestT); // set table node for var_decl
 		$6->lowestT = $$->lowestT;
 		$7->lowestT = $$->lowestT;
+#endif
 	}
 	| CLASS ID O_BR var_decl_list C_BR { 
 		$$ = new ClassDeclSimple($2, $4, nullptr); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->setTableNodes($$->lowestT); // set table node for var_decl
 		$4->lowestT = $$->lowestT;
+#endif
 	}
   | CLASS ID EXTENDS ID O_BR var_decl_list C_BR { 
 		$$ = new ClassDeclExtends($2, $4, $6, nullptr); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->lowestT = $$->lowestT;
 		$6->setTableNodes($$->lowestT); // set table node for var_decl
 		$6->lowestT = $$->lowestT;
+#endif
 	}
 	/* No var_decl */
 	| CLASS ID O_BR method_decl_list C_BR /* with method_decl_list */ { $$ = new ClassDeclSimple($2, nullptr, $4); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->setTableParentNodes($$->lowestT); 
 		$4->lowestT = $$->lowestT;
+#endif
 	}
   | CLASS ID EXTENDS ID O_BR method_decl_list C_BR /* with method_decl_list */ { 
 		$$ = new ClassDeclExtends($2, $4, nullptr, $6); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->lowestT = $$->lowestT;
 	  // for all m method_decl: m->classTableNode
 		$6->setTableParentNodes($$->lowestT); 
 		$6->lowestT = $$->lowestT;
+#endif
 	}
 	| CLASS ID O_BR C_BR { 
 		$$ = new ClassDeclSimple($2, nullptr, nullptr); 
+#ifdef ASSEM
 		$2->lowestT = $$->lowestT;
 		$$->lowestT = new TableNode(nullptr); 
+#endif
 	}
   | CLASS ID EXTENDS ID O_BR C_BR { 
 		$$ = new ClassDeclExtends($2, $4, nullptr, nullptr); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 		$2->lowestT = $$->lowestT;
 		$4->lowestT = $$->lowestT;
+#endif
 	};
 
 var_decl_list : /* Eliminate var_decl* */
@@ -213,28 +237,30 @@ var_decl_list : /* Eliminate var_decl* */
 
 var_decl : 
 	INT ID SEMI { 
-		$$ = new VarDecl( new TypePrime(new IntType()), $2 ); 
+		$$ = new VarDecl( new IntType(), $2 ); 
 		//$$->data = new SimpleVar($2->id, "INT", new IntLiteral(0));
 	}
 	| BOOL ID SEMI { 
-		$$ = new VarDecl( new TypePrime(new BoolType()), $2 ); 
+		$$ = new VarDecl( new BoolType(), $2 ); 
 		//$$->data = new SimpleVar($2->id, "BOOL", new BoolLiteral(false));
 	}
 	| ID ID SEMI { 
-		$$ = new VarDecl( new TypePrime(new IdentType($1)), $2 ); 
+		$$ = new VarDecl( new IdentType($1), $2 ); 
 		// TODO: FIXME 
+#ifdef ASSEM
 		$$->data = new RefVar($2->id, $1->id, nullptr);
+#endif
 	}
 	| INT type_bracket_list ID SEMI {
-		$2->getLastNull()->t = new TypePrime(new IntType());
+		$2->getLastNull()->t = new IntType();
 		$$ = new VarDecl( $2, $3 ); 
 	}
 	| BOOL type_bracket_list ID SEMI { 
-		$2->getLastNull()->t = new TypePrime(new BoolType());
+		$2->getLastNull()->t = new BoolType();
 		$$ = new VarDecl( $2, $3 ); 
 	}
 	| ID type_bracket_list ID SEMI { 
-		$2->getLastNull()->t = new TypePrime(new IdentType($1));
+		$2->getLastNull()->t = new IdentType($1);
 		$$ = new VarDecl( $2, $3 ); 
 	}
 	;
@@ -248,10 +274,14 @@ method_decl_list : /* Eliminate method_decl* */
 	method_decl_list method_decl { 
 		$$ = $1; 
 		$1->append( $2 ); 
+#ifdef ASSEM
 		$2->data = new MethodVar($2->i->id);
+#endif
 	}
 	| method_decl { $$ = new MethodDeclList( $1 ); 
+#ifdef ASSEM
 		$1->data = new MethodVar($1->i->id);
+#endif
 	}
 	;
 
@@ -260,6 +290,7 @@ method_decl :
 	{ // TODO: Apend to table
 		// DONE: set nodes for -, -, -, - , -, - 
 		$$ = new MethodDecl($2, $3, $5, $8, $9, $11);  
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT); // type
@@ -270,9 +301,11 @@ method_decl :
 		$9->setTableNodes($$->lowestT); // set table nodes for statement
 		$9->lowestT = $$->lowestT; // set table node for statement_list
 		$11->setTable($$->lowestT); // ok set stuff for exp too
+#endif
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR 
 	{ $$ = new MethodDecl($2, $3, nullptr, $7, $8, $10); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
@@ -282,9 +315,11 @@ method_decl :
 		$8->setTableNodes($$->lowestT); // set table nodes for statement
 		$8->lowestT = $$->lowestT; // set table node for statement_list
 		$10->setTable($$->lowestT); // ok set stuff for exp too
+#endif
 	}
 	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR /* no var_decl */
 	{ $$ = new MethodDecl($2, $3, $5, nullptr, $8, $10); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
@@ -293,9 +328,11 @@ method_decl :
 		$8->setTableNodes($$->lowestT); // set table nodes for statement
 		$8->lowestT = $$->lowestT; // set table node for statement_list
 		$10->setTable($$->lowestT); // ok set stuff for exp too
+#endif
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR /* no var_decl */
 	{ $$ = new MethodDecl($2, $3, nullptr, nullptr, $7, $9); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
@@ -303,10 +340,12 @@ method_decl :
 		$7->setTableNodes($$->lowestT); // set table nodes for statement
 		$7->lowestT = $$->lowestT; // set table node for statement_list
 		$9->setTable($$->lowestT); // ok set stuff for exp too
+#endif
 	}
 	/* No Statement List */
 	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
 	{ $$ = new MethodDecl($2, $3, $5, $8, nullptr, $10); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
@@ -315,9 +354,11 @@ method_decl :
 		$8->setTableNodes($$->lowestT); // set table nodes for var_decl
 		$8->lowestT = $$->lowestT; // set table node for var_decl_list
 		$10->setTable($$->lowestT); // ok set stuff for exp too
+#endif
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
 	{ $$ = new MethodDecl($2, $3, nullptr, $7, nullptr, $9); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
@@ -325,34 +366,43 @@ method_decl :
 		$7->setTableNodes($$->lowestT); // set table nodes for var_decl
 		$7->lowestT = $$->lowestT; // set table node for var_decl_list
 		$9->setTable($$->lowestT); // ok set stuff for exp too
+#endif
 	}
 	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR  RETURN full_exp SEMI C_BR /* no var_decl */
 	{ $$ = new MethodDecl($2, $3, $5, nullptr, nullptr, $9); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
 		$5->setTable($$->lowestT); // formal list
 		$9->setTable($$->lowestT); // ok set stuff for exp too
+#endif
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR  RETURN full_exp SEMI C_BR /* no var_decl */
 	{ $$ = new MethodDecl($2, $3, nullptr, nullptr, nullptr, $8); 
+#ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr); 
 
 		$2->setTable($$->lowestT);
 		$3->lowestT = $$->lowestT;
 		$8->setTable($$->lowestT); // ok set stuff for exp too
+#endif
 	}
 	;
 
 formal_list : 
 	type ID formal_rest_list { 
 		$$ = new FormalList( $1, $2, $3 ); 
+#ifdef ASSEM
 		$$->data = new RefVar($2->id, typeStringHolder, nullptr);
+#endif
 	}
 	| type ID { 
 		$$ = new FormalList( $1, $2 ); 
+#ifdef ASSEM
 		$$->data = new RefVar($2->id, typeStringHolder, nullptr);
+#endif
 	}
 	;
 
@@ -364,12 +414,14 @@ formal_rest_list : /* Eliminate formal_rest* */
 formal_rest :
 	COMMA type ID { 
 		$$ = new FormalRest( $2, $3 ); 
+#ifdef ASSEM
 		$$->data = new RefVar($3->id, typeStringHolder, nullptr);
+#endif
 	}
 	;
 
 type : 
-	prime_type { $$ = new TypePrime( $1 ); }
+	prime_type { $$ = dynamic_cast<Type *> ($1) ; }
 	| type O_SQ C_SQ { $$ = new TypeIndexList( $1 ); }
 	;
 

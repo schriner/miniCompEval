@@ -48,6 +48,20 @@ set_property (TEST EvalHanoi
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
+add_test(NAME EvalArray COMMAND meval ${TEST_DIR}/Interpreter/Array.java)
+set (passRegex "Sort successful\n") 
+set_property (TEST EvalArray
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+
+add_test(NAME EvalArrayPrint COMMAND meval ${TEST_DIR}/Interpreter/array_print.java)
+set (passRegex "^Printing Array of Length: 8\n60 40 20 0 50 70 10 30 \nPrinting Array of Length: 8\n0 10 20 30 40 50 60 70 \nSort successful\n") 
+set_property (TEST EvalArrayPrint
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+
 add_test(NAME EvalMultiplePrint COMMAND meval ${TEST_DIR}/Compiler/multiplePrint.java)
 set (passRegex
   "The answer\nto the meaning\nof life\nis:\n42\n"
