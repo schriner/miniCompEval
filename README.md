@@ -1,5 +1,5 @@
 
-# A compiler and interpreter for the MiniJava syntax:
+# A compiler and interpreter for the MiniJava syntax: [![CMake on a single platform](https://github.com/schriner/miniCompEval/actions/workflows/cmake-single-platform.yml/badge.svg?branch=master)](https://github.com/schriner/miniCompEval/actions/workflows/cmake-single-platform.yml)
 
 Syntax dervied from: https://www.cs.tufts.edu/~sguyer/classes/comp181-2006/minijava.html
 
