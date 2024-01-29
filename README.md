@@ -108,7 +108,7 @@ From the build directory:
     meval [-o <output_file>] <inputfile>.java
     ```
 Functionality is tested for the files contained within: [`test/Interpreter`](test/Interpreter)
-* class method calls, recursion, and arrays are supported
+* class method calls, variables, recursion with arguments, and single dimensional arrays are supported
 * class variable delarations and keyword `extends` are unimplemented.
 
 ### mjavac: Compiler to ARM 32 bit assembly 
@@ -117,6 +117,7 @@ From the build directory:
     ```
     mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
     ```
+* (todo) functionality supported
 
 TODO: Automated testing to compile output files.
 
