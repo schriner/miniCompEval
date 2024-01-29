@@ -65,6 +65,17 @@ class TreeNode {
 		Data * data = nullptr; 
 		int lineRecord = -1;
 		virtual void traverse() = 0; 
+		void reportLine() {
+			fprintf(stderr, "%s: Report Line: %d\n", exe, lineRecord);
+			FILE * f = fopen(yyfilename, "r");
+			char buf[256] = "";
+			for (auto i = 0; i < lineRecord; i++) {
+				fgets(buf, 256, f);
+			}
+			buf[255] = '\0';
+			fprintf(stderr, "%s: %s", exe, buf);
+			fclose(f);oid reportLine() {
+		}
 		void reportError() {
 			programTypeError = true;
 			fprintf(stderr, "%s: Type Violation in Line %d\n", exe, lineRecord);
@@ -100,6 +111,7 @@ class Program : public TreeNode {
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
 		map<string, ClassDecl *> class_table;
+		vector<string *>call_stack; // Fixme(ss) call stack - object with variables
 		vector<map<string, int> *> scope_stack; // something like a sym table
 		ExpList * arg_stack = nullptr;
 		int return_reg;
