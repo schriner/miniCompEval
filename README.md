@@ -118,8 +118,12 @@ From the build directory:
     mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
     ```
 
+TODO: Automated testing to compile output files.
+
 ## Test Functionality
 From within the build directory:
 ```
 ctest
 ```
+
+Output should mirror output from `javac`
