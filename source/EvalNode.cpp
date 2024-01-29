@@ -1,4 +1,6 @@
 
+#ifndef ASSEM
+
 /*
  * miniCompEval
  * Sonya Schriner
@@ -10,26 +12,71 @@
 
 using namespace std;
 
-#ifndef ASSEM
+extern Program * programRoot;
 
 void Program::evaluate() {
 	  if (programTypeError) return;
-		  m->evaluate();
+		if (c) c->evaluate();
+		m->evaluate();
 }
 
 void MainClass::evaluate() {
+		programRoot->return_reg = 0;
 	  s->evaluate();
 }
 
-//TODO(ss): void ClassDeclList::evaluate() {}
-
-//TODO(ss): void ClassDecl::evaluate() {}
+void ClassDeclList::evaluate() {
+	if (!cdVector) return;
+	for (auto c : *cdVector) {
+		c->evaluate();
+	}
+}
+void ClassDeclSimple::evaluate() {
+	// add v and method decl to table 
+	programRoot->class_table[*i->id] = this;
+	for (auto md : *m->mdVector) {
+		method_table[*md->i->id] = md;
+	}
+	// TODO: var_table for an instance of a class
+	// cerr << "TODO Var Decl\n";
+}
 
 //TODO(ss): void ClassDeclExtends::evaluate() {}
 
-//TODO(ss): void VarDecl::evaluate() {
-// Account For type
-//}
+void VarDeclList::evaluate() {
+	cerr << "TODO: VarDeclList\n";
+}
+void VarDecl::evaluate() { 
+	cerr << "TODO: VarDeclList\n";
+}
+
+int MethodDecl::evaluate() {
+	// Used during an actual method call
+	programRoot->return_reg = 0;
+	map<string, int> variable; // assume no complex types
+	programRoot->scope_stack.push_back(&variable);
+	for (auto var : *v->vdVector) {
+		variable[*var->i->id] = 0;
+	}
+	s->evaluate();
+	if (programRoot->return_reg) return programRoot->return_reg;
+
+	programRoot->return_reg = e->evaluate();
+	programRoot->scope_stack.pop_back();
+	return programRoot->return_reg;
+}
+void MethodDeclList::evaluate() {
+	cerr << "TODO: MethodDeclList\n";
+}
+
+//TODO(ss): void FormalList::evaluate() {}
+//TODO(ss): void FormalRestList::evaluate() {}
+//TODO(ss): void FormalRest::evaluate() {}
+
+//TODO(ss): void IntType::evaluate() {}
+//TODO(ss): void BoolType::evaluate() {}
+//TODO(ss): void IdentType::evaluate() {}
+//TODO(ss)(Array): void TypeIndexList::evaluate() {}
 
 void BlockStatements::evaluate() {
 	if (s) { s->evaluate(); }
@@ -65,24 +112,31 @@ void PrintString::evaluate() {
 	cout << *(s->str);
 }
 
-//TODO(ss)void Assign::evaluate() {
-//  TypeCheck
-//	cout << *(s->str);
-//}
+void Assign::evaluate() { 
+	(*programRoot->scope_stack.back())[*i->id] = e->evaluate();
+  //TODO(ss)
+	/*  TypeCheck */ 
+	/*  Instance variables */ 
+}
 
-//TODO(ss)void IndexAssign::evaluate() {}
+//TODO(ss)(Array)void IndexAssign::evaluate() {}
 
-//TODO(ss) void ReturnStatement::evaluate(TableNode * t) {}
+void ReturnStatement::evaluate() {
+	cerr <<  "ReturnStatement\n";
+	if (!e) { programRoot->return_reg = 100; return; }
+	cerr << e->evaluate() << "ReturnStatement\n" << endl;
+	programRoot->return_reg = e->evaluate();
+}
 
 void StatementList::evaluate() {
-	for (auto s = sVector->begin(); s < sVector->end(); s++) {
+	for (auto s = sVector->begin(); s != sVector->end(); s++) {
 		(*s)->evaluate();
+		if (programRoot->return_reg) { return; }
 	}
 }
 
-//TODO(ss)void SingleIndex::evaluate() {}
-
-//TODO(ss)void MultipleIndices::evaluate() {}
+//TODO(ss)(Array)void SingleIndex::evaluate() {}
+//TODO(ss)(Array)void MultipleIndices::evaluate() {}
 
 int Or::evaluate() {
 	int r1 = e1->evaluate();
@@ -174,11 +228,9 @@ int ParenExp::evaluate() {
 	return e->evaluate();
 }
 
-//TODO(ss)void ArrayAccess::evaluate() {}
-//TODO(ss)void ArrayAccessLength::evaluate() {}
-
-/* list of "exp" or "exp , exp, ..." */
-//TODO(ss) void ExpList::evaluate() { // add erl or e to table }
+//TODO(ss)(Array)void ArrayAccess::evaluate() {}
+//TODO(ss)(Array)void Length::evaluate() {}
+//TODO(ss)(Array)void ArrayAccessLength::evaluate() {}
 
 int LitInt::evaluate() {
 	return i->i;
@@ -191,5 +243,38 @@ int True::evaluate() {
 int False::evaluate() {
 	return 0;
 }
+
+int ExpObject::evaluate() {
+	if (IdObj * id = dynamic_cast<IdObj *>(o)) {
+		//cerr << "ExpObject " << *id->i->id;
+		//cerr << (*programRoot->scope_stack.back())[*id->i->id] << endl;
+		return (*programRoot->scope_stack.back())[*id->i->id];
+	}
+	return 11;
+}
+
+int ObjectMethodCall::evaluate() {
+	// look up the method
+	// place the result somewhere
+	if (dynamic_cast<NewIdObj *>(o)) {
+		// look up the method in the table and traverse
+		// todo arguments 
+		// var decl for a class
+		ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
+		return cl->method_table[*i->id]->evaluate();
+		//cerr << *i->id << ":" << *(dynamic_cast<NewIdObj *>(o)->i)->id << endl;
+		// call the method and evaluate
+	}
+	return 0;
+}
+//TODO(ss)void IdObj::evaluate() {}
+//TODO(ss)void ThisObj::evaluate() {}
+void NewIdObj::evaluate() {
+	// TODO(ss) create an obj and add it to a table or return the addr
+}
+//TODO(ss)void NewTypeObj::evaluate() {}
+
+/* list of "exp" or "exp , exp, ..." */
+//TODO(ss) void ExpList::evaluate() { // add erl or e to table }
 
 #endif
