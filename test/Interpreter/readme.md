@@ -4,5 +4,7 @@
 4. `array_print.java`: Tests while loop with the array, array access, bubble sorting, array length, and passing an arrray as an arg. 
 5. `basicIf.java`: Tests multiple if statements within main without a method call.
 6. `number.java`: Tests complicated computation (n choose k, greatest common divisor). It requires method invocation with arguments to be implemented.
-7. `HanoiDemo.java`: Tests recursive method call. Requires implementation of `this`.
+7. `HanoiDemo.java`: Tests recursive method call. Requires implementation of `this`. 
 8-10. `multiplePrint*`: Tests printing and expresion functionality within main().
+
+TODO(ss): Automate Testing within this dir with javac output
