@@ -21,7 +21,7 @@ void Program::evaluate() {
 }
 
 void MainClass::evaluate() {
-		programRoot->return_reg = 0;
+		programRoot->return_reg = {0};
 	  s->evaluate();
 }
 
@@ -50,30 +50,34 @@ void VarDecl::evaluate() {
 	cerr << "TODO: VarDeclList\n";
 }
 
-int MethodDecl::evaluate() {
+VAL MethodDecl::evaluate() {
 	// Used during an actual method call
-	programRoot->return_reg = 0;
-	map<string, EXP> variable; // assume no complex types
+	programRoot->return_reg = {0};
+	map<string, SYM> variable; // assume no complex types
 
 	if (f && programRoot->arg_stack
 			&& programRoot->arg_stack->e && f->t && f->i) {
-			variable[*f->i->id] = {programRoot->arg_stack->e->evaluate()}; 
+			variable[*f->i->id] = {programRoot->arg_stack->e->evaluate(), f->t}; 
 	}
 	if (f && programRoot->arg_stack->erlVector && f->frVector) {
 		auto i_erl = 0;
 		for (auto param : *f->frVector) {
 			//cerr << *param->i->id << " : ";
-			variable[*param->i->id] = {(*programRoot->arg_stack->erlVector)[i_erl++]->evaluate()};
+			variable[*param->i->id] = {(*programRoot->arg_stack->erlVector)[i_erl++]->evaluate(), param->t};
 			//cerr << variable[*param->i->id] << endl;
 		}
 	}
 	programRoot->scope_stack.push_back(&variable);
 	for (auto var : *v->vdVector) {
-		variable[*var->i->id] = {0};
+		// Type Handler
+		Type * type = var->t;
+
+		variable[*var->i->id] = {0, var->t};
 	}
 	
 	s->evaluate();
-	if (programRoot->return_reg) {
+	if (programRoot->return_reg.exp) {
+		// Check if it is an early return with value 0;
 		programRoot->arg_stack = nullptr;
 		programRoot->scope_stack.pop_back();
 		return programRoot->return_reg;
@@ -102,7 +106,7 @@ void BlockStatements::evaluate() {
 }
 
 void IfStatement::evaluate() {
-	if ( e->evaluate() ) {
+	if ( e->evaluate().exp ) {
 		s_if->evaluate();
 	} else {
 		s_el->evaluate();
@@ -110,13 +114,13 @@ void IfStatement::evaluate() {
 }
 
 void WhileStatement::evaluate() {
-	while ( e->evaluate() ) {
+	while ( e->evaluate().exp ) {
 		s->evaluate();
 	}
 }
 
 void PrintLineExp::evaluate () {
-	cout << e->evaluate() << endl;
+	cout << e->evaluate().exp << endl;
 }
 
 void PrintLineString::evaluate() {
@@ -124,7 +128,7 @@ void PrintLineString::evaluate() {
 }
 
 void PrintExp::evaluate () {
-	cout << e->evaluate();
+	cout << e->evaluate().exp;
 }
 
 void PrintString::evaluate() {
@@ -132,24 +136,22 @@ void PrintString::evaluate() {
 }
 
 void Assign::evaluate() { 
-	(*programRoot->scope_stack.back())[*i->id] = {(e->evaluate())};
+	(*programRoot->scope_stack.back())[*i->id].val = (e->evaluate());
   //TODO(ss)
 	/*  TypeCheck */ 
 	/*  Instance variables */ 
 }
 
-//TODO(ss)(Array)
 //TODO(ss)(ArrayMulti)
 void IndexAssign::evaluate() {
-	int offset = i->evaluate();
-	cerr << "Array" << *i->id << "Offset: " << offset << endl;
-	(*programRoot->scope_stack.back())[*i->id] = {(e->evaluate())};
+	int offset = ind->evaluate();
+	(*programRoot->scope_stack.back())[*i->id].val.exp_single[offset + 1] = e->evaluate().exp;
 }
 
 void ReturnStatement::evaluate() {
 	cerr <<  "ReturnStatement\n";
-	if (!e) { programRoot->return_reg = 100; return; }
-	cerr << e->evaluate() << "ReturnStatement\n" << endl;
+	if (!e) { programRoot->return_reg = {100}; return; }
+	cerr << e->evaluate().exp << "ReturnStatement\n" << endl;
 	programRoot->return_reg = e->evaluate();
 }
 
@@ -161,141 +163,163 @@ void StatementList::evaluate() {
 }
 
 int SingleIndex::evaluate() {
-	return e->evaluate();
+	return e->evaluate().exp;
 }
 //TODO(ss)(ArrayMulti)void MultipleIndices::evaluate() {}
 
-int Or::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 || r2;
+VAL Or::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp || r2.exp};
 }
 
-int And::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 && r2;
+VAL And::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp && r2.exp};
 }
 
-int Equal::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 == r2;
+VAL Equal::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp == r2.exp};
 }
 
-int NotEqual::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 != r2;
+VAL NotEqual::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp != r2.exp};
 }
 
-int Lesser::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 < r2;
+VAL Lesser::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp < r2.exp};
 }
 
-int Greater::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 > r2;
+VAL Greater::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp > r2.exp};
 }
 
-int LessEqual::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 <= r2;
+VAL LessEqual::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp <= r2.exp};
 }
 
-int GreatEqual::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 >= r2;
+VAL GreatEqual::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp >= r2.exp};
 }
 
-int Add::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 + r2;
+VAL Add::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp + r2.exp};
 }
 
-int Subtract::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 - r2;
+VAL Subtract::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp - r2.exp};
 }
 
-int Divide::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 / r2;
+VAL Divide::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp / r2.exp};
 }
 
-int Multiply::evaluate() {
-	int r1 = e1->evaluate();
-	int r2 = e2->evaluate();
-	return r1 * r2;
+VAL Multiply::evaluate() {
+	VAL r1 = e1->evaluate();
+	VAL r2 = e2->evaluate();
+	return {r1.exp * r2.exp};
 }
 
-int Not::evaluate() {
-	return !(e->evaluate());
+VAL Not::evaluate() {
+	return {!(e->evaluate().exp)};
 }
 
-int Pos::evaluate() {
+VAL Pos::evaluate() {
 	// making something positive does absolutely nothing
 	return e->evaluate();
 }
 
-int Neg::evaluate() {
-	return -(e->evaluate());
+VAL Neg::evaluate() {
+	return {-(e->evaluate().exp)};
 }
 
-int ParenExp::evaluate() {
+VAL ParenExp::evaluate() {
 	//fprintf(stderr, "ParenExp\n");
 	return e->evaluate();
 }
 
-/*int ArrayAccess::evaluate() {
-	//TODO 
-	return 1000;
-}*/
-//TODO(ss)(Array)
-/*void Length::evaluate() {
-	return 0;
-}*/
+VAL ArrayAccess::evaluate() {
+	if (SingleIndex * s_i = dynamic_cast<SingleIndex * >(ind)) {
+		if ((*programRoot->scope_stack.back())[*i->id].val.exp_single == nullptr) {
+			cerr << "Calling Length on uninit array";
+			return {0};
+		}
+		return VAL{(*programRoot->scope_stack.back())[*i->id].val.exp_single[s_i->e->evaluate().exp + 1]};
+	}
+	return {0};
+}
+VAL Length::evaluate() {
+	// Check that this id is an array
+	if ((*programRoot->scope_stack.back())[*i->id].val.exp_single == nullptr) {
+		cerr << "Calling Length on uninit array";
+		return {0};
+	}
+	return {(*programRoot->scope_stack.back())[*i->id].val.exp_single[0]};
+}
 
 //TODO(ss)(ArrayMulti)void ArrayAccessLength::evaluate() {}
 
-int LitInt::evaluate() {
-	return i->i;
+VAL LitInt::evaluate() {
+	return {i->i};
 }
 
-int True::evaluate() {
-	return 1;
+VAL True::evaluate() {
+	return {1};
 }
 
-int False::evaluate() {
-	return 0;
+VAL False::evaluate() {
+	return {0};
 }
 
-int ExpObject::evaluate() {
+VAL ExpObject::evaluate() {
 	if (IdObj * id = dynamic_cast<IdObj *>(o)) {
 		//cerr << "ExpObject " << *id->i->id;
 		//cerr << (*programRoot->scope_stack.back())[*id->i->id] << endl;
-		return (*programRoot->scope_stack.back())[*id->i->id].exp;
+		return (*programRoot->scope_stack.back())[*id->i->id].val;
 	} else if (dynamic_cast<NewIdObj *>(o)) {
 		cerr << "Err: Trying to evaluate and obj with NewIdObj\n";
 	} else if (dynamic_cast<ThisObj *>(o)) {
 		cerr << "Err: Trying to evaluate and obj with ThisObj\n";
-	} else if (dynamic_cast<NewTypeObj *>(o)) {
+	} else if (NewTypeObj * nto = dynamic_cast<NewTypeObj *>(o)) {
+		// NEW prime_type index 
+		// (Array)
+		if (SingleIndex * i = dynamic_cast<SingleIndex * >(nto->i)) {
+			if (!dynamic_cast<IdentType * >(nto->p)) { // Is BOOL or INT
+				int array_length = i->e->evaluate().exp; 
+				int * array = new int[array_length + 1];
+				array[0] = array_length;
+				return {.exp_single = array};
+			} else { /* TODO(IdentType) */}
+		}
+		
+		// TODO: (MultiArray)
 		cerr << "Err: Trying to evaluate and obj with NewTypeObj\n";
 	} else {
 		cerr << "ExpObject" << endl;
 	}
-	return 11;
+	return {11};
 }
 
-int ObjectMethodCall::evaluate() {
+VAL ObjectMethodCall::evaluate() {
 	// look up the method
 	// place the result somewhere
 	programRoot->arg_stack = nullptr;
@@ -325,7 +349,7 @@ int ObjectMethodCall::evaluate() {
 		cerr << "Methodcall" << endl;
 	}
 
-	return 0;
+	return {0};
 }
 //TODO(ss)void IdObj::evaluate() {}
 //TODO(ss)void ThisObj::evaluate() {}

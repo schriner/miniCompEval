@@ -159,11 +159,6 @@ void IdentType::traverse() {
 	i->traverse();
 	PRINTDEBUGTREE("IdentType");
 }
-// TypePrime //
-void TypePrime::traverse() {
-	p->traverse();
-	PRINTDEBUGTREE("TypePrime");
-}
 // TypeIndexList //
 void TypeIndexList::traverse() {
 	t->traverse();
@@ -664,10 +659,6 @@ void BoolType::setTable(TableNode * t){
 }
 void IdentType::setTable(TableNode * t){
 	lowestT = t;
-}
-void TypePrime::setTable(TableNode * ta){
-	lowestT = ta;
-	p->setTable(ta);
 }
 void TypeIndexList::setTable(TableNode * ta){
 	lowestT = ta;

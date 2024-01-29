@@ -106,14 +106,14 @@ void VarDeclList::assem( map<string, string *> * nameTable, map<string, string*>
   }
 }
 void VarDecl::assem( map<string, string * > * nameTable, map<string, string*> * typeTable) {
-  if (dynamic_cast< TypePrime* >( t )){
-    TypePrime * p = (TypePrime * ) t;
-    if (dynamic_cast< BoolType* >( p->p )
-        || dynamic_cast< IntType* >( p->p )) {
+  if (dynamic_cast< PrimeType* >( t )){
+    PrimeType * p = (PrimeType * ) t;
+    if (dynamic_cast< BoolType* >( p )
+        || dynamic_cast< IntType* >( p )) {
       programRoot->dataSection->push_back(new string("sReg" + to_string(regCnt) + ": .word 0"));
       label = new string("sReg" + to_string(regCnt++));
       (*nameTable)[*(i->id)] = label;
-      if (dynamic_cast< BoolType* >( p->p )) {
+      if (dynamic_cast< BoolType* >( p )) {
         (*typeTable)[*(i->id)] = new std::string("BOOL");
       } else {
         (*typeTable)[*(i->id)] = new std::string("INT");

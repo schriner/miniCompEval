@@ -237,37 +237,31 @@ var_decl_list : /* Eliminate var_decl* */
 
 var_decl : 
 	INT ID SEMI { 
-		$$ = new VarDecl( new TypePrime(new IntType()), $2 ); 
+		$$ = new VarDecl( new IntType(), $2 ); 
 		//$$->data = new SimpleVar($2->id, "INT", new IntLiteral(0));
 	}
 	| BOOL ID SEMI { 
-		$$ = new VarDecl( new TypePrime(new BoolType()), $2 ); 
+		$$ = new VarDecl( new BoolType(), $2 ); 
 		//$$->data = new SimpleVar($2->id, "BOOL", new BoolLiteral(false));
 	}
 	| ID ID SEMI { 
-		$$ = new VarDecl( new TypePrime(new IdentType($1)), $2 ); 
+		$$ = new VarDecl( new IdentType($1), $2 ); 
 		// TODO: FIXME 
 #ifdef ASSEM
 		$$->data = new RefVar($2->id, $1->id, nullptr);
 #endif
 	}
 	| INT type_bracket_list ID SEMI {
-		$2->getLastNull()->t = new TypePrime(new IntType());
-#ifdef ASSEM
+		$2->getLastNull()->t = new IntType();
 		$$ = new VarDecl( $2, $3 ); 
-#endif
 	}
 	| BOOL type_bracket_list ID SEMI { 
-		$2->getLastNull()->t = new TypePrime(new BoolType());
-#ifdef ASSEM
+		$2->getLastNull()->t = new BoolType();
 		$$ = new VarDecl( $2, $3 ); 
-#endif
 	}
 	| ID type_bracket_list ID SEMI { 
-		$2->getLastNull()->t = new TypePrime(new IdentType($1));
-#ifdef ASSEM
+		$2->getLastNull()->t = new IdentType($1);
 		$$ = new VarDecl( $2, $3 ); 
-#endif
 	}
 	;
 
@@ -427,7 +421,7 @@ formal_rest :
 	;
 
 type : 
-	prime_type { $$ = new TypePrime( $1 ); }
+	prime_type { $$ = dynamic_cast<Type *> ($1) ; }
 	| type O_SQ C_SQ { $$ = new TypeIndexList( $1 ); }
 	;
 

@@ -24,11 +24,6 @@
 #ifdef ASSEM
 #define PRINTLN_EXP "pln"
 #define PRINT_EXP "p"
-#else
-typedef union { 
-	int exp; // bool or int
-	int * exp_single; // bool or int single indx array
-} EXP;
 #endif
 
 using namespace std;
@@ -60,6 +55,17 @@ class ExpList;
 class Ident;
 class IntLiteral;
 class StringLiteral;
+
+#ifndef ASSEM
+typedef union { 
+	int exp; // bool or int
+	int * exp_single; // bool or int single indx array
+} VAL; 
+typedef struct {
+	VAL val;
+	Type * t;
+} SYM;
+#endif
 
 // Parent Abstract Class of Everything
 class TreeNode {
@@ -117,9 +123,9 @@ class Program : public TreeNode {
 			: m(m), c(nullptr) {}
 		map<string, ClassDecl *> class_table;
 		vector<string *>call_stack; // Fixme(ss) call stack - object with variables
-		vector<map<string, EXP> *> scope_stack; // something like a sym table
+		vector<map<string, SYM> *> scope_stack; // something like a sym table
 		ExpList * arg_stack = nullptr;
-		int return_reg;
+		VAL return_reg;
 		void evaluate();
 #endif
 		void traverse(); 
@@ -205,6 +211,7 @@ class ClassDeclExtends : public ClassDecl {
 #ifdef ASSEM
 		virtual void assem();
 #else
+		 //void evaluate();
 #endif
 };
 /* Abstract class ClassDecl End */
@@ -270,7 +277,7 @@ class MethodDecl : public TreeNode {
 #ifdef ASSEM
 		void assem(string * objName);
 #else
-		int evaluate();
+		VAL evaluate();
 #endif
 };
 
@@ -318,8 +325,15 @@ class FormalList : public TreeNode {
 #endif
 };
 
+/* Abstract Class Type */
+class Type : public TreeNode {
+	public:
+#ifdef ASSEM
+		virtual void setTable(TableNode * t) = 0;
+#endif
+};
 /* Begin Abstract Class PrimeType */
-class PrimeType : public TreeNode {
+class PrimeType : public Type {
 	public:
 #ifdef ASSEM
 		virtual void setTable(TableNode * t) = 0;
@@ -352,22 +366,6 @@ class IdentType : public PrimeType {
 };
 /* End Abstract Class PrimeType */
 
-/* Abstract Class Type */
-class Type : public TreeNode {
-	public:
-#ifdef ASSEM
-		virtual void setTable(TableNode * t) = 0;
-#endif
-};
-class TypePrime : public Type { 
-	public:
-		PrimeType * p = nullptr;
-		TypePrime(PrimeType * p) : p(p) {}
-		void traverse();
-#ifdef ASSEM
-		void setTable(TableNode * t);
-#endif
-};
 class TypeIndexList : public Type {
 	public:
 		Type * t = nullptr;
@@ -566,6 +564,7 @@ class Index : public TreeNode {
 #else
 		virtual int evaluate() {
 			cerr << "Index unimplemented" << endl;
+			return 0;
 		}
 #endif
 }; 
@@ -607,9 +606,9 @@ class Exp : public TreeNode {
 		} 
 #else
 		// for bool values evaluate stuff to 0 and 1
-		virtual int evaluate() {
+		virtual VAL evaluate() {
 			cerr << endl << "\tError: Expr function not implemented" << endl;
-			return 1;
+			return {0};
 		} 
 #endif
 }; 
@@ -631,7 +630,7 @@ class Or : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class And : public BinExp {
@@ -641,7 +640,7 @@ class And : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Equal : public BinExp {
@@ -651,7 +650,7 @@ class Equal : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class NotEqual : public BinExp {
@@ -661,7 +660,7 @@ class NotEqual : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Lesser : public BinExp {
@@ -671,7 +670,7 @@ class Lesser : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Greater : public BinExp {
@@ -681,7 +680,7 @@ class Greater : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class LessEqual : public BinExp {
@@ -691,7 +690,7 @@ class LessEqual : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class GreatEqual : public BinExp {
@@ -701,7 +700,7 @@ class GreatEqual : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Add : public BinExp {
@@ -711,7 +710,7 @@ class Add : public BinExp {
 #ifdef ASSEM
 	  void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Subtract : public BinExp {
@@ -721,7 +720,7 @@ class Subtract : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Divide : public BinExp {
@@ -731,7 +730,7 @@ class Divide : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Multiply : public BinExp {
@@ -741,7 +740,7 @@ class Multiply : public BinExp {
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };    // End Binary Op
 
@@ -762,7 +761,7 @@ class Not : public UnaryExp {
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Pos : public UnaryExp {
@@ -772,7 +771,7 @@ class Pos : public UnaryExp {
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class Neg : public UnaryExp {
@@ -782,7 +781,7 @@ class Neg : public UnaryExp {
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };    // End Unary Ops
 
@@ -793,7 +792,7 @@ class ParenExp : public UnaryExp {
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class ArrayAccess : public Exp {
@@ -804,6 +803,8 @@ class ArrayAccess : public Exp {
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
+#else
+		VAL evaluate();
 #endif
 };
 class Length : public Exp {
@@ -813,6 +814,8 @@ class Length : public Exp {
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
+#else
+		VAL evaluate();
 #endif
 };
 class ArrayAccessLength : public Exp {
@@ -834,7 +837,7 @@ class LitInt : public Exp {
 		void setTable(TableNode * t);
 		virtual void assem(string * exp_str, string * branchLabel);
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class True : public Exp {
@@ -844,7 +847,7 @@ class True : public Exp {
 		void setTable(TableNode * t);
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class False : public Exp {
@@ -854,7 +857,7 @@ class False : public Exp {
 		void setTable(TableNode * t);
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate(); 
+		VAL evaluate(); 
 #endif
 };
 class ExpObject : public Exp {
@@ -866,7 +869,7 @@ class ExpObject : public Exp {
 		void setTable(TableNode * t);
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate();
+		VAL evaluate();
 #endif
 };
 class ObjectMethodCall : public Exp {
@@ -880,7 +883,7 @@ class ObjectMethodCall : public Exp {
 		void setTable(TableNode * t);
 		virtual void assem(string * exp_str, string * branchLabel); 
 #else
-		int evaluate();
+		VAL evaluate();
 #endif
 };
 /* End Expression Abstract Classes */
