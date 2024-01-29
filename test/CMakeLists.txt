@@ -48,6 +48,13 @@ set_property (TEST EvalHanoi
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
+add_test(NAME EvalArray COMMAND meval ${TEST_DIR}/Interpreter/Array.java)
+set (passRegex "Sort successful\n") 
+set_property (TEST EvalArray
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+
 add_test(NAME EvalMultiplePrint COMMAND meval ${TEST_DIR}/Compiler/multiplePrint.java)
 set (passRegex
   "The answer\nto the meaning\nof life\nis:\n42\n"
