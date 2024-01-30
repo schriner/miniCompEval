@@ -108,7 +108,7 @@ From the build directory:
     meval [-o <output_file>] <inputfile>.java
     ```
 Functionality is tested for the files contained within: [`test/Interpreter`](test/Interpreter)
-* class method calls, variables, recursion with arguments, and single dimensional arrays are supported
+* class method calls, variables, recursion with arguments, and multi dimensional arrays are supported for bool and int types
 * class variable delarations and keyword `extends` are unimplemented.
 
 ### mjavac: Compiler to ARM 32 bit assembly 
