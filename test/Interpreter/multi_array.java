@@ -1,27 +1,27 @@
 // This test case ask for interpreting array access.
 class arrayMulti {
     public static void main(String [] args) {
-        if ((new Sorter().bubblesortDemo(new int[7][5])) == true) {
-            System.out.println("Sort successful");
+        if ((new Sorter().bubble(new int[7][5])) == 10) {
+            System.out.println("Array successful");
         } else {
-            System.out.println("Sort failed");
+            System.out.println("Array failed");
         }
     }
 }
 
 class Sorter {
-    public int printArray(int [][] array, int len1, int len2) {
+    public int printArray(int [][] array) {
 			int i;
 			int j;
 			System.out.print("Printing Array of Dim: ");
-			System.out.print(len1);
+			System.out.print(array.length);
 			System.out.print(" : ");
-			System.out.println(len2);
+			System.out.println(array[0].length);
 			i = 0;
-			j = 0;
-			while (i < len1) {
+			while (i < array.length) {
 			  System.out.println(": ");
-				while (j < len2) {
+			  j = 0;
+				while (j < array[0].length) {
 					System.out.print(array[i][j]);
 					j = j + 1;
 			  	if (j < len2) { System.out.print(" "); } else {}
@@ -32,14 +32,14 @@ class Sorter {
 
 			return 0;
 		}
-		public boolean bubblesortDemo(int [][] array) {
+		public int bubble(int [][] array) {
         int i;
         int j;
 				int res;
 
 				i = 0;
-				j = 0;
 				while (i < array.length) {
+			    j = 0;
 					while (j < array[0].length) {
 						array[i][j] = i + j;
 						j = j + 1;
@@ -49,6 +49,6 @@ class Sorter {
 
 				res = this.printArray(array, array.length, array[0].length);
 
-        return false;
+        return array[array.length - 1][array[0].length - 1];
     }
 }

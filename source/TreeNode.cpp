@@ -286,12 +286,12 @@ void SingleIndex::traverse() {
 
 // MultipleIndices //
 void MultipleIndices::traverse() {
-	ind->traverse();
+	/*ind->traverse();
 	expErr = false;
 	e->traverse();
 	if (expErr) { e->reportError(); }
 	expErr = false;
-	PRINTDEBUGTREE("MultipleIndices");
+	PRINTDEBUGTREE("MultipleIndices");*/
 }
 
 // BinExp //
@@ -727,8 +727,8 @@ void SingleIndex::setTable(TableNode * t) {
 }
 void MultipleIndices::setTable(TableNode * t) {
 	lowestT = t;
-	ind->setTable(t);
-	e->setTable(t);
+	//ind->setTable(t);
+	//e->setTable(t);
 }
 void BinExp::setTable(TableNode * t) {
 	lowestT = t;

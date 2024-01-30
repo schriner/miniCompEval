@@ -581,14 +581,12 @@ class SingleIndex : public Index {
 };
 class MultipleIndices : public Index {
 	public:
-		Index * ind = nullptr;
-		Exp * e = nullptr;
-		MultipleIndices(Index * ind, Exp * e) : ind(ind), e(e) {}
+		vector<Index *> * ind = nullptr;
+		MultipleIndices(Index * i, Exp * e) :
+			ind( new vector<Index *> {i, new SingleIndex( e )} ) {}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
-#else
-//		int evaluate();
 #endif
 };
 /* End Abstract Class Index */
@@ -826,6 +824,8 @@ class ArrayAccessLength : public Exp {
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
+#else
+		VAL evaluate();
 #endif
 };
 class LitInt : public Exp {
