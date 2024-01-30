@@ -82,4 +82,11 @@ set_property (TEST
   PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
+add_test(NAME EvalArrayPrintClassVar COMMAND meval ${TEST_DIR}/Interpreter/array_print_class_var.java)
+set (passRegex "^Printing Array of Length: 8\n60 40 20 0 50 70 10 30 \nPrinting Array of Length: 8\n0 10 20 30 40 50 60 70 \nSort successful\n") 
+set_property (TEST EvalArrayPrintClassVar
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+
 add_test(NAME EvalMultiplePrintCompiler COMMAND mjavac ${TEST_DIR}/Compiler/multiplePrint.java)

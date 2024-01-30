@@ -60,6 +60,7 @@ class StringLiteral;
 typedef union { 
 	int exp; // bool or int
 	int * exp_single; // bool or int single indx array
+	string * name;	// classname
 } VAL; 
 typedef struct {
 	VAL val;
@@ -87,9 +88,10 @@ class TreeNode {
 			fprintf(stderr, "%s: %s", exe, buf);
 			fclose(f);
 		}
+		string error_msg = "Type Violation in Line";
 		void reportError() {
 			programTypeError = true;
-			fprintf(stderr, "%s: Type Violation in Line %d\n", exe, lineRecord);
+			fprintf(stderr, "%s: %s , lineno:%d\n", exe, error_msg.c_str(), lineRecord);
 			fprintf(stderr, "%s: %s:%d\n", exe, yyfilename, lineRecord);
 			
 			FILE * f = fopen(yyfilename, "r");
@@ -122,7 +124,8 @@ class Program : public TreeNode {
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
 		map<string, ClassDecl *> class_table;
-		vector<string *>call_stack; // Fixme(ss) call stack - object with variables
+		//vector<string *>call_stack; // Fixme(ss) call stack - object with variables
+		vector<map<string, SYM> *>call_stack; // Fixme(ss) call stack - object with variables
 		vector<map<string, SYM> *> scope_stack; // something like a sym table
 		ExpList * arg_stack = nullptr;
 		VAL return_reg;
@@ -171,10 +174,14 @@ class ClassDeclList : public TreeNode {
 /* Abstract class ClassDecl Start */
 class ClassDecl : public TreeNode {
 	public:
+		VarDeclList * v = nullptr;
+		MethodDeclList * m = nullptr;
+		ClassDecl (VarDeclList * v,  MethodDeclList * m) : v(v), m(m) {}
 #ifdef ASSEM
 		virtual void assem() = 0;
 #else 
 		map<string, MethodDecl *> method_table;
+		map<string, SYM> var_table;
 		virtual void evaluate () {
 			cerr << "Class Decl Evaluate Unimplemented\n";
 		}
@@ -183,18 +190,18 @@ class ClassDecl : public TreeNode {
 class ClassDeclSimple : public ClassDecl {
 	public:
 		Ident * i = nullptr;
-		VarDeclList * v = nullptr;
-		MethodDeclList * m = nullptr;
-		map<string, string*> * nameTable = nullptr; // id -> symRegLabel
-		map<string, string*> * typeTable = nullptr; // id -> symRegLabel
 
 		ClassDeclSimple (Ident * i, VarDeclList * v,  MethodDeclList * m)
-			: i(i), v(v), m(m) { 
+			: ClassDecl(v, m), i(i) { 
+#ifdef ASSEM
 			nameTable = new map<string, string*>;
 			typeTable = new map<string, string*>;
+#endif
 		}
 		void traverse();
 #ifdef ASSEM
+		map<string, string*> * nameTable = nullptr; // id -> symRegLabel
+		map<string, string*> * typeTable = nullptr; // id -> symRegLabel
 		virtual void assem();
 #else
 		void evaluate();
@@ -203,10 +210,8 @@ class ClassDeclSimple : public ClassDecl {
 class ClassDeclExtends : public ClassDecl {
 	public:
 		Ident * i1 = nullptr; Ident * i2 = nullptr;
-		VarDeclList * v = nullptr;
-		MethodDeclList * m = nullptr;
 		ClassDeclExtends (Ident * i1, Ident * i2, VarDeclList * v,  MethodDeclList * m) 
-			: i1(i1), i2(i2), v(v), m(m) {}
+			: ClassDecl(v, m), i1(i1), i2(i2) {}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem();
