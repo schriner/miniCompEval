@@ -156,7 +156,9 @@ void Assign::evaluate() {
 	} else if (programRoot->call_stack.back()->find(*i->id) != programRoot->call_stack.back()->end()) {
 		(*programRoot->call_stack.back())[*i->id].val = (e->evaluate());
 	} else {
-		cerr << "Assign::evaluate() `Runtime Error in assign" << endl;
+		error_msg = "Assign::evaluate() runtime error";
+		error_msg += " token \"" + *i->id + "\"";
+		reportError();
 	}
 }
 
@@ -167,8 +169,8 @@ void IndexAssign::evaluate() {
 	} else if (programRoot->call_stack.back()->end() != programRoot->call_stack.back()->find(*i->id)) {
 		array = (*programRoot->call_stack.back())[*i->id].val.exp_single;
 	} else {
-		cerr << "IndexAssign::evaluate() runtime error" << endl;
-		return;
+		error_msg = "IndexAssign::evaluate() runtime error";
+		reportError();
 	}
 	if (dynamic_cast<SingleIndex *>(ind)) {
 		int offset = ind->evaluate();
@@ -301,9 +303,8 @@ VAL ArrayAccess::evaluate() {
 	} else if (programRoot->call_stack.back()->find(*i->id) != programRoot->call_stack.back()->end()) {
 			array = (*programRoot->call_stack.back())[*i->id].val.exp_single;
 	} else {
-		cerr << "Calling ArrayAccess on uninit array";
-		abort();
-		return {0};
+		error_msg = "Calling ArrayAccess on uninit array";
+		reportError();
 	}
 	if (SingleIndex * s_i = dynamic_cast<SingleIndex * >(ind)) {
 		return VAL{array[s_i->e->evaluate().exp + 2]};
@@ -330,12 +331,14 @@ VAL Length::evaluate() {
 	} else if (programRoot->call_stack.back()->find(*i->id) != programRoot->call_stack.back()->end()) {
 			array = (*programRoot->call_stack.back())[*i->id].val.exp_single;
 	} else {
-		cerr << "Calling ArrayAccess on uninit array";
-		abort();
+		error_msg = "Calling ArrayAccess on uninit array";
+		reportError();
 	}
 
 	if (array == nullptr) {
 		cerr << *i->id << " Calling Length on uninit array " << (*programRoot->scope_stack.back())[*i->id].val.exp_single << endl;
+		error_msg = "Calling ArrayAccess on uninit array";
+		reportError();
 		return {0};
 	}
 	return {array[1]};
@@ -349,8 +352,8 @@ VAL ArrayAccessLength::evaluate() {
 	} else if (programRoot->call_stack.back()->find(*i->id) != programRoot->call_stack.back()->end()) {
 			array = (*programRoot->call_stack.back())[*i->id].val.exp_single;
 	} else {
-		cerr << "Calling ArrayLength on uninit array";
-		abort();
+		error_msg = "Calling ArrayAccess on uninit array";
+		reportError();
 	}
 
   // Index Count len1, l1n2, len3, ... elemen[0][0][0]
@@ -375,19 +378,22 @@ VAL False::evaluate() {
 
 VAL ExpObject::evaluate() {
 	if (IdObj * id = dynamic_cast<IdObj *>(o)) {
-		auto _id = id->i->id;
+		string * _id = id->i->id;
 		if (programRoot->scope_stack.back()->find(*_id) != programRoot->scope_stack.back()->end()) {
 			return (*programRoot->scope_stack.back())[*_id].val;
 		} else if (programRoot->call_stack.back()->find(*_id) != programRoot->call_stack.back()->end()) {
 			return (*programRoot->call_stack.back())[*_id].val;
 		} else {
-			cerr << "ExpObject::evaluate() runtime error with id: " << *_id << endl;
-			abort();
+			error_msg = "ExpObject::evaluate() runtime error with id: ";
+			error_msg += *_id;
+			reportError();
 		}
 	} else if (dynamic_cast<NewIdObj *>(o)) {
-		cerr << "Err: Trying to evaluate and obj with NewIdObj\n";
+		error_msg = "Err: Trying to evaluate and obj with NewIdObj\n";
+		reportError();
 	} else if (dynamic_cast<ThisObj *>(o)) {
-		cerr << "Err: Trying to evaluate and obj with ThisObj\n";
+		error_msg = "Err: Trying to evaluate and obj with ThisObj\n";
+		reportError();
 	} else if (NewTypeObj * nto = dynamic_cast<NewTypeObj *>(o)) {
 		// NEW prime_type index 
 		// (Array)

@@ -88,9 +88,10 @@ class TreeNode {
 			fprintf(stderr, "%s: %s", exe, buf);
 			fclose(f);
 		}
+		string error_msg = "Type Violation in Line";
 		void reportError() {
 			programTypeError = true;
-			fprintf(stderr, "%s: Type Violation in Line %d\n", exe, lineRecord);
+			fprintf(stderr, "%s: %s , lineno:%d\n", exe, error_msg.c_str(), lineRecord);
 			fprintf(stderr, "%s: %s:%d\n", exe, yyfilename, lineRecord);
 			
 			FILE * f = fopen(yyfilename, "r");
