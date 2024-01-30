@@ -8,9 +8,11 @@
 8. `multiplePrint.java`: Tests printing and expresion functionality within main().
 9. `multiplePrintNumber.java`: Tests printing and expresion functionality within main().
 10. `multiplePrintWAdd.java`: Tests printing and expresion functionality within main().
+11. `multi_array.java` Multidimensional arrays of bool or int type. Tests an array of 2 dim.
 
-11. `TODO:` `graphTraversal.java`: Test multiple classes, class instance variables, and arrays of class variables.
-12. `TODO:` Multidimensional arrays of bool or int type
+12. `TODO:` `graphTraversal.java`: Test multiple classes, class instance variables, and arrays of class variables.
 13. `TODO:` Class Extends 
+14. `multi_array_4d.java` Tests an array of 4 dim.
 
 TODO(ss): Automate Testing within this dir with javac output
+TODO(ss): Error Testing for undeclared variables and inproper argument signatures on variables 
