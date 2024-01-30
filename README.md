@@ -120,6 +120,7 @@ From the build directory:
 * (todo) functionality supported
 
 TODO: Automated testing to compile output files.
+Some sample output is located in [test/CompilerOut](test/CompilerOut)
 
 ## Test Functionality
 From within the build directory:
