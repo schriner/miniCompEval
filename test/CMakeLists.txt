@@ -72,4 +72,14 @@ set_property (TEST
   PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
+add_test(NAME EvalMultiDimArray COMMAND meval ${TEST_DIR}/Interpreter/multi_array.java)
+set (passRegex
+	"^Printing Array of Dim: 7 : 5\n: 0 1 2 3 4\n: 1 2 3 4 5\n: 2 3 4 5 6\n: 3 4 5 6 7\n: 4 5 6 7 8\n: 5 6 7 8 9\n: 6 7 8 9 10\nArray successful\n"
+)
+set_property (TEST
+	EvalMultiDimArray
+  PROPERTY
+  PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+
 add_test(NAME EvalMultiplePrintCompiler COMMAND mjavac ${TEST_DIR}/Compiler/multiplePrint.java)
