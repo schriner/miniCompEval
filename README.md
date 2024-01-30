@@ -20,15 +20,13 @@ From the build directory:
 * (todo) functionality supported
 
 TODO: Automated testing to compile output files.
-Some sample output is located in [test/CompilerOut](test/CompilerOut)
+Some sample output is located in [`test/CompilerOut`](test/CompilerOut)
 
 ## Grammar : 
-see:
+see for Grammar specification:
 * [readme](doc/readme.md)
 * [MiniJava_syntax.output](doc/MiniJava_syntax.output)
 * Tree representation: ([tree.png](doc/tree.png))
-
-for Grammar specification 
 
 Syntax dervied from: https://www.cs.tufts.edu/~sguyer/classes/comp181-2006/minijava.html
 
