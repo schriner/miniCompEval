@@ -19,15 +19,15 @@ class Sorter {
 			System.out.println(array[0].length);
 			i = 0;
 			while (i < array.length) {
-			  System.out.println(": ");
+			  System.out.print(": ");
 			  j = 0;
 				while (j < array[0].length) {
 					System.out.print(array[i][j]);
 					j = j + 1;
-			  	if (j < len2) { System.out.print(" "); } else {}
+			  	if (j < array[0].length) { System.out.print(" "); } else {}
 				}
 				i = i + 1;
-			  if (i < len1) { System.out.println(""); } else {}
+			  System.out.println("");
 			}
 
 			return 0;
@@ -47,8 +47,8 @@ class Sorter {
 					i = i + 1;
 				}
 
-				res = this.printArray(array, array.length, array[0].length);
+				res = this.printArray(array);
 
-        return array[array.length - 1][array[0].length - 1];
+        return array[array.length - 1][array[0].length -1];
     }
 }
