@@ -92,10 +92,10 @@ Create Tree PNG:
 make png
 ```
 
-## Test Functionality
+## Automated Testing for Parser and Interpreter
 From within the build directory:
 ```
 ctest
 ```
 
-Output should mirror output from `javac`
+Output should mirror output from `javac`. Automated compilation testing for correct execution of .s files is todo
