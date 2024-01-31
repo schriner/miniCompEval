@@ -1036,9 +1036,7 @@ class Object : public TreeNode {
 class IdObj : public Object {
 	public: // For: id
 		Ident * i = nullptr;
-		IdObj(Ident * i) : i(i) {
-			// TYPECHECK table lookup for redundancy 
-		}
+		IdObj(Ident * i) : i(i) {}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);

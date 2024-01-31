@@ -137,6 +137,7 @@ program :
 
 main_class : 
 	CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement C_BR C_BR { 
+		// Dummy node to construct table for type checking
 		programRoot = new Program(nullptr, nullptr);
 
 		$$ = new MainClass($2, $12, $15); 
