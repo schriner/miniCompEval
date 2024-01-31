@@ -116,6 +116,7 @@ class Program : public TreeNode {
 
 		// (TYPECHECK:ss)
 		// Use these during AST generation for EXPR
+		// TODO(ss): notice variable redeclarations within a method scope
 		map<string, ClassDecl *> class_table;
 		vector<map<string, SYM> *>call_stack; // Fixme(ss) call stack - object with variables
 		vector<map<string, SYM> *> scope_stack; // something like a sym table
@@ -392,6 +393,33 @@ class TypeIndexList : public Type {
 };
 /* End Class Type */
 
+class IntResExp;
+class LitInt;
+class Pos;
+class Neg;
+class ObjectMethodCall;
+class ParenExp;
+class Exp : public TreeNode {
+	public:
+		bool isIntRes(); 
+		bool isBoolRes(); 
+		virtual ~Exp() = default;
+#ifdef ASSEM
+		virtual void setTable(TableNode * t) {
+			cerr << "Set Table Undefined" << endl;
+		}
+		virtual void assem(string * exp_str, string * branchLabel) {
+			*exp_str = *exp_str + "\n\tError(Debug):Next Assem expr unimplemented ";
+		} 
+#else
+		// for bool values evaluate stuff to 0 and 1
+		virtual VAL evaluate() {
+			cerr << endl << "\tError: Expr function not implemented" << endl;
+			return {0};
+		} 
+#endif
+};
+
 /* Abstract Class Statement Start */
 class Statement : public TreeNode { 
 	public:
@@ -425,7 +453,11 @@ class IfStatement : public Statement {
 		Exp * e = nullptr;
 		Statement * s_if = nullptr; Statement * s_el = nullptr;
 		IfStatement( Exp * e, Statement * s_if, Statement * s_el ) 
-			: e(e), s_if(s_if), s_el(s_el) {}
+			: e(e), s_if(s_if), s_el(s_el) {
+				if (!e->isBoolRes()) {
+					e->reportError(" at token: \"" + e->token + "\" with if conditional");
+				}
+			}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -439,7 +471,11 @@ class WhileStatement : public Statement {
 	public:
 		Exp * e = nullptr;
 		Statement * s = nullptr;
-		WhileStatement(Exp * e, Statement * s) : e(e), s(s) {}
+		WhileStatement(Exp * e, Statement * s) : e(e), s(s) {
+			if (!e->isBoolRes()) {
+				e->reportError(" at token: \"" + e->token + "\" with while conditional");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -505,7 +541,10 @@ class Assign : public Statement {
 	public:
 		Ident * i = nullptr;
 		Exp * e = nullptr;
-		Assign(Ident * i, Exp * e) : i(i), e(e) {}
+		Assign(Ident * i, Exp * e) : i(i), e(e) {
+			// TYPECHECK:ss 
+			// check the type and expr match
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -520,7 +559,10 @@ class IndexAssign : public Statement {
 		Ident * i = nullptr;
 		Index * ind = nullptr;
 		Exp * e = nullptr;
-		IndexAssign(Ident * i, Index * ind, Exp * e) : i(i), ind(ind), e(e) {}
+		IndexAssign(Ident * i, Index * ind, Exp * e) : i(i), ind(ind), e(e) {
+			// TYPECHECK:ss 
+			// check the type and expr match
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -578,7 +620,11 @@ class Index : public TreeNode {
 class SingleIndex : public Index {
 	public:
 		Exp * e = nullptr;
-		SingleIndex(Exp * e) : e(e) {}
+		SingleIndex(Exp * e) : e(e) {
+			if (!e->isIntRes()) {
+				e->reportError(" at token: \"" + e->token + "\" with array index");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -599,32 +645,6 @@ class MultipleIndices : public Index {
 /* End Abstract Class Index */
 
 /* Start Expression Abstract Classes */
-class IntResExp;
-class LitInt;
-class Pos;
-class Neg;
-class ObjectMethodCall;
-class ParenExp;
-class Exp : public TreeNode {
-	public:
-		bool isIntRes(); 
-		bool isBoolRes(); 
-		virtual ~Exp() = default;
-#ifdef ASSEM
-		virtual void setTable(TableNode * t) {
-			cerr << "Set Table Undefined" << endl;
-		}
-		virtual void assem(string * exp_str, string * branchLabel) {
-			*exp_str = *exp_str + "\n\tError(Debug):Next Assem expr unimplemented ";
-		} 
-#else
-		// for bool values evaluate stuff to 0 and 1
-		virtual VAL evaluate() {
-			cerr << endl << "\tError: Expr function not implemented" << endl;
-			return {0};
-		} 
-#endif
-}; 
 			// Start Op
 class UnaryExp : public Exp { 
 	protected:
@@ -652,19 +672,32 @@ class BoolResExp : public BinExp {
 }; 
 class IntResExp : public BinExp {
 	public:
-		IntResExp(Exp * e1, Exp * e2)
+		IntResExp(Exp * e1, Exp * e2, char tok)
 			: BinExp(e1, e2) {
 				// (TYPECHECK:ss)
 				// if not integer literal or intres expr or id with type int type error
 				// if ObjectMethodCall check e type
 				// if ExpObject fixme 
 				// check they type of the expr within the parentheses
+				if (!e1->isIntRes()) {
+					e1->reportError(" at token: \"" + e1->token + "\" with expr \"" + tok + "\"");
+				}
+				if (!e2->isIntRes()) { 
+					e2->reportError(" at token: \"" + e2->token + "\" with expr \"" + tok + "\"");
+				}
 			}
 }; 
 	    // Start Binary op
 class Or : public BoolResExp { 
 	public:
-		Or(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
+		Or(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			if (!e1->isBoolRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"||\"");
+			}
+			if (!e2->isBoolRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"||\"");
+			}
+		} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
@@ -674,7 +707,14 @@ class Or : public BoolResExp {
 };
 class And : public BoolResExp {
 	public:
-		And(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
+		And(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			if (!e1->isBoolRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"&&\"");
+			}
+			if (!e2->isBoolRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"&&\"");
+			}
+		} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
@@ -684,7 +724,10 @@ class And : public BoolResExp {
 };
 class Equal : public BoolResExp {
 	public:
-		Equal(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
+		Equal(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			// TYPECHECK fixme post symbol table lookup
+			// vardecl && methoddecl
+		} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -694,7 +737,10 @@ class Equal : public BoolResExp {
 };
 class NotEqual : public BoolResExp {
 	public:
-		NotEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {}
+		NotEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			// TYPECHECK fixme post symbol table lookup
+			// vardecl && methoddecl
+		}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -704,7 +750,15 @@ class NotEqual : public BoolResExp {
 };
 class Lesser : public BoolResExp {
 	public:
-		Lesser(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
+		Lesser(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			char tok = '<';
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"" + tok + "\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"" + tok + "\"");
+			}
+		} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -714,7 +768,15 @@ class Lesser : public BoolResExp {
 };
 class Greater : public BoolResExp {
 	public:
-		Greater(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {}
+		Greater(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			char tok = '>';
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"" + tok + "\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"" + tok + "\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -724,7 +786,14 @@ class Greater : public BoolResExp {
 };
 class LessEqual : public BoolResExp {
 	public:
-		LessEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
+		LessEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"<=\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"<=\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -734,7 +803,14 @@ class LessEqual : public BoolResExp {
 };
 class GreatEqual : public BoolResExp {
 	public:
-		GreatEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {}
+		GreatEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \">=\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \">=\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -744,14 +820,7 @@ class GreatEqual : public BoolResExp {
 };
 class Add : public IntResExp {
 	public:
-		Add(Exp * e1, Exp * e2) : IntResExp(e1, e2) {
-			if (!e1->isIntRes()) {
-				e1->reportError(" at token: \"" + e1->token + "\" with expr \"+\"");
-			}
-			if (!e2->isIntRes()) { 
-				e2->reportError(" at token: \"" + e2->token + "\" with expr \"+\"");
-			}
-		} 
+		Add(Exp * e1, Exp * e2) : IntResExp(e1, e2, '+') {} 
 		void traverse();
 #ifdef ASSEM
 	  void assem(string * exp_str, string * branchLabel); 
@@ -761,7 +830,7 @@ class Add : public IntResExp {
 };
 class Subtract : public IntResExp {
 	public:
-		Subtract(Exp * e1, Exp * e2) : IntResExp(e1, e2) {}
+		Subtract(Exp * e1, Exp * e2) : IntResExp(e1, e2, '-') {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -771,7 +840,7 @@ class Subtract : public IntResExp {
 };
 class Divide : public IntResExp {
 	public:
-		Divide(Exp * e1, Exp * e2) : IntResExp(e1, e2) {}
+		Divide(Exp * e1, Exp * e2) : IntResExp(e1, e2, '/') {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -781,7 +850,7 @@ class Divide : public IntResExp {
 };
 class Multiply : public IntResExp {
 	public:
-		Multiply(Exp * e1, Exp * e2) : IntResExp(e1, e2) {}
+		Multiply(Exp * e1, Exp * e2) : IntResExp(e1, e2, '*') {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
