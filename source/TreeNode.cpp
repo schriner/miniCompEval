@@ -298,6 +298,7 @@ bool Exp::isBoolRes() {
 	if (dynamic_cast<BoolResExp *>(this)
 			|| dynamic_cast<True *>(this)
 			|| dynamic_cast<False *>(this)
+			|| dynamic_cast<Not *>(this)
 	) {
 		return true;
 	}
@@ -315,6 +316,11 @@ bool Exp::isBoolRes() {
 }
 
 bool Exp::isIntRes() {
+	// (TYPECHECK:ss)
+	// if not integer literal or intres expr or id with type int type error
+	// if ObjectMethodCall check e type
+	// if ExpObject fixme
+	// check they type of the expr within the parentheses
 	if (dynamic_cast<IntResExp *>(this)
 			|| dynamic_cast<LitInt *>(this)
 			|| dynamic_cast<Pos *>(this)

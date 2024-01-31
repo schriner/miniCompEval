@@ -575,7 +575,11 @@ class ReturnStatement : public Statement {
 	// For: return e 
 	public:
 		Exp * e = nullptr;
-		ReturnStatement(Exp * e) : e(e) {}
+		ReturnStatement(Exp * e) : e(e) {
+			// TYPECHECK:ss
+			// check the type and expr match with table lookup
+			// main is return type void 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -674,11 +678,6 @@ class IntResExp : public BinExp {
 	public:
 		IntResExp(Exp * e1, Exp * e2, char tok)
 			: BinExp(e1, e2) {
-				// (TYPECHECK:ss)
-				// if not integer literal or intres expr or id with type int type error
-				// if ObjectMethodCall check e type
-				// if ExpObject fixme 
-				// check they type of the expr within the parentheses
 				if (!e1->isIntRes()) {
 					e1->reportError(" at token: \"" + e1->token + "\" with expr \"" + tok + "\"");
 				}
@@ -863,9 +862,9 @@ class Multiply : public IntResExp {
 class Not : public UnaryExp {
 	public:
 		Not(Exp * e) : UnaryExp(e) {
-			// (TYPECHECK:ss)
-			// if not boolean literal or bool res expr or id with type bool return 
-			// also check the contents of a paren expr
+			if (!e->isBoolRes()) { 
+				e->reportError(" at token: \"" + e->token + "\" with expr \"!\"");
+			}
 		}
 		void traverse();
 #ifdef ASSEM
@@ -877,9 +876,9 @@ class Not : public UnaryExp {
 class Pos : public UnaryExp {
 	public:
 		Pos(Exp * e) : UnaryExp(e) {
-				// (TYPECHECK:ss)
-				// if not integer literal or intres expr or id with type int type error
-				// check the contents of a paren expr 
+			if (!e->isIntRes()) { 
+				e->reportError(" at token: \"" + e->token + "\" with expr \"+\"");
+			}
 		}
 		void traverse();
 #ifdef ASSEM
@@ -891,9 +890,9 @@ class Pos : public UnaryExp {
 class Neg : public UnaryExp {
 	public: 
 		Neg(Exp * e) : UnaryExp(e) {
-				// (TYPECHECK:ss)
-				// if not integer literal or intres expr or id with type int type error
-				// check the contents of a paren expr 
+			if (!e->isIntRes()) { 
+				e->reportError(" at token: \"" + e->token + "\" with expr \"-\"");
+			}
 		}
 		void traverse();
 #ifdef ASSEM
@@ -920,7 +919,7 @@ class ArrayAccess : public Exp {
 		ArrayAccess(Ident * i, Index * ind) : i(i), ind(ind){
 			// (TYPECHECK:ss)
 			// if not integer literal or intres expr or id with type int type error
-			// also check the contents of a paren expr
+			// check if the array is initialized
 		}
 		void traverse();
 #ifdef ASSEM
@@ -935,7 +934,7 @@ class Length : public Exp {
 		Length(Ident * i) : i(i) {
 			// (TYPECHECK:ss)
 			// Check if the id is an array expr
-			// also check the contents of a paren expr
+			// check if the array is initialized
 		}
 		void traverse();
 #ifdef ASSEM
@@ -951,7 +950,7 @@ class ArrayAccessLength : public Exp {
 		ArrayAccessLength(Ident * i, Index * ind) : i(i), ind(ind) {
 			// (TYPECHECK:ss)
 			// Check if the id is an array expr
-			// also check the contents of a paren expr
+			// check if the array is initialized
 		}
 		void traverse();
 #ifdef ASSEM
@@ -995,7 +994,9 @@ class False : public Exp {
 class ExpObject : public Exp {
 	public:
 		Object * o = nullptr;
-		ExpObject(Object * o) : o(o) {}
+		ExpObject(Object * o) : o(o) {
+			// TYPECHECK table lookup for redundancy 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -1009,7 +1010,9 @@ class ObjectMethodCall : public Exp {
 		Object * o = nullptr;
 		Ident * i = nullptr;
 		ExpList * e = nullptr;
-		ObjectMethodCall(Object * o, Ident * i, ExpList * e) : o(o), i(i), e(e) {}
+		ObjectMethodCall(Object * o, Ident * i, ExpList * e) : o(o), i(i), e(e) {
+			// TYPECHECK table lookup for exp type 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -1033,7 +1036,9 @@ class Object : public TreeNode {
 class IdObj : public Object {
 	public: // For: id
 		Ident * i = nullptr;
-		IdObj(Ident * i) : i(i) {}
+		IdObj(Ident * i) : i(i) {
+			// TYPECHECK table lookup for redundancy 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -1053,7 +1058,9 @@ class ThisObj : public Object {
 class NewIdObj : public Object {
 	public: // For: new id ()
 		Ident * i = nullptr;
-		NewIdObj(Ident * i) : i(i) {}
+		NewIdObj(Ident * i) : i(i) {
+			// TYPECHECK table lookup for redundancy 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -1065,7 +1072,9 @@ class NewTypeObj : public Object {
 	public:
 		PrimeType * p = nullptr;
 		Index * i = nullptr;
-		NewTypeObj(PrimeType * p, Index * i) : p(p), i(i) {}
+		NewTypeObj(PrimeType * p, Index * i) : p(p), i(i) {
+			// TYPECHECK table lookup for redundancy 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
