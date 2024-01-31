@@ -17,7 +17,7 @@ From the build directory:
     ```
     mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
     ```
-* (todo) functionality supported
+* (todo): \<list current functionality supported - symbol tables need work within the compiler\>
 * TODO: Automated testing to compile output files.
 * Some sample output is located in [`test/CompilerOut`](test/CompilerOut)
 To utilize the present test env: 
