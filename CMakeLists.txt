@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(mjavac)
 
-find_package(BISON)
-find_package(FLEX)
+find_package(BISON 3.8.2)
+find_package(FLEX 2.6.4)
 
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g --std=c++11")
 set(AUTOGEN_FLEXBISON "${CMAKE_CURRENT_BINARY_DIR}/parse")

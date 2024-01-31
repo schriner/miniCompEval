@@ -15,14 +15,14 @@ class Factorial {
 		bool b;
     public int compute10(int a, int prod) {
         int prod;
-        int prod;
+        bool prod;
         int multiplier;
         int multiplier;
 				a = bool;
-				a = 1;
+				a = true;
         multiplier = 1;
         prod = 1;
-        while (multiplier <= 10) {
+        while (multiplier + 10) {
             prod = prod * multiplier;
             multiplier = multiplier + 1;
         }

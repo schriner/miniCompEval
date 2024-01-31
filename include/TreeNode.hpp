@@ -29,6 +29,7 @@
 using namespace std;
 
 extern int yylineno;
+extern char * yytext;
 extern char * exe;
 extern char * yyfilename;
 extern bool programTypeError;
@@ -55,27 +56,29 @@ class ExpList;
 class Ident;
 class IntLiteral;
 class StringLiteral;
+struct _SYM;
 
-#ifndef ASSEM
 typedef union { 
 	int exp; // bool or int
 	int * exp_single; // bool or int single indx array
 	string * name;	// classname
+	map<string, _SYM> * id; // identifier type
 } VAL; 
-typedef struct {
+typedef struct _SYM {
 	VAL val;
 	Type * t;
 } SYM;
-#endif
 
 // Parent Abstract Class of Everything
 class TreeNode {
 	protected:
-		TreeNode() : lineRecord(yylineno) {}
+		TreeNode() : lineRecord(yylineno), token(yytext) {
+		}
 	public: 
 		TableNode * lowestT = nullptr;
 		Data * data = nullptr; 
 		int lineRecord = -1;
+		string token;
 		virtual void traverse() = 0; 
 		void reportLine() {
 			fprintf(stderr, "%s: Report Line: %d\n", exe, lineRecord);
@@ -88,10 +91,10 @@ class TreeNode {
 			fprintf(stderr, "%s: %s", exe, buf);
 			fclose(f);
 		}
-		string error_msg = "Type Violation in Line";
-		void reportError() {
+		void reportError(string append_error_msg = "", 
+				string error_msg = "Type Violation in Line") {
 			programTypeError = true;
-			fprintf(stderr, "%s: %s , lineno:%d\n", exe, error_msg.c_str(), lineRecord);
+			fprintf(stderr, "%s: %s%s, lineno:%d\n", exe, error_msg.c_str(), append_error_msg.c_str(), lineRecord);
 			fprintf(stderr, "%s: %s:%d\n", exe, yyfilename, lineRecord);
 			
 			FILE * f = fopen(yyfilename, "r");
@@ -110,6 +113,14 @@ class Program : public TreeNode {
 	public:
 		MainClass * m;
 		ClassDeclList * c;
+
+		// (TYPECHECK:ss)
+		// Use these during AST generation for EXPR
+		// TODO(ss): notice variable redeclarations within a method scope
+		map<string, ClassDecl *> class_table;
+		vector<map<string, SYM> *>call_stack; // Fixme(ss) call stack - object with variables
+		vector<map<string, SYM> *> scope_stack; // something like a sym table
+		ExpList * arg_stack = nullptr;
 #ifdef ASSEM
 		vector<string * > * dataSection;
 		vector<string * > * textSection;
@@ -123,11 +134,6 @@ class Program : public TreeNode {
 			: m(m), c(c) {}
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
-		map<string, ClassDecl *> class_table;
-		//vector<string *>call_stack; // Fixme(ss) call stack - object with variables
-		vector<map<string, SYM> *>call_stack; // Fixme(ss) call stack - object with variables
-		vector<map<string, SYM> *> scope_stack; // something like a sym table
-		ExpList * arg_stack = nullptr;
 		VAL return_reg;
 		void evaluate();
 #endif
@@ -174,9 +180,11 @@ class ClassDeclList : public TreeNode {
 /* Abstract class ClassDecl Start */
 class ClassDecl : public TreeNode {
 	public:
+		Ident * i = nullptr;
 		VarDeclList * v = nullptr;
 		MethodDeclList * m = nullptr;
-		ClassDecl (VarDeclList * v,  MethodDeclList * m) : v(v), m(m) {}
+		ClassDecl (Ident * i, VarDeclList * v,  MethodDeclList * m)
+			: i(i), v(v), m(m) {}
 #ifdef ASSEM
 		virtual void assem() = 0;
 #else 
@@ -189,10 +197,8 @@ class ClassDecl : public TreeNode {
 };
 class ClassDeclSimple : public ClassDecl {
 	public:
-		Ident * i = nullptr;
-
 		ClassDeclSimple (Ident * i, VarDeclList * v,  MethodDeclList * m)
-			: ClassDecl(v, m), i(i) { 
+			: ClassDecl(i, v, m) { 
 #ifdef ASSEM
 			nameTable = new map<string, string*>;
 			typeTable = new map<string, string*>;
@@ -209,9 +215,9 @@ class ClassDeclSimple : public ClassDecl {
 };
 class ClassDeclExtends : public ClassDecl {
 	public:
-		Ident * i1 = nullptr; Ident * i2 = nullptr;
+		Ident * i2 = nullptr;
 		ClassDeclExtends (Ident * i1, Ident * i2, VarDeclList * v,  MethodDeclList * m) 
-			: ClassDecl(v, m), i1(i1), i2(i2) {}
+			: ClassDecl(i1, v, m), i2(i2) {}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem();
@@ -240,10 +246,7 @@ class VarDecl : public TreeNode {
 class VarDeclList : public TreeNode { 
 	public:
 		vector<VarDecl * > * vdVector = nullptr;
-		VarDeclList(VarDecl * v) {
-			vdVector = new vector<VarDecl * >;
-			vdVector->push_back(v);
-		}
+		VarDeclList(VarDecl * v) : vdVector(new vector<VarDecl * >{v}) {}
 		void append(VarDecl * v) {
 			vdVector->push_back(v);
 		}
@@ -251,8 +254,8 @@ class VarDeclList : public TreeNode {
 #ifdef ASSEM
 		void setTableNodes(TableNode * n) {
 			lowestT = n;
-			for (auto v = vdVector->begin(); v < vdVector->end(); v++) {
-				(*v)->setTable(n);
+			for (auto v : *vdVector) {
+				v->setTable(n);
 			}
 		}
 		void assem(map<string, string*> *, map<string, string*> *);
@@ -390,6 +393,33 @@ class TypeIndexList : public Type {
 };
 /* End Class Type */
 
+class IntResExp;
+class LitInt;
+class Pos;
+class Neg;
+class ObjectMethodCall;
+class ParenExp;
+class Exp : public TreeNode {
+	public:
+		bool isIntRes(); 
+		bool isBoolRes(); 
+		virtual ~Exp() = default;
+#ifdef ASSEM
+		virtual void setTable(TableNode * t) {
+			cerr << "Set Table Undefined" << endl;
+		}
+		virtual void assem(string * exp_str, string * branchLabel) {
+			*exp_str = *exp_str + "\n\tError(Debug):Next Assem expr unimplemented ";
+		} 
+#else
+		// for bool values evaluate stuff to 0 and 1
+		virtual VAL evaluate() {
+			cerr << endl << "\tError: Expr function not implemented" << endl;
+			return {0};
+		} 
+#endif
+};
+
 /* Abstract Class Statement Start */
 class Statement : public TreeNode { 
 	public:
@@ -423,7 +453,11 @@ class IfStatement : public Statement {
 		Exp * e = nullptr;
 		Statement * s_if = nullptr; Statement * s_el = nullptr;
 		IfStatement( Exp * e, Statement * s_if, Statement * s_el ) 
-			: e(e), s_if(s_if), s_el(s_el) {}
+			: e(e), s_if(s_if), s_el(s_el) {
+				if (!e->isBoolRes()) {
+					e->reportError(" at token: \"" + e->token + "\" with if conditional");
+				}
+			}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -437,7 +471,11 @@ class WhileStatement : public Statement {
 	public:
 		Exp * e = nullptr;
 		Statement * s = nullptr;
-		WhileStatement(Exp * e, Statement * s) : e(e), s(s) {}
+		WhileStatement(Exp * e, Statement * s) : e(e), s(s) {
+			if (!e->isBoolRes()) {
+				e->reportError(" at token: \"" + e->token + "\" with while conditional");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -503,7 +541,10 @@ class Assign : public Statement {
 	public:
 		Ident * i = nullptr;
 		Exp * e = nullptr;
-		Assign(Ident * i, Exp * e) : i(i), e(e) {}
+		Assign(Ident * i, Exp * e) : i(i), e(e) {
+			// TYPECHECK:ss 
+			// check the type and expr match
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -518,7 +559,10 @@ class IndexAssign : public Statement {
 		Ident * i = nullptr;
 		Index * ind = nullptr;
 		Exp * e = nullptr;
-		IndexAssign(Ident * i, Index * ind, Exp * e) : i(i), ind(ind), e(e) {}
+		IndexAssign(Ident * i, Index * ind, Exp * e) : i(i), ind(ind), e(e) {
+			// TYPECHECK:ss 
+			// check the type and expr match
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -531,7 +575,11 @@ class ReturnStatement : public Statement {
 	// For: return e 
 	public:
 		Exp * e = nullptr;
-		ReturnStatement(Exp * e) : e(e) {}
+		ReturnStatement(Exp * e) : e(e) {
+			// TYPECHECK:ss
+			// check the type and expr match with table lookup
+			// main is return type void 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -576,7 +624,11 @@ class Index : public TreeNode {
 class SingleIndex : public Index {
 	public:
 		Exp * e = nullptr;
-		SingleIndex(Exp * e) : e(e) {}
+		SingleIndex(Exp * e) : e(e) {
+			if (!e->isIntRes()) {
+				e->reportError(" at token: \"" + e->token + "\" with array index");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -597,25 +649,16 @@ class MultipleIndices : public Index {
 /* End Abstract Class Index */
 
 /* Start Expression Abstract Classes */
-class Exp : public TreeNode {
+			// Start Op
+class UnaryExp : public Exp { 
+	protected:
+		UnaryExp(Exp * e) : e(e) {};
 	public:
-		virtual ~Exp() = default;
+		Exp * e = nullptr;
 #ifdef ASSEM
-		virtual void setTable(TableNode * t) {
-			cerr << "Set Table Undefined" << endl;
-		}
-		virtual void assem(string * exp_str, string * branchLabel) {
-			*exp_str = *exp_str + "\n\tError(Debug):Next Assem expr unimplemented ";
-		} 
-#else
-		// for bool values evaluate stuff to 0 and 1
-		virtual VAL evaluate() {
-			cerr << endl << "\tError: Expr function not implemented" << endl;
-			return {0};
-		} 
+		void setTable(TableNode * t);
 #endif
-}; 
-	    // Start Binary op
+};
 class BinExp : public Exp { 
 	protected:
 		BinExp(Exp * e1, Exp * e2) : e1(e1), e2(e2) {}; 
@@ -626,9 +669,34 @@ class BinExp : public Exp {
 		void setTable(TableNode * t);
 #endif
 };
-class Or : public BinExp { 
+class BoolResExp : public BinExp {
 	public:
-		Or(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		BoolResExp(Exp * e1, Exp * e2)
+			: BinExp(e1, e2) {}
+}; 
+class IntResExp : public BinExp {
+	public:
+		IntResExp(Exp * e1, Exp * e2, char tok)
+			: BinExp(e1, e2) {
+				if (!e1->isIntRes()) {
+					e1->reportError(" at token: \"" + e1->token + "\" with expr \"" + tok + "\"");
+				}
+				if (!e2->isIntRes()) { 
+					e2->reportError(" at token: \"" + e2->token + "\" with expr \"" + tok + "\"");
+				}
+			}
+}; 
+	    // Start Binary op
+class Or : public BoolResExp { 
+	public:
+		Or(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			if (!e1->isBoolRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"||\"");
+			}
+			if (!e2->isBoolRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"||\"");
+			}
+		} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
@@ -636,9 +704,16 @@ class Or : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class And : public BinExp {
+class And : public BoolResExp {
 	public:
-		And(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		And(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			if (!e1->isBoolRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"&&\"");
+			}
+			if (!e2->isBoolRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"&&\"");
+			}
+		} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
@@ -646,9 +721,12 @@ class And : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Equal : public BinExp {
+class Equal : public BoolResExp {
 	public:
-		Equal(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		Equal(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			// TYPECHECK fixme post symbol table lookup
+			// vardecl && methoddecl
+		} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -656,9 +734,12 @@ class Equal : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class NotEqual : public BinExp {
+class NotEqual : public BoolResExp {
 	public:
-		NotEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		NotEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			// TYPECHECK fixme post symbol table lookup
+			// vardecl && methoddecl
+		}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -666,9 +747,17 @@ class NotEqual : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Lesser : public BinExp {
+class Lesser : public BoolResExp {
 	public:
-		Lesser(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		Lesser(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			char tok = '<';
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"" + tok + "\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"" + tok + "\"");
+			}
+		} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -676,9 +765,17 @@ class Lesser : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Greater : public BinExp {
+class Greater : public BoolResExp {
 	public:
-		Greater(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		Greater(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			char tok = '>';
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"" + tok + "\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"" + tok + "\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -686,9 +783,16 @@ class Greater : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class LessEqual : public BinExp {
+class LessEqual : public BoolResExp {
 	public:
-		LessEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		LessEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"<=\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"<=\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -696,9 +800,16 @@ class LessEqual : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class GreatEqual : public BinExp {
+class GreatEqual : public BoolResExp {
 	public:
-		GreatEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		GreatEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \">=\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \">=\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -706,9 +817,9 @@ class GreatEqual : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Add : public BinExp {
+class Add : public IntResExp {
 	public:
-		Add(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		Add(Exp * e1, Exp * e2) : IntResExp(e1, e2, '+') {} 
 		void traverse();
 #ifdef ASSEM
 	  void assem(string * exp_str, string * branchLabel); 
@@ -716,9 +827,9 @@ class Add : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Subtract : public BinExp {
+class Subtract : public IntResExp {
 	public:
-		Subtract(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		Subtract(Exp * e1, Exp * e2) : IntResExp(e1, e2, '-') {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -726,9 +837,9 @@ class Subtract : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Divide : public BinExp {
+class Divide : public IntResExp {
 	public:
-		Divide(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		Divide(Exp * e1, Exp * e2) : IntResExp(e1, e2, '/') {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -736,9 +847,9 @@ class Divide : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Multiply : public BinExp {
+class Multiply : public IntResExp {
 	public:
-		Multiply(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		Multiply(Exp * e1, Exp * e2) : IntResExp(e1, e2, '*') {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -748,18 +859,13 @@ class Multiply : public BinExp {
 };    // End Binary Op
 
 	    // Unary Ops
-class UnaryExp : public Exp { 
-	protected:
-		UnaryExp(Exp * e) : e(e) {};
-	public:
-		Exp * e = nullptr;
-#ifdef ASSEM
-		void setTable(TableNode * t);
-#endif
-};
 class Not : public UnaryExp {
 	public:
-		Not(Exp * e) : UnaryExp(e) {}
+		Not(Exp * e) : UnaryExp(e) {
+			if (!e->isBoolRes()) { 
+				e->reportError(" at token: \"" + e->token + "\" with expr \"!\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
@@ -769,7 +875,11 @@ class Not : public UnaryExp {
 };
 class Pos : public UnaryExp {
 	public:
-		Pos(Exp * e) : UnaryExp(e) {}
+		Pos(Exp * e) : UnaryExp(e) {
+			if (!e->isIntRes()) { 
+				e->reportError(" at token: \"" + e->token + "\" with expr \"+\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
@@ -779,7 +889,11 @@ class Pos : public UnaryExp {
 };
 class Neg : public UnaryExp {
 	public: 
-		Neg(Exp * e) : UnaryExp(e) {}
+		Neg(Exp * e) : UnaryExp(e) {
+			if (!e->isIntRes()) { 
+				e->reportError(" at token: \"" + e->token + "\" with expr \"-\"");
+			}
+		}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
@@ -802,7 +916,11 @@ class ArrayAccess : public Exp {
 	public:
 		Ident * i = nullptr;
 		Index * ind = nullptr;
-		ArrayAccess(Ident * i, Index * ind) : i(i), ind(ind){}
+		ArrayAccess(Ident * i, Index * ind) : i(i), ind(ind){
+			// (TYPECHECK:ss)
+			// if not integer literal or intres expr or id with type int type error
+			// check if the array is initialized
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -813,7 +931,11 @@ class ArrayAccess : public Exp {
 class Length : public Exp {
 	public:
 		Ident * i = nullptr;
-		Length(Ident * i) : i(i) {}
+		Length(Ident * i) : i(i) {
+			// (TYPECHECK:ss)
+			// Check if the id is an array expr
+			// check if the array is initialized
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -825,7 +947,11 @@ class ArrayAccessLength : public Exp {
 	public:
 		Ident * i = nullptr;
 		Index * ind = nullptr;
-		ArrayAccessLength(Ident * i, Index * ind) : i(i), ind(ind) {}
+		ArrayAccessLength(Ident * i, Index * ind) : i(i), ind(ind) {
+			// (TYPECHECK:ss)
+			// Check if the id is an array expr
+			// check if the array is initialized
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -868,7 +994,9 @@ class False : public Exp {
 class ExpObject : public Exp {
 	public:
 		Object * o = nullptr;
-		ExpObject(Object * o) : o(o) {}
+		ExpObject(Object * o) : o(o) {
+			// TYPECHECK table lookup for redundancy 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -882,7 +1010,9 @@ class ObjectMethodCall : public Exp {
 		Object * o = nullptr;
 		Ident * i = nullptr;
 		ExpList * e = nullptr;
-		ObjectMethodCall(Object * o, Ident * i, ExpList * e) : o(o), i(i), e(e) {}
+		ObjectMethodCall(Object * o, Ident * i, ExpList * e) : o(o), i(i), e(e) {
+			// TYPECHECK table lookup for exp type 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -926,7 +1056,9 @@ class ThisObj : public Object {
 class NewIdObj : public Object {
 	public: // For: new id ()
 		Ident * i = nullptr;
-		NewIdObj(Ident * i) : i(i) {}
+		NewIdObj(Ident * i) : i(i) {
+			// TYPECHECK table lookup for redundancy 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -938,7 +1070,9 @@ class NewTypeObj : public Object {
 	public:
 		PrimeType * p = nullptr;
 		Index * i = nullptr;
-		NewTypeObj(PrimeType * p, Index * i) : p(p), i(i) {}
+		NewTypeObj(PrimeType * p, Index * i) : p(p), i(i) {
+			// TYPECHECK table lookup for redundancy 
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);

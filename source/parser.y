@@ -108,7 +108,8 @@ string * typeStringHolder = nullptr;
 %%
 
 program : 
-	main_class class_decl_list { // TODO: add main + decl to table 
+ main_class class_decl_list { // TODO: add main + decl to table 
+ 		delete programRoot;
 		programRoot = new Program($1, $2);
 #ifdef ASSEM
 		rootScope = new TableNode(nullptr);
@@ -123,6 +124,7 @@ program :
 		//programRoot->traverse();
 	}
 	| main_class { 
+ 		delete programRoot;
 		programRoot = new Program($1, nullptr); 
 #ifdef ASSEM
 		rootScope = new TableNode(nullptr);
@@ -135,6 +137,9 @@ program :
 
 main_class : 
 	CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement C_BR C_BR { 
+		// Dummy node to construct table for type checking
+		programRoot = new Program(nullptr, nullptr);
+
 		$$ = new MainClass($2, $12, $15); 
 #ifdef ASSEM
 		$$->lowestT = new TableNode(nullptr);
