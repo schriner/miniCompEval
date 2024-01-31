@@ -48,9 +48,10 @@ Error Output:
 ./build/mjavac:                 int a;
 ```
 ```
-./build/meval: Type Violation in Line 6
-./build/meval: test/Interpreter/simpleCheck.java:6
-./build/meval:         if (true + (2 < 3)) {
+./build/mjavac: Type Violation in Line at token: "true" with expr "+", lineno:6
+./build/mjavac: test/TypeError/simpleCheck.java:6
+./build/mjavac:         if (true + (2 < 3)) {
+[1]    61376 abort      ./build/mjavac -p test/TypeError/simpleCheck.java
 ```
 ```
 ./build/meval: Type Violation in Line 27
