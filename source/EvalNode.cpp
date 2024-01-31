@@ -10,7 +10,7 @@
 
 #include "TreeNode.hpp"
 
-// TODO(ss): Move Type checking within this file during interpretation
+// TODO(ss): Type check during AST generation 
 
 using namespace std;
 
@@ -376,6 +376,8 @@ VAL False::evaluate() {
 	return {0};
 }
 
+// (TYPECHECK:ss)
+// Typecheck objects at evaluation time
 VAL ExpObject::evaluate() {
 	if (IdObj * id = dynamic_cast<IdObj *>(o)) {
 		string * _id = id->i->id;
@@ -431,6 +433,8 @@ VAL ExpObject::evaluate() {
 	return {11};
 }
 
+// (TYPECHECK:ss)
+// Typecheck objects at evaluation time
 VAL ObjectMethodCall::evaluate() {
 	// look up the method
 	// place the result somewhere

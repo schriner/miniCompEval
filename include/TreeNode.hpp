@@ -55,18 +55,18 @@ class ExpList;
 class Ident;
 class IntLiteral;
 class StringLiteral;
+struct _SYM;
 
-#ifndef ASSEM
 typedef union { 
 	int exp; // bool or int
 	int * exp_single; // bool or int single indx array
 	string * name;	// classname
+	map<string, _SYM> * id; // identifier type
 } VAL; 
-typedef struct {
+typedef struct _SYM {
 	VAL val;
 	Type * t;
 } SYM;
-#endif
 
 // Parent Abstract Class of Everything
 class TreeNode {
@@ -110,6 +110,13 @@ class Program : public TreeNode {
 	public:
 		MainClass * m;
 		ClassDeclList * c;
+
+		// (TYPECHECK:ss)
+		// Use these during AST generation for EXPR
+		map<string, ClassDecl *> class_table;
+		vector<map<string, SYM> *>call_stack; // Fixme(ss) call stack - object with variables
+		vector<map<string, SYM> *> scope_stack; // something like a sym table
+		ExpList * arg_stack = nullptr;
 #ifdef ASSEM
 		vector<string * > * dataSection;
 		vector<string * > * textSection;
@@ -123,11 +130,6 @@ class Program : public TreeNode {
 			: m(m), c(c) {}
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
-		map<string, ClassDecl *> class_table;
-		//vector<string *>call_stack; // Fixme(ss) call stack - object with variables
-		vector<map<string, SYM> *>call_stack; // Fixme(ss) call stack - object with variables
-		vector<map<string, SYM> *> scope_stack; // something like a sym table
-		ExpList * arg_stack = nullptr;
 		VAL return_reg;
 		void evaluate();
 #endif
@@ -615,7 +617,16 @@ class Exp : public TreeNode {
 		} 
 #endif
 }; 
-	    // Start Binary op
+			// Start Op
+class UnaryExp : public Exp { 
+	protected:
+		UnaryExp(Exp * e) : e(e) {};
+	public:
+		Exp * e = nullptr;
+#ifdef ASSEM
+		void setTable(TableNode * t);
+#endif
+};
 class BinExp : public Exp { 
 	protected:
 		BinExp(Exp * e1, Exp * e2) : e1(e1), e2(e2) {}; 
@@ -626,9 +637,26 @@ class BinExp : public Exp {
 		void setTable(TableNode * t);
 #endif
 };
-class Or : public BinExp { 
+class BoolResExp : public BinExp {
 	public:
-		Or(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		BoolResExp(Exp * e1, Exp * e2)
+			: BinExp(e1, e2) {}
+}; 
+class IntResExp : public BinExp {
+	public:
+		IntResExp(Exp * e1, Exp * e2)
+			: BinExp(e1, e2) {
+				// (TYPECHECK:ss)
+				// if not integer literal or intres expr or id with type int type error
+				// if ObjectMethodCall check e type
+				// if ExpObject fixme 
+				// check they type of the expr within the parentheses
+			}
+}; 
+	    // Start Binary op
+class Or : public BoolResExp { 
+	public:
+		Or(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
@@ -636,9 +664,9 @@ class Or : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class And : public BinExp {
+class And : public BoolResExp {
 	public:
-		And(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		And(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel);
@@ -646,9 +674,9 @@ class And : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Equal : public BinExp {
+class Equal : public BoolResExp {
 	public:
-		Equal(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		Equal(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -656,9 +684,9 @@ class Equal : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class NotEqual : public BinExp {
+class NotEqual : public BoolResExp {
 	public:
-		NotEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		NotEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -666,9 +694,9 @@ class NotEqual : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Lesser : public BinExp {
+class Lesser : public BoolResExp {
 	public:
-		Lesser(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		Lesser(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -676,9 +704,9 @@ class Lesser : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Greater : public BinExp {
+class Greater : public BoolResExp {
 	public:
-		Greater(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		Greater(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -686,9 +714,9 @@ class Greater : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class LessEqual : public BinExp {
+class LessEqual : public BoolResExp {
 	public:
-		LessEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		LessEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {} 
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -696,9 +724,9 @@ class LessEqual : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class GreatEqual : public BinExp {
+class GreatEqual : public BoolResExp {
 	public:
-		GreatEqual(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		GreatEqual(Exp * e1, Exp * e2) : BoolResExp(e1, e2) {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -706,9 +734,10 @@ class GreatEqual : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Add : public BinExp {
+class Add : public IntResExp {
 	public:
-		Add(Exp * e1, Exp * e2) : BinExp(e1, e2) {} 
+		Add(Exp * e1, Exp * e2) : IntResExp(e1, e2) {
+		} 
 		void traverse();
 #ifdef ASSEM
 	  void assem(string * exp_str, string * branchLabel); 
@@ -716,9 +745,9 @@ class Add : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Subtract : public BinExp {
+class Subtract : public IntResExp {
 	public:
-		Subtract(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		Subtract(Exp * e1, Exp * e2) : IntResExp(e1, e2) {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -726,9 +755,9 @@ class Subtract : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Divide : public BinExp {
+class Divide : public IntResExp {
 	public:
-		Divide(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		Divide(Exp * e1, Exp * e2) : IntResExp(e1, e2) {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -736,9 +765,9 @@ class Divide : public BinExp {
 		VAL evaluate(); 
 #endif
 };
-class Multiply : public BinExp {
+class Multiply : public IntResExp {
 	public:
-		Multiply(Exp * e1, Exp * e2) : BinExp(e1, e2) {}
+		Multiply(Exp * e1, Exp * e2) : IntResExp(e1, e2) {}
 		void traverse();
 #ifdef ASSEM
 		void assem(string * exp_str, string * branchLabel); 
@@ -748,18 +777,13 @@ class Multiply : public BinExp {
 };    // End Binary Op
 
 	    // Unary Ops
-class UnaryExp : public Exp { 
-	protected:
-		UnaryExp(Exp * e) : e(e) {};
-	public:
-		Exp * e = nullptr;
-#ifdef ASSEM
-		void setTable(TableNode * t);
-#endif
-};
 class Not : public UnaryExp {
 	public:
-		Not(Exp * e) : UnaryExp(e) {}
+		Not(Exp * e) : UnaryExp(e) {
+			// (TYPECHECK:ss)
+			// if not boolean literal or bool res expr or id with type bool return 
+			// also check the contents of a paren expr
+		}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
@@ -769,7 +793,11 @@ class Not : public UnaryExp {
 };
 class Pos : public UnaryExp {
 	public:
-		Pos(Exp * e) : UnaryExp(e) {}
+		Pos(Exp * e) : UnaryExp(e) {
+				// (TYPECHECK:ss)
+				// if not integer literal or intres expr or id with type int type error
+				// check the contents of a paren expr 
+		}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
@@ -779,7 +807,11 @@ class Pos : public UnaryExp {
 };
 class Neg : public UnaryExp {
 	public: 
-		Neg(Exp * e) : UnaryExp(e) {}
+		Neg(Exp * e) : UnaryExp(e) {
+				// (TYPECHECK:ss)
+				// if not integer literal or intres expr or id with type int type error
+				// check the contents of a paren expr 
+		}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem(string * exp_str, string * branchLabel); 
@@ -802,7 +834,11 @@ class ArrayAccess : public Exp {
 	public:
 		Ident * i = nullptr;
 		Index * ind = nullptr;
-		ArrayAccess(Ident * i, Index * ind) : i(i), ind(ind){}
+		ArrayAccess(Ident * i, Index * ind) : i(i), ind(ind){
+			// (TYPECHECK:ss)
+			// if not integer literal or intres expr or id with type int type error
+			// also check the contents of a paren expr
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -813,7 +849,11 @@ class ArrayAccess : public Exp {
 class Length : public Exp {
 	public:
 		Ident * i = nullptr;
-		Length(Ident * i) : i(i) {}
+		Length(Ident * i) : i(i) {
+			// (TYPECHECK:ss)
+			// Check if the id is an array expr
+			// also check the contents of a paren expr
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -825,7 +865,11 @@ class ArrayAccessLength : public Exp {
 	public:
 		Ident * i = nullptr;
 		Index * ind = nullptr;
-		ArrayAccessLength(Ident * i, Index * ind) : i(i), ind(ind) {}
+		ArrayAccessLength(Ident * i, Index * ind) : i(i), ind(ind) {
+			// (TYPECHECK:ss)
+			// Check if the id is an array expr
+			// also check the contents of a paren expr
+		}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
