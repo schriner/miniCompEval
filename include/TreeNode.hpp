@@ -176,9 +176,11 @@ class ClassDeclList : public TreeNode {
 /* Abstract class ClassDecl Start */
 class ClassDecl : public TreeNode {
 	public:
+		Ident * i = nullptr;
 		VarDeclList * v = nullptr;
 		MethodDeclList * m = nullptr;
-		ClassDecl (VarDeclList * v,  MethodDeclList * m) : v(v), m(m) {}
+		ClassDecl (Ident * i, VarDeclList * v,  MethodDeclList * m)
+			: i(i), v(v), m(m) {}
 #ifdef ASSEM
 		virtual void assem() = 0;
 #else 
@@ -191,10 +193,8 @@ class ClassDecl : public TreeNode {
 };
 class ClassDeclSimple : public ClassDecl {
 	public:
-		Ident * i = nullptr;
-
 		ClassDeclSimple (Ident * i, VarDeclList * v,  MethodDeclList * m)
-			: ClassDecl(v, m), i(i) { 
+			: ClassDecl(i, v, m) { 
 #ifdef ASSEM
 			nameTable = new map<string, string*>;
 			typeTable = new map<string, string*>;
@@ -211,9 +211,9 @@ class ClassDeclSimple : public ClassDecl {
 };
 class ClassDeclExtends : public ClassDecl {
 	public:
-		Ident * i1 = nullptr; Ident * i2 = nullptr;
+		Ident * i2 = nullptr;
 		ClassDeclExtends (Ident * i1, Ident * i2, VarDeclList * v,  MethodDeclList * m) 
-			: ClassDecl(v, m), i1(i1), i2(i2) {}
+			: ClassDecl(i1, v, m), i2(i2) {}
 		void traverse();
 #ifdef ASSEM
 		virtual void assem();

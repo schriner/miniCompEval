@@ -66,7 +66,7 @@ void ClassDeclSimple::traverse() {
 
 // ClassDeclExtends //
 void ClassDeclExtends::traverse() {
-	i1->traverse();
+	i->traverse();
 	i2->traverse();
 	if (v) { v->traverse(); }
 	lowestT->reportBadMethodDecl();
