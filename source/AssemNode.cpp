@@ -2,7 +2,7 @@
 /*
  * miniCompEval
  * Sonya Schriner
- * File: TreeNode.cpp
+ * File: AssemNode.cpp
  *
  */
 
