@@ -4,9 +4,9 @@
 ## meval:  Interpreter
 From the build directory: 
 
-    ```
+```
     meval [-o <output_file>] <inputfile>.java
-    ```
+```
 Functionality is tested for the files contained within: [`test/Interpreter`](test/Interpreter)
 * class method calls, variables, recursion with arguments, class variable delarations, and multi dimensional arrays are supported for bool and int types
 * keyword `extends` and testing for recursion with `this` are unimplemented 
@@ -14,9 +14,9 @@ Functionality is tested for the files contained within: [`test/Interpreter`](tes
 ## mjavac: Compiler to ARM 32 bit assembly 
 From the build directory: 
 
-    ```
+```
     mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
-    ```
+```
 * (todo): \<list current functionality supported - symbol tables need work within the compiler\>
 * TODO: Automated testing to compile output files.
 * Some sample output is located in [`test/CompilerOut`](test/CompilerOut)
