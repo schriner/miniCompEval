@@ -54,9 +54,10 @@ Error Output:
 [1]    61376 abort      ./build/mjavac -p test/TypeError/simpleCheck.java
 ```
 ```
-./build/meval: Type Violation in Line 27
-./build/meval: test/Interpreter/loopCheck.java:27
-./build/meval:             multiplier = multiplier + 1;
+./build/mjavac: Type Violation in Line at token: ")" with while conditional, lineno:25
+./build/mjavac: test/TypeError/loopCheck.java:25
+./build/mjavac:         while (multiplier + 10) {
+[1]    4590 abort      ./build/mjavac -p test/TypeError/loopCheck.java
 ```
 
 ## Build (MacOs)
