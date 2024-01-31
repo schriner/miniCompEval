@@ -29,6 +29,7 @@
 using namespace std;
 
 extern int yylineno;
+extern char * yytext;
 extern char * exe;
 extern char * yyfilename;
 extern bool programTypeError;
@@ -71,11 +72,13 @@ typedef struct _SYM {
 // Parent Abstract Class of Everything
 class TreeNode {
 	protected:
-		TreeNode() : lineRecord(yylineno) {}
+		TreeNode() : lineRecord(yylineno), token(yytext) {
+		}
 	public: 
 		TableNode * lowestT = nullptr;
 		Data * data = nullptr; 
 		int lineRecord = -1;
+		string token;
 		virtual void traverse() = 0; 
 		void reportLine() {
 			fprintf(stderr, "%s: Report Line: %d\n", exe, lineRecord);
@@ -88,10 +91,10 @@ class TreeNode {
 			fprintf(stderr, "%s: %s", exe, buf);
 			fclose(f);
 		}
-		string error_msg = "Type Violation in Line";
-		void reportError() {
+		void reportError(string append_error_msg = "", 
+				string error_msg = "Type Violation in Line") {
 			programTypeError = true;
-			fprintf(stderr, "%s: %s , lineno:%d\n", exe, error_msg.c_str(), lineRecord);
+			fprintf(stderr, "%s: %s%s, lineno:%d\n", exe, error_msg.c_str(), append_error_msg.c_str(), lineRecord);
 			fprintf(stderr, "%s: %s:%d\n", exe, yyfilename, lineRecord);
 			
 			FILE * f = fopen(yyfilename, "r");
@@ -242,10 +245,7 @@ class VarDecl : public TreeNode {
 class VarDeclList : public TreeNode { 
 	public:
 		vector<VarDecl * > * vdVector = nullptr;
-		VarDeclList(VarDecl * v) {
-			vdVector = new vector<VarDecl * >;
-			vdVector->push_back(v);
-		}
+		VarDeclList(VarDecl * v) : vdVector(new vector<VarDecl * >{v}) {}
 		void append(VarDecl * v) {
 			vdVector->push_back(v);
 		}
@@ -253,8 +253,8 @@ class VarDeclList : public TreeNode {
 #ifdef ASSEM
 		void setTableNodes(TableNode * n) {
 			lowestT = n;
-			for (auto v = vdVector->begin(); v < vdVector->end(); v++) {
-				(*v)->setTable(n);
+			for (auto v : *vdVector) {
+				v->setTable(n);
 			}
 		}
 		void assem(map<string, string*> *, map<string, string*> *);
@@ -599,8 +599,16 @@ class MultipleIndices : public Index {
 /* End Abstract Class Index */
 
 /* Start Expression Abstract Classes */
+class IntResExp;
+class LitInt;
+class Pos;
+class Neg;
+class ObjectMethodCall;
+class ParenExp;
 class Exp : public TreeNode {
 	public:
+		bool isIntRes(); 
+		bool isBoolRes(); 
 		virtual ~Exp() = default;
 #ifdef ASSEM
 		virtual void setTable(TableNode * t) {
@@ -737,6 +745,12 @@ class GreatEqual : public BoolResExp {
 class Add : public IntResExp {
 	public:
 		Add(Exp * e1, Exp * e2) : IntResExp(e1, e2) {
+			if (!e1->isIntRes()) {
+				e1->reportError(" at token: \"" + e1->token + "\" with expr \"+\"");
+			}
+			if (!e2->isIntRes()) { 
+				e2->reportError(" at token: \"" + e2->token + "\" with expr \"+\"");
+			}
 		} 
 		void traverse();
 #ifdef ASSEM

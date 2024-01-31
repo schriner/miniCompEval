@@ -294,6 +294,53 @@ void MultipleIndices::traverse() {
 	PRINTDEBUGTREE("MultipleIndices");*/
 }
 
+bool Exp::isBoolRes() {
+	if (dynamic_cast<BoolResExp *>(this)
+			|| dynamic_cast<True *>(this)
+			|| dynamic_cast<False *>(this)
+	) {
+		return true;
+	}
+	
+	if (dynamic_cast<ExpObject *>(this) 
+			|| dynamic_cast<ObjectMethodCall *>(this) 
+			|| dynamic_cast<ArrayAccess *>(this)
+	) {
+		return true;
+	}
+	if (ParenExp * p = dynamic_cast<ParenExp *>(this)) {
+		return p->e->isBoolRes();
+	}
+	return false;
+}
+
+bool Exp::isIntRes() {
+	if (dynamic_cast<IntResExp *>(this)
+			|| dynamic_cast<LitInt *>(this)
+			|| dynamic_cast<Pos *>(this)
+			|| dynamic_cast<Neg *>(this)
+			|| dynamic_cast<Length *>(this)
+			|| dynamic_cast<ArrayAccessLength *>(this)
+	) {
+		return true;
+	}
+	//if (ObjectMethodCall * o = dynamic_cast<ObjectMethodCall *>(this)) {
+	//if (ExpObject * o = dynamic_cast<ExpObject *>(this)) {
+	if (dynamic_cast<ExpObject *>(this) 
+			|| dynamic_cast<ObjectMethodCall *>(this)
+			|| dynamic_cast<ArrayAccess *>(this)
+	) {
+		// check the return type in the obj after a table lookup
+		//return o->e->isIntRes();
+		// check the return type in the obj after a table lookup
+		//return o->e->isIntRes();
+		return true;
+	}
+	if (ParenExp * p = dynamic_cast<ParenExp *>(this)) {
+		return p->e->isIntRes();
+	}
+	return false;
+}
 // BinExp //
 
 // UnaryExp //
