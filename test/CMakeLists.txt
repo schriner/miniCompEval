@@ -90,7 +90,7 @@ set_property (TEST EvalArrayPrintClassVar
 )
 
 add_test(NAME EvalFactorial2 COMMAND meval ${TEST_DIR}/Interpreter/loop2.java)
-set (passRegex "^Factorial of 10 is:3628800\nFactorial of 9 is:362880Factorial of 8 is:40320\nFactorial of 7 is:5040\nFactorial of 6 is:720\nFactorial of 5 is:120\nFactorial of 4 is:24\nFactorial of 3 is:6\nFactorial of 2 is:2\nFactorial of 1 is:1\nSuccess") 
+set (passRegex "^Factorial of 10 is:3628800\nFactorial of 9 is:362880\nFactorial of 8 is:40320\nFactorial of 7 is:5040\nFactorial of 6 is:720\nFactorial of 5 is:120\nFactorial of 4 is:24\nFactorial of 3 is:6\nFactorial of 2 is:2\nFactorial of 1 is:1\nSuccess") 
 set_property (TEST EvalFactorial2 
 	PROPERTY 
 	PASS_REGULAR_EXPRESSION "${passRegex}"
