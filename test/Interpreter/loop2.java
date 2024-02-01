@@ -23,7 +23,7 @@ class PrintFactorial10 {
 			System.out.print("Factorial of ");
 			System.out.print(f.fact());
 			System.out.print(" is:");
-			System.out.print(f.computeDec());
+			System.out.println(f.computeDec());
 		}
 		return f.fact() == 0;
 	}

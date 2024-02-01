@@ -122,7 +122,7 @@ class Program : public TreeNode {
     // TODO(ss): Check memory management for this during evaluate
 		// Stack of class instance scopes for instance variables
 		// ["class"] entry within the map contains the classname for the given scope
-		vector<map<string, SYM> *>call_stack; // Fixme(ss) call stack - object with variables
+		vector<map<string, SYM> *> call_stack; // Fixme(ss) call stack - object with variables
 		// stack of method calls scopes
 		// variables that survive for the life of a particular method call
 		vector<map<string, SYM> *> scope_stack; // something like a sym table

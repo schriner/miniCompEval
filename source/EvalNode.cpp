@@ -40,6 +40,7 @@ void ClassDeclSimple::evaluate() {
 		method_table[*md->i->id] = md;
 	}
 	var_table["class"] = {{.name = i->id}, nullptr};
+	//cerr << *i->id << endl;
 	if (v && v->vdVector) { 
 		for (auto var : *v->vdVector) {
 			// Type Handler
@@ -79,14 +80,15 @@ VAL MethodDecl::evaluate() {
 		}
 	}
 	programRoot->scope_stack.push_back(&variable);
-	for (auto var : *v->vdVector) {
-		// Type Handler
-		Type * type = var->t;
+	if (v && v->vdVector) {
+		for (auto var : *v->vdVector) {
+			// Type Handler
+			Type * type = var->t;
 
-		variable[*var->i->id] = {0, var->t};
+			variable[*var->i->id] = {0, var->t};
+		}
 	}
-	
-	s->evaluate();
+	if (s) s->evaluate();
 	if (programRoot->return_reg.exp) {
 		// Check if it is an early return with value 0;
 		programRoot->arg_stack = nullptr;
@@ -193,6 +195,7 @@ void ReturnStatement::evaluate() {
 }
 
 void StatementList::evaluate() {
+	if (!sVector) return;
 	for (auto s = sVector->begin(); s != sVector->end(); s++) {
 		(*s)->evaluate();
 		if (dynamic_cast<ReturnStatement *>(*s)) { return; }
@@ -381,10 +384,16 @@ VAL ExpObject::evaluate() {
 		} else {
 			reportError(*_id, "ExpObject::evaluate() runtime error with id: ");
 		}
-	} else if (dynamic_cast<NewIdObj *>(o)) {
-		reportError("", "Err: Trying to evaluate and obj with NewIdObj\n");
+	
+	} else if (NewIdObj * obj = dynamic_cast<NewIdObj *>(o)) {
+		string * _id = obj->i->id;
+		ClassDecl * cl = programRoot->class_table[*obj->i->id];
+		return {.id = (new map<string, SYM>(cl->var_table))}; // push classname
+		//reportError("", "Err: Trying to evaluate and obj with NewIdObj\n");
+	
 	} else if (dynamic_cast<ThisObj *>(o)) {
-		reportError("", "Err: Trying to evaluate and obj with ThisObj\n");
+		return {.id = programRoot->call_stack.back()};
+	
 	} else if (NewTypeObj * nto = dynamic_cast<NewTypeObj *>(o)) {
 		// NEW prime_type index 
 		// (Array)
@@ -437,9 +446,21 @@ VAL ObjectMethodCall::evaluate() {
 		programRoot->call_stack.push_back(new map<string, SYM>(cl->var_table) ); // push classname
 		//cerr << *i->id << ":" << *(dynamic_cast<NewIdObj *>(o)->i)->id << endl;
 		return cl->method_table[*i->id]->evaluate();
-	
-	} else if (dynamic_cast<IdObj *>(o)){
-		cerr << "Err: Trying to make a method call with IdObj\n";
+ 	
+	} else if (dynamic_cast<IdObj *>(o)){	
+		string * id = (dynamic_cast<IdObj *>(o)->i)->id;
+		map<string, SYM> * scope; // current scope with variable
+		if (programRoot->scope_stack.back()->find(*id) != programRoot->scope_stack.back()->end()) {
+			scope = programRoot->scope_stack.back();
+		} else if (programRoot->call_stack.back()->find(*id) != programRoot->scope_stack.back()->end()) {
+			scope = programRoot->call_stack.back();
+		} else {
+			abort();
+		}
+		ClassDecl * cl = programRoot->class_table[*(*(*scope)[*id].val.id)["class"].val.name];
+		programRoot->call_stack.push_back((*scope)[*id].val.id);
+		return cl->method_table[*i->id]->evaluate();
+		//cerr << "Err: Trying to make a method call with IdObj\n";
 	
 	} else if (dynamic_cast<ThisObj *>(o)){
 		programRoot->call_stack.push_back((programRoot->call_stack.back()));
