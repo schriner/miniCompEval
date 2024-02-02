@@ -163,20 +163,21 @@ void Assign::evaluate() {
 }
 
 void IndexAssign::evaluate() {
-	//int * array;
 	map<string, _SYM>::iterator s;
 	if (s = programRoot->scope_stack.back()->find(*i->id);
-		s == programRoot->scope_stack.back()->end()) {
-		//array = (*programRoot->scope_stack.back())[*i->id].val.exp_array;
+			s == programRoot->scope_stack.back()->end()) {
 		if (s = programRoot->call_stack.back()->find(*i->id);
-		s == programRoot->call_stack.back()->end()) {
-		//array = (*programRoot->call_stack.back())[*i->id].val.exp_array;
-		//} else {
-		reportError("", "IndexAssign::evaluate() runtime error");
-	}}
+				s == programRoot->call_stack.back()->end()) {
+			reportError("", "IndexAssign::evaluate() runtime error");
+		}
+	}
 	if (dynamic_cast<SingleIndex *>(ind)) {
 		int offset = ind->evaluate();
-		s->second.val.exp_array[offset + 2] = e->evaluate().exp;
+		if (!dynamic_cast<IdentType * >(s->second.t)) {
+			s->second.val.exp_array[offset + 2] = e->evaluate().exp;
+			return;
+		}
+		s->second.val.id_array[offset + 2] = {e->evaluate().id};
 		return;
 	}
 	int offset = s->second.val.exp_array[0] + 1;
@@ -186,45 +187,12 @@ void IndexAssign::evaluate() {
 			offset += s->second.val.exp_array[a++]*(dynamic_cast<SingleIndex *>(m)->e->evaluate().exp); 
 		}
 	}
-	s->second.val.exp_array[offset] = e->evaluate().exp;
-/*
-	map<string, _SYM>::iterator s;
-	if (s = programRoot->scope_stack.back()->find(*i->id);
-			s == programRoot->scope_stack.back()->end()) {
-		if (s = programRoot->call_stack.back()->find(*i->id);
-				s == programRoot->call_stack.back()->end()) {
-			reportError("", "IndexAssign::evaluate() runtime error");
-		} 
-	}
-
-	int offset;
-	if (dynamic_cast<SingleIndex *>(ind)) {
-		cerr << ind->evaluate() << " " ;
-		offset = ind->evaluate() + 2;
-	} else if (!dynamic_cast<IdentType * >(s->second.t)) {
-		offset = ((int *) s->second.val.exp_array)[0] + 1;
-		int a = 1;
-		if (MultipleIndices * m_i = dynamic_cast<MultipleIndices *>(ind)){
-			for (auto m : *m_i->ind) {
-				offset += ((int *) s->second.val.exp_array) [a++]*(dynamic_cast<SingleIndex *>(m)->e->evaluate().exp);
-			}
-		}
-	} else {
-		offset = s->second.val.id_array[0].index + 1;
-		int a = 1;
-		if (MultipleIndices * m_i = dynamic_cast<MultipleIndices *>(ind)){
-			for (auto m : *m_i->ind) {
-				offset += s->second.val.id_array[a++].index*(dynamic_cast<SingleIndex *>(m)->e->evaluate().exp);
-			}
-		}
-	}
-
 	if (!dynamic_cast<IdentType * >(s->second.t)) {
-		cerr << offset << " : " << e->evaluate().exp << endl;
-		((int *) s->second.val.exp_array)[offset] = e->evaluate().exp;
+		s->second.val.exp_array[offset] = e->evaluate().exp;
+		return;
 	}
-	s->second.val.id_array[offset].id = e->evaluate().id;
-*/
+	s->second.val.id_array[offset] = {e->evaluate().id};
+
 }
 
 void ReturnStatement::evaluate() {
