@@ -24,7 +24,7 @@ jobs:
 
     - name: Brew
       # Build your program with the given configuration
-      run: brew install flex && brew install bison
+      run: brew install flex && brew install bison && echo 'export PATH="/opt/homebrew/opt/flex/bin:$PATH"' && echo 'export PATH="/opt/homebrew/opt/bison/bin:$PATH"'
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
