@@ -29,7 +29,7 @@ class Factorial {
     public int compute10() {
         int prod;
         int multiplier;
-				bool b;
+				boolean b;
         multiplier = 1;
         prod = 1;
         //System.out.print("multiplier:");

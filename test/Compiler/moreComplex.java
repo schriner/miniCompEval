@@ -1,7 +1,7 @@
 // This example involves string literal printing, integer printing,
 // and if-else branch execution.
 // Indicated by the else branch, your interpretation should not print the line in it.
-class simple {
+class moreComplex {
     public static void main(String [] args) {
 			{
         if (true && (2 < 3)) { // 0
