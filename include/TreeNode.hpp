@@ -58,13 +58,19 @@ class IntLiteral;
 class StringLiteral;
 struct _SYM;
 
-typedef union { 
+typedef union _ID_ARRAY { 
+	map<string, _SYM> * id;
+	int index;
+} ID_ARRAY;
+
+typedef union _VAL { 
 	int exp; // bool or int
-	int * exp_single; // bool or int single indx array
-	string * name;	// classname
+	int * exp_array; // bool or int single indx array
 	map<string, _SYM> * id; // identifier type
-	map<string, _SYM> ** id_array; // identifier type array (TODO: union for map or int entry)
+  _ID_ARRAY * id_array; // identifier type array
+	string * name;	// classname
 } VAL; 
+
 typedef struct _SYM {
 	VAL val;
 	Type * t;
