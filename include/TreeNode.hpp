@@ -63,6 +63,7 @@ typedef union {
 	int * exp_single; // bool or int single indx array
 	string * name;	// classname
 	map<string, _SYM> * id; // identifier type
+	map<string, _SYM> ** id_array; // identifier type array (TODO: union for map or int entry)
 } VAL; 
 typedef struct _SYM {
 	VAL val;

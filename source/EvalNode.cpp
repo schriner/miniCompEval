@@ -297,6 +297,7 @@ VAL ParenExp::evaluate() {
 }
 
 VAL ArrayAccess::evaluate() {
+	// TODO(ss): id_array
 	int * array;
 	if (programRoot->scope_stack.back()->find(*i->id) != programRoot->scope_stack.back()->end()) {
 			array = (*programRoot->scope_stack.back())[*i->id].val.exp_single;
@@ -323,6 +324,7 @@ VAL ArrayAccess::evaluate() {
 	return {0};
 }
 VAL Length::evaluate() {
+	// TODO(ss): id_array
 	// Check that this id is an array
 	int * array;
 	if (programRoot->scope_stack.back()->find(*i->id) != programRoot->scope_stack.back()->end()) {
@@ -342,6 +344,7 @@ VAL Length::evaluate() {
 }
 
 VAL ArrayAccessLength::evaluate() {
+	// TODO(ss): id_array
 	// Check that this id is an array
 	int * array;
 	if (programRoot->scope_stack.back()->find(*i->id) != programRoot->scope_stack.back()->end()) {
@@ -396,6 +399,7 @@ VAL ExpObject::evaluate() {
 	
 	} else if (NewTypeObj * nto = dynamic_cast<NewTypeObj *>(o)) {
 		// NEW prime_type index 
+		// TODO(ss): id_array
 		// (Array)
 		if (SingleIndex * i = dynamic_cast<SingleIndex * >(nto->i)) {
 			if (!dynamic_cast<IdentType * >(nto->p)) { // Is BOOL or INT
