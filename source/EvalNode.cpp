@@ -163,27 +163,30 @@ void Assign::evaluate() {
 }
 
 void IndexAssign::evaluate() {
-	int * array;
-	if (programRoot->scope_stack.back()->find(*i->id) != programRoot->scope_stack.back()->end()) {
-		array = (*programRoot->scope_stack.back())[*i->id].val.exp_array;
-	} else if (programRoot->call_stack.back()->end() != programRoot->call_stack.back()->find(*i->id)) {
-		array = (*programRoot->call_stack.back())[*i->id].val.exp_array;
-	} else {
+	//int * array;
+	map<string, _SYM>::iterator s;
+	if (s = programRoot->scope_stack.back()->find(*i->id);
+		s == programRoot->scope_stack.back()->end()) {
+		//array = (*programRoot->scope_stack.back())[*i->id].val.exp_array;
+		if (s = programRoot->call_stack.back()->find(*i->id);
+		s == programRoot->call_stack.back()->end()) {
+		//array = (*programRoot->call_stack.back())[*i->id].val.exp_array;
+		//} else {
 		reportError("", "IndexAssign::evaluate() runtime error");
-	}
+	}}
 	if (dynamic_cast<SingleIndex *>(ind)) {
 		int offset = ind->evaluate();
-		array[offset + 2] = e->evaluate().exp;
+		s->second.val.exp_array[offset + 2] = e->evaluate().exp;
 		return;
 	}
-	int offset = array[0] + 1;
+	int offset = s->second.val.exp_array[0] + 1;
 	int a = 1;
 	if (MultipleIndices * m_i = dynamic_cast<MultipleIndices *>(ind)){
 		for (auto m : *m_i->ind) {
-			offset += array[a++]*(dynamic_cast<SingleIndex *>(m)->e->evaluate().exp); 
+			offset += s->second.val.exp_array[a++]*(dynamic_cast<SingleIndex *>(m)->e->evaluate().exp); 
 		}
 	}
-	array[offset] = e->evaluate().exp;
+	s->second.val.exp_array[offset] = e->evaluate().exp;
 /*
 	map<string, _SYM>::iterator s;
 	if (s = programRoot->scope_stack.back()->find(*i->id);
