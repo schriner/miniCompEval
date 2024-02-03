@@ -3,7 +3,7 @@
 class loop {
     public static void main(String [] args) {
         {
-				/*System.out.print("Divide 7/3:");
+				System.out.print("Divide 7/3:");
 				System.out.println(7/3);
 				System.out.print("Divide 6/3:");
 				System.out.println(6/3);
@@ -17,7 +17,6 @@ class loop {
 				System.out.println(-6/3);
 				System.out.print("Divide -7/3:");
 				System.out.println(-7/3);
-        */
 				System.out.print("Factorial of 10 is:");
         System.out.println(new Factorial().compute10());
         }

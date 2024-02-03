@@ -17,26 +17,11 @@ From the build directory:
 ```
 mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
 ```
-* (todo): \<list current functionality supported - symbol tables need work within the compiler\>
-* Automated testing to compile output and compair with javac files:
-```
-./test/test_assem.sh
-```
-Produces output like:
-```
-././test/../build/mjavac -o ./test/CompilerOut/basicIf.s ./test/Compiler/basicIf.java
-././test/../build/mjavac -o ./test/CompilerOut/loop.s ./test/Compiler/loop.java
+* Supported functionality would include object method calls, expression evaluation, expression assignment to variables, print() via prtinf, and control flow statements
+* TODO: Symbol table improvements, arrays, class instance variables, `this`, nested method calls, class extends
+* Some sample `.s` output is located in [`test/CompilerOut`](test/CompilerOut)
 
-...
-
-Beginning Test: simpleMethodCall
-Success
-
-...
-```
-
-* Some sample output is located in [`test/CompilerOut`](test/CompilerOut)
-To utilize the present test env: 
+To utilize the present test compilation env: 
 ```
 <within the root dir>
 docker build -t mjavac_arm_test .
@@ -44,7 +29,6 @@ docker run -it --rm mjavac_arm_test
 cd CompilerOut
 make
 ```
-
 
 ## Grammar : 
 see for Grammar specification:
@@ -55,6 +39,8 @@ see for Grammar specification:
 Syntax dervied from: https://www.cs.tufts.edu/~sguyer/classes/comp181-2006/minijava.html
 
 ### Type and Syntax Violation Reporting
+
+* TODO: type checking for variable assignments and variable name redundancy
 
 Error Output:
 
@@ -115,5 +101,23 @@ From within the build directory:
 ```
 ctest
 ```
+## Automated Testing for Assembly
+From within the root directory:
+```
+./test/test_assem.sh
+```
+Produces output like:
+```
+././test/../build/mjavac -o ./test/CompilerOut/basicIf.s ./test/Compiler/basicIf.java
+././test/../build/mjavac -o ./test/CompilerOut/loop.s ./test/Compiler/loop.java
 
-Output should mirror output from `javac`. Automated compilation testing for correct execution of .s files is todo
+...
+
+Beginning Test: simpleMethodCall
+Success
+
+...
+```
+
+Output should mirror output from `javac`. Automated compilation testing for correct execution of .s files 
+
