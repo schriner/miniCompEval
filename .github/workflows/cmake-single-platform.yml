@@ -24,8 +24,7 @@ jobs:
 
     - name: Flex/Bison
       # Build your program with the given configuration
-      run: brew install flex && brew install bison && brew link bison --force && \
-        export PATH="/opt/homebrew/opt/flex/bin:$PATH" && export PATH="/opt/homebrew/opt/bison/bin:$PATH"
+      run: brew install flex && brew install bison && brew link bison --force && export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
         
     - name: Docker
       run: brew cask install docker && open -a Docker
