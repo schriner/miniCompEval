@@ -46,4 +46,4 @@ jobs:
 
     - name: Test Assembly
       working-directory: ${{github.workspace}}
-      run: ./test/test_assem.sh
+      run: open /Applications/Docker.app && ./test/test_assem.sh
