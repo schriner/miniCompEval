@@ -22,6 +22,7 @@ then
 	echo "Expected: "
 	./CompilerOut/$1
 	echo "Actual $1: "
+	exit -1
 else
 	echo "There was something wrong with the diff command"
 fi

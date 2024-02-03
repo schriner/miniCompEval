@@ -153,11 +153,7 @@ if4:
 
 el4:
 
-		b not11
-not12:
-	b if5
-not11:
-	ldr r0, =str10
+		ldr r0, =str10
 	bl printf
 	b el5
 if5:
@@ -171,11 +167,7 @@ el5:
 	mov r1, #5
 	pop {r2}
 	cmp r2, r1
-	ble not14
-	b not13
-not14:
-	b if6
-not13:
+	ble if6
 	ldr r0, =str12
 	bl printf
 	b el6
@@ -190,9 +182,9 @@ el6:
 	mov r1, #5
 	pop {r2}
 	cmp r2, r1
-	ble not15
+	ble not11
 	b if7
-not15:
+not11:
 	ldr r0, =str14
 	bl printf
 	b el7

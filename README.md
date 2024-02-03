@@ -18,7 +18,23 @@ From the build directory:
 mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
 ```
 * (todo): \<list current functionality supported - symbol tables need work within the compiler\>
-* TODO: Automated testing to compile output files.
+* Automated testing to compile output and compair with javac files:
+```
+./test/test_assem.sh
+```
+Produces output like:
+```
+././test/../build/mjavac -o ./test/CompilerOut/basicIf.s ./test/Compiler/basicIf.java
+././test/../build/mjavac -o ./test/CompilerOut/loop.s ./test/Compiler/loop.java
+
+...
+
+Beginning Test: simpleMethodCall
+Success
+
+...
+```
+
 * Some sample output is located in [`test/CompilerOut`](test/CompilerOut)
 To utilize the present test env: 
 ```

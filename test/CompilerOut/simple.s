@@ -33,23 +33,15 @@ e0:
 	bl printf
 
 	mov r1, #32
-	push {r1}
-	mov r1, #70
-	pop {r2}
-	sub r1, r2, r1
-	push {r1}
-	mov r1, #2
-	pop {r2}
-	sub r1, r2, r1
+	sub r1, r1, #70
+	sub r1, r1, #2
 	add r1, r1, #9
 	ldr r0, =pln
 	bl printf
 
 	mov r1, #3
 	add r1, r1, #5
-	push {r1}
-	mov r1, #17
-	pop {r2}
+	mov r2, #17
 	mul r1, r2, r1
 	ldr r0, =pln
 	bl printf

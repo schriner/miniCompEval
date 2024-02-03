@@ -23,7 +23,7 @@ e0:
 	ldr r0, =str0
 	bl printf
 
-	bl FactorialstupidFunction
+	bl dummyFunctionfunction
 	mov r1, r0
 	ldr r0, =pln
 	bl printf
@@ -35,8 +35,8 @@ if0:
 el0:
 
 	pop {pc}
-Factorial:
-FactorialstupidFunction:
+dummyFunction:
+dummyFunctionfunction:
 	push {lr}
 
 	ldr r0, =str2
@@ -61,13 +61,10 @@ FactorialstupidFunction:
 	mul r1, r2, r1
 	pop {r2}
 	add r1, r2, r1
+	sub r1, r1, #39
 	push {r1}
-	mov r1, #39
-	pop {r2}
-	sub r1, r2, r1
-	push {r1}
-	mov r1, #10
-	mov r2, #8
+	mov r2, #10
+	mov r1, #8
 	mul r1, r2, r1
 	pop {r2}
 	add r1, r2, r1
