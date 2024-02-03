@@ -5,8 +5,8 @@ name: CMake on a single platform
 on:
   push:
     branches: [ "master" ]
-  #pull_request:
-  #  branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -22,11 +22,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Brew
+    - name: Flex/Bison
       # Build your program with the given configuration
-      run: brew install flex && brew install bison && brew link bison --force && \
-        export PATH="/opt/homebrew/opt/flex/bin:$PATH" && export PATH="/opt/homebrew/opt/bison/bin:$PATH" && \
-        brew cask install docker && open -a Docker
+      run: 
+        brew install flex && brew install bison && brew link bison --force && export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
+        
+    - name: Docker
+      run: 
+        brew install --cask docker && cd /Applications && sudo /Applications/Docker.app/Contents/MacOS/install
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -43,6 +46,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest #-C ${{env.BUILD_TYPE}}
 
-    - name: Test Interpreter Parser
+    - name: Test Assembly
       working-directory: ${{github.workspace}}
-      run: ./test/test_assem.sh
+      run: 
+        open -a docker && sleep 10 && ./test/test_assem.sh
