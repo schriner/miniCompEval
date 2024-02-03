@@ -19,14 +19,19 @@ if [ -d "$BUILD" ]; then
 	popd
 fi
 
+for entry in "$TEST_DIR"/*".java"
+do
+	file=$(basename -- "$entry")
+	echo "	./$BUILD_DIR/mjavac -o $OUT_DIR/${file%.*}.s $entry"
+	./$BUILD_DIR/mjavac -o $OUT_DIR/"${file%.*}.s" "$entry" 
+done
+
 echo "Building Docker Container for Testing"
 docker build -t armv7_s $TEST_PATH/.. 
 
 for entry in "$TEST_DIR"/*".java"
 do
 	file=$(basename -- "$entry")
-	echo "$entry" $OUT_DIR/$file "${file%.*}.s"
-	./$BUILD_DIR/mjavac -o $OUT_DIR/"${file%.*}.s" "$entry" 
 	docker run -it --rm armv7_s bash ./comp.sh "${file%.*}"
 done
 

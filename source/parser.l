@@ -39,6 +39,7 @@ B_COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 {STRING} { 
 	PRINTDEBUG(yytext);
 	string temp(yytext + 1, strlen(yytext) - 2);
+#ifndef ASSEM
 	string fin("");
 	for (int i = 0; i < temp.length(); i++) {
 		if (temp[i] == '\\' && (i + 1 < temp.length()) ) {
@@ -65,7 +66,9 @@ B_COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 		}
 	}
 	yylval.st_l = new StringLiteral( new string(fin) ); 
-	//yylval.st_l = new StringLiteral( new string(temp) ); 
+#else
+	yylval.st_l = new StringLiteral( new string(temp) ); 
+#endif
 	return STRING_LITERAL; 
 }
 {INT} { PRINTDEBUG(yytext); yylval.in_l = new IntLiteral( atoi(yytext) ); return INTEGER_LITERAL; }
