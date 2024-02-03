@@ -58,6 +58,12 @@ class IntLiteral;
 class StringLiteral;
 struct _SYM;
 
+struct StringCmp {
+	bool operator()(string * lhs, string * rhs) const {
+		return !lhs->compare(*rhs);
+	}
+};
+
 typedef union _ID_ARRAY { 
 	map<string, _SYM> * id;
 	int index;

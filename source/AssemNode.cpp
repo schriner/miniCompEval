@@ -160,11 +160,11 @@ void MethodDeclList::assem(string * objName) {
   }
 }
 
-void BlockStatements::assem(string * stmt_str, map<string, string*> * nameTable)  {
+void BlockStatements::assem(string * stmt_str, map<string, string*> * nameTable) {
   s->assem(stmt_str, nameTable);
 }
 
-void IfStatement::assem(string * stmt_str, map<string, string*> * nameTable)  {
+void IfStatement::assem(string * stmt_str, map<string, string*> * nameTable) {
   string label("if" + to_string(ifCnt));
   e->assem(stmt_str, &label);
 
@@ -181,7 +181,7 @@ void IfStatement::assem(string * stmt_str, map<string, string*> * nameTable)  {
   ifCnt++;
 }
 
-void WhileStatement::assem(string * stmt_str, map<string, string*> * nameTable)  {
+void WhileStatement::assem(string * stmt_str, map<string, string*> * nameTable) {
   string label("lp" + to_string(lCnt) + ":\n");
   *stmt_str = stmt_str->substr(0, stmt_str->length() - 1) + label;
 
@@ -195,7 +195,7 @@ void WhileStatement::assem(string * stmt_str, map<string, string*> * nameTable) 
   lCnt++;
 }
 
-void PrintLineExp::assem(string * stmt_str, map<string, string*> * nameTable){
+void PrintLineExp::assem(string * stmt_str, map<string, string*> * nameTable) {
   // need to put the format string somewhere
   string e_str("");
   e->assem(&e_str, nullptr);
@@ -214,7 +214,7 @@ void PrintLineString::assem(string * stmt_str, map<string, string*> * nameTable)
   branchPrint(s->label, stmt_str);
 }
 
-void PrintExp::assem(string * stmt_str, map<string, string*> * nameTable){
+void PrintExp::assem(string * stmt_str, map<string, string*> * nameTable) {
   string e_str("");
   e->assem(&e_str, nullptr);
   string s("ldr r0, =");
@@ -222,7 +222,7 @@ void PrintExp::assem(string * stmt_str, map<string, string*> * nameTable){
   *stmt_str = *stmt_str + s.substr(1);
 }
 
-void PrintString::assem(string * stmt_str, map<string, string*> * nameTable){
+void PrintString::assem(string * stmt_str, map<string, string*> * nameTable) {
   s->assem();
   branchPrint(s->label, stmt_str);
 }
@@ -247,7 +247,7 @@ void Assign::assem(string * stmt_str, map<string, string*> * nameTable) {
 
 void IndexAssign::assem(string * stmt_str, map<string, string*> *nT) {}
 
-void ReturnStatement::assem(string * stmt_str, map<string, string*> *nT){
+void ReturnStatement::assem(string * stmt_str, map<string, string*> *nT) {
   e->assem(stmt_str, nullptr);
   *stmt_str = *stmt_str + "\n\tmov r0, r1\n\tpop {pc}\n";
 }
@@ -284,7 +284,7 @@ void Or::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void And::assem(string * exp_str, string * branchLabel){
+void And::assem(string * exp_str, string * branchLabel) {
   string label( "e" + to_string(expCnt++) );
   e1->assem(exp_str, branchLabel);
   if (!branchLabel) {
@@ -298,7 +298,7 @@ void And::assem(string * exp_str, string * branchLabel){
   }
 }
 
-void Equal::assem(string * exp_str, string * branchLabel){
+void Equal::assem(string * exp_str, string * branchLabel) {
   e1->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
   e2->assem(exp_str, nullptr); // has to b int
@@ -310,7 +310,7 @@ void Equal::assem(string * exp_str, string * branchLabel){
   }
 }
 
-void NotEqual::assem(string * exp_str, string * branchLabel){
+void NotEqual::assem(string * exp_str, string * branchLabel) {
   e1->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
   e2->assem(exp_str, nullptr); // has to b int
@@ -322,7 +322,7 @@ void NotEqual::assem(string * exp_str, string * branchLabel){
   }
 }
 
-void Lesser::assem(string * exp_str, string * branchLabel){
+void Lesser::assem(string * exp_str, string * branchLabel) {
   e1->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
   e2->assem(exp_str, nullptr); // has to b int
@@ -334,7 +334,7 @@ void Lesser::assem(string * exp_str, string * branchLabel){
   }
 }
 
-void Greater::assem(string * exp_str, string * branchLabel){
+void Greater::assem(string * exp_str, string * branchLabel) {
     e1->assem(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpush {r1}\n";
     e2->assem(exp_str, nullptr); // has to b int
@@ -346,7 +346,7 @@ void Greater::assem(string * exp_str, string * branchLabel){
   }
 }
 
-void LessEqual::assem(string * exp_str, string * branchLabel){
+void LessEqual::assem(string * exp_str, string * branchLabel) {
   e1->assem(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
   e2->assem(exp_str, nullptr); // has to b int
@@ -358,7 +358,7 @@ void LessEqual::assem(string * exp_str, string * branchLabel){
   }
 }
 
-void GreatEqual::assem(string * exp_str, string * branchLabel){
+void GreatEqual::assem(string * exp_str, string * branchLabel) {
     e1->assem(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpush {r1}\n";
     e2->assem(exp_str, nullptr); // has to b int
@@ -370,7 +370,7 @@ void GreatEqual::assem(string * exp_str, string * branchLabel){
   }
 }
 
-void Add::assem(string * exp_str, string * branchLabel){
+void Add::assem(string * exp_str, string * branchLabel) {
     //if (dynamic_cast<LitInt *>( e1 )) {
     if (isIntLiteral(e1)) {
         std::string lit_string("");
@@ -395,7 +395,7 @@ void Add::assem(string * exp_str, string * branchLabel){
 }
 
 
-void Subtract::assem(string * exp_str, string * branchLabel){
+void Subtract::assem(string * exp_str, string * branchLabel) {
   if ( isIntLiteral( e2 ) ) {
     std::string lit_string("");
     getIntLiteral (e2, &lit_string);
@@ -427,7 +427,7 @@ void Divide::assem(string * exp_str, string * branchLabel) {
     lCnt++;
 }
 
-void Multiply::assem(string * exp_str, string * branchLabel){
+void Multiply::assem(string * exp_str, string * branchLabel) {
   if (isIntLiteral( e1 ) && isIntLiteral( e2 )) {
     // Both are positive int literals
     string lit_string("");
@@ -581,14 +581,14 @@ void LitInt::assem(string * exp_str, string * branchLabel) {
   *exp_str = *exp_str + "\tmov r1, #"+ to_string(i->i) + "\n";
 }
 
-void True::assem(string * exp_str, string * branchLabel){
+void True::assem(string * exp_str, string * branchLabel) {
   // Do Nothing - true will always execute the first part of the statement
   if (branchLabel == nullptr){
     *exp_str = *exp_str + "\tmov r1, #1\n";
   }
 }
 
-void False::assem(string * exp_str, string * branchLabel){
+void False::assem(string * exp_str, string * branchLabel) {
   // False always branches
   if (branchLabel == nullptr){
     *exp_str = *exp_str + "\tmov r1, #0\n";
@@ -613,7 +613,7 @@ void ObjectMethodCall::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void IdObj::assem(string * exp_str, string * branchLabel){
+void IdObj::assem(string * exp_str, string * branchLabel) {
   map<string, string*> * table = nameTableStack.back();
   if (table->find(*(i->id)) == table->end()
       && nameTableStack.size() > 1) {
