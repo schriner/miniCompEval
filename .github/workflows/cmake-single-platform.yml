@@ -27,7 +27,7 @@ jobs:
       run: brew install flex && brew install bison && brew link bison --force && export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
         
     - name: Docker
-      run: brew install --cask docker && cd /Applications && sudo /Applications/Docker.app/Contents/MacOS/install
+      run: brew install --cask docker && cd /Applications && sudo /Applications/Docker.app/Contents/MacOS/install && open /Applications/Docker.app
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -46,4 +46,4 @@ jobs:
 
     - name: Test Assembly
       working-directory: ${{github.workspace}}
-      run: open /Applications/Docker.app && ./test/test_assem.sh
+      run: ./test/test_assem.sh
