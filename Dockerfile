@@ -1,7 +1,8 @@
 
 FROM arm32v7/ubuntu:22.04 
 
-RUN export DEBIAN_FRONTEND="noninteractive" && apt-get update && \
+#RUN export DEBIAN_FRONTEND="noninteractive" && apt-get update && \
+RUN apt-get update && \
 		apt-get install -y default-jre default-jdk  
 
 RUN apt-get update && \
