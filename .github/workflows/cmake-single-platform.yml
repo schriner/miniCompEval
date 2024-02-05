@@ -37,7 +37,7 @@ jobs:
     - name: Test Assembly
       working-directory: ${{github.workspace}}
       run: 
-        docker build -t armv7_s . && ./test/test_assem.sh
+        docker build --platform="linux/amd64" -t armv7_s . && ./test/test_assem.sh
         
   build_mac-os:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
