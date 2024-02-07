@@ -48,7 +48,7 @@ set_property (TEST EvalHanoi
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
-add_test(NAME EvalArray COMMAND meval ${TEST_DIR}/Interpreter/Array.java)
+add_test(NAME EvalArray COMMAND meval ${TEST_DIR}/Interpreter/array.java)
 set (passRegex "Sort successful\n") 
 set_property (TEST EvalArray
 	PROPERTY 
