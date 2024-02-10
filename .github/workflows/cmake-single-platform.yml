@@ -74,5 +74,4 @@ jobs:
 
     - name: Test Assembly
       working-directory: ${{github.workspace}}
-      run: 
-        open --background -a Docker && sleep 10 && ./test/test_assem.sh
+      run: ./.github/start_docker.sh && sleep 10 && ./test/test_assem.sh
