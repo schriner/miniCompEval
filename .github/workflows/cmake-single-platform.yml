@@ -74,4 +74,4 @@ jobs:
 
     - name: Test Assembly
       working-directory: ${{github.workspace}}
-      run: /Applications/Docker.app/Contents/MacOS/install && ./.github/start_docker.sh && sleep 10 && ./test/test_assem.sh
+      run: /Applications/Docker.app/Contents/MacOS/install --accept-license && ./.github/start_docker.sh && sleep 10 && ./test/test_assem.sh
