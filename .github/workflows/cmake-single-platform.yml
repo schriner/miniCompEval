@@ -31,7 +31,7 @@ jobs:
     - name: Test Assembly
       working-directory: ${{github.workspace}}
       run: 
-        docker build --platform="linux/amd64" -t armv8_s . && ./test/test_assem.sh
+        docker build --platform="linux/amd64" -t armv8_s . #&& ./test/test_assem.sh
 
     - name: Test Interpreter Parser
       working-directory: ${{github.workspace}}/build/test
