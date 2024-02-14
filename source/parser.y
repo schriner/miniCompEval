@@ -24,6 +24,7 @@ using namespace std;
 	ClassDecl * cd;
 	VarDeclList * vdl;
 	VarDecl * vd;
+	VarDeclExp * vde;
 	MethodDeclList * mdl;
 	MethodDecl * md;
 	FormalList * fl;
@@ -76,6 +77,7 @@ string * typeStringHolder = nullptr;
 %type<cd>   class_decl
 %type<vdl>  var_decl_list
 %type<vd>   var_decl
+%type<vde>  var_decl_exp
 %type<mdl>  method_decl_list
 %type<md>   method_decl
 %type<fl>   formal_list
@@ -98,7 +100,7 @@ string * typeStringHolder = nullptr;
 %token<id>   ID
 
 %token THIS NEW EXTENDS RETURN LENGTH
-%token PRINT_STATE PRINT_STATE_LN IF ELSE WHILE STRING
+%token PRINT_STATE PRINT_STATE_LN IF ELSE FOR WHILE STRING
 %token CLASS MAIN STATIC VOID PUBLIC
 %token SEMI COMMA NOT PLUS MINUS EQUAL TRUE FALSE DOT
 %token O_PAREN C_PAREN O_BR C_BR O_SQ C_SQ 
@@ -267,6 +269,36 @@ var_decl :
 	| ID type_bracket_list ID SEMI { 
 		$2->getLastNull()->t = new IdentType($1);
 		$$ = new VarDecl( $2, $3 ); 
+	}
+	;
+
+var_decl_exp : 
+	INT ID EQUAL full_exp { 
+		$$ = new VarDeclExp( new IntType(), $2 ); 
+		//$$->data = new SimpleVar($2->id, "INT", new IntLiteral(0));
+	}
+	| BOOL ID EQUAL full_exp { 
+		$$ = new VarDeclExp( new BoolType(), $2 ); 
+		//$$->data = new SimpleVar($2->id, "BOOL", new BoolLiteral(false));
+	}
+	| ID ID EQUAL full_exp { 
+		$$ = new VarDeclExp( new IdentType($1), $2 ); 
+		// TODO: FIXME 
+#ifdef ASSEM
+		$$->data = new RefVar($2->id, $1->id, nullptr);
+#endif
+	}
+	| INT type_bracket_list ID EQUAL full_exp {
+		$2->getLastNull()->t = new IntType();
+		$$ = new VarDeclExp( $2, $3 ); 
+	}
+	| BOOL type_bracket_list ID EQUAL full_exp { 
+		$2->getLastNull()->t = new BoolType();
+		$$ = new VarDeclExp( $2, $3 ); 
+	}
+	| ID type_bracket_list ID EQUAL full_exp { 
+		$2->getLastNull()->t = new IdentType($1);
+		$$ = new VarDeclExp( $2, $3 ); 
 	}
 	;
 
@@ -458,6 +490,9 @@ statement :
 		$$ = new IfStatement( $3, $5, $7 ); }
   | WHILE O_PAREN full_exp C_PAREN statement {
 		$$ = new WhileStatement( $3, $5 ); }
+  | FOR O_PAREN var_decl_exp SEMI full_exp SEMI ID EQUAL full_exp C_PAREN statement {
+		$$ = new ForStatement( $3, $5, new Assign( $7, $9), $11 );
+	}
   | PRINT_STATE O_PAREN full_exp C_PAREN SEMI
 		{ $$ = new PrintExp( $3 ); }
   | PRINT_STATE O_PAREN STRING_LITERAL C_PAREN SEMI

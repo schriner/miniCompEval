@@ -58,40 +58,44 @@ void VarDeclList::evaluate() {
 	cerr << "TODO: VarDeclList\n";
 }
 void VarDecl::evaluate() { 
-	cerr << "TODO: VarDeclList\n";
+	cerr << "TODO: VarDecl\n";
+}
+void VarDeclExp::evaluate() { 
+	cerr << "TODO: VarDeclExp\n";
 }
 
 VAL MethodDecl::evaluate() {
 	// Used during an actual method call
 	programRoot->return_reg = {0};
-	map<string, SYM> variable; // assume no complex types
+	map<string, SYM> * variable = new map<string, SYM>(); // assume no complex types
 
 	if (f && programRoot->arg_stack
 			&& programRoot->arg_stack->e && f->t && f->i) {
-			variable[*f->i->id] = {programRoot->arg_stack->e->evaluate(), f->t}; 
+			(*variable)[*f->i->id] = {programRoot->arg_stack->e->evaluate(), f->t}; 
 			//cerr << *f->i->id << " " << variable[*f->i->id].val.exp_array << endl;
 	}
 	if (f && programRoot->arg_stack->erlVector && f->frVector) {
 		auto i_erl = 0;
 		for (auto param : *f->frVector) {
 			//cerr << *param->i->id << " : ";
-			variable[*param->i->id] = {(*programRoot->arg_stack->erlVector)[i_erl++]->evaluate(), param->t};
+			(*variable)[*param->i->id] = {(*programRoot->arg_stack->erlVector)[i_erl++]->evaluate(), param->t};
 			//cerr << variable[*param->i->id] << endl;
 		}
 	}
-	programRoot->scope_stack.push_back(&variable);
+	programRoot->scope_stack.push_back(variable);
 	if (v && v->vdVector) {
 		for (auto var : *v->vdVector) {
 			// Type Handler
 			Type * type = var->t;
 
-			variable[*var->i->id] = {0, var->t};
+			(*variable)[*var->i->id] = {0, var->t};
 		}
 	}
 	if (s) s->evaluate();
 	if (programRoot->return_reg.exp) {
 		// Check if it is an early return with value 0;
 		programRoot->arg_stack = nullptr;
+		delete programRoot->scope_stack.back();
 		programRoot->scope_stack.pop_back();
 	  programRoot->call_stack.pop_back();
 		return programRoot->return_reg;
@@ -99,6 +103,7 @@ VAL MethodDecl::evaluate() {
 
 	programRoot->arg_stack = nullptr;
 	programRoot->return_reg = e->evaluate();
+	delete programRoot->scope_stack.back();
 	programRoot->scope_stack.pop_back();
 	programRoot->call_stack.pop_back();
 	return programRoot->return_reg;
@@ -128,6 +133,14 @@ void IfStatement::evaluate() {
 	}
 }
 
+void ForStatement::evaluate() {
+	/*
+	for ( e->evaluate().exp ) {
+		s->evaluate();
+	}
+	*/
+}
+
 void WhileStatement::evaluate() {
 	while ( e->evaluate().exp ) {
 		s->evaluate();
@@ -152,8 +165,9 @@ void PrintString::evaluate() {
 
 void Assign::evaluate() { 
   //TODO(ss)
-	/*  TypeCheck */ 
-	if (programRoot->scope_stack.back()->find(*i->id) != programRoot->scope_stack.back()->end()) {
+	/* TypeCheck */
+	if ( programRoot->scope_stack.size() != 0 && 
+			(programRoot->scope_stack.back()->find(*i->id) != programRoot->scope_stack.back()->end())) {
 		(*programRoot->scope_stack.back())[*i->id].val = (e->evaluate());
 	} else if (programRoot->call_stack.back()->find(*i->id) != programRoot->call_stack.back()->end()) {
 		(*programRoot->call_stack.back())[*i->id].val = (e->evaluate());

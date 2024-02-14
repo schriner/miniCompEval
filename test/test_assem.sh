@@ -27,7 +27,7 @@ do
 done
 
 echo "Building Docker Container for Testing"
-docker build --platform="linux/arm64" -t armv7_s $TEST_PATH/.. 
+docker build -t armv7_s $TEST_PATH/. 
 
 for entry in "$TEST_DIR"/*".java"
 do

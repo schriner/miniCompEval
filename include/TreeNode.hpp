@@ -36,6 +36,7 @@ extern bool programTypeError;
 
 // Forward Class Declarations 
 class MainClass;
+class Assign;
 class ClassDeclList;
 class ClassDecl;
 class VarDeclList;
@@ -245,6 +246,23 @@ class ClassDeclExtends : public ClassDecl {
 #endif
 };
 /* Abstract class ClassDecl End */
+
+class VarDeclExp : public TreeNode {
+	public: 
+		Type * t = nullptr;
+		Ident * i = nullptr;
+		string * label = nullptr;
+		VarDeclExp(Type * t, Ident * i) : t(t), i(i) {} 
+		void traverse() { cerr << "traverse unimplmented in VarDeclExp" << endl; }
+		// TODO(ss): void evaluate();
+#ifdef ASSEM
+		//void setTable(TableNode * ta);
+		void assem(map<string, string*> *, map<string, string*> *) {
+			cerr << "assem unimplmented in VarDeclExp" << endl; }
+#else
+		void evaluate();
+#endif
+};
 
 class VarDecl : public TreeNode {
 	public: 
@@ -499,6 +517,28 @@ class WhileStatement : public Statement {
 #ifdef ASSEM
 		void setTable(TableNode * t);
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
+#endif
+};
+class ForStatement : public Statement {
+	// For: for (e) s
+	public:
+		VarDeclExp * vd = nullptr; 
+		Exp * e = nullptr;
+		Assign * a = nullptr;
+		Statement * s = nullptr;
+		ForStatement(VarDeclExp * vd, Exp * e, Assign * a, Statement * s) : vd(vd), e(e), a(a), s(s) {
+			//if (!e->isBoolRes()) {
+			//	e->reportError(" at token: \"" + e->token + "\" with for conditional");
+			//}
+		}
+		void traverse();
+#ifdef ASSEM
+		void setTable(TableNode * t) {
+			//cerr << "setTable unimplmented in ForStatement" << endl; }
+		void assem(string * stmt_str, map<string, string*> *) {
+			cerr << "assem unimplmented in ForStatement" << endl; }
 #else
 		void evaluate();
 #endif
