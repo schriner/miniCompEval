@@ -134,6 +134,8 @@ void IfStatement::evaluate() {
 }
 
 void ForStatement::evaluate() {
+	// add variable to scope
+	// TODO nested scopes
 	/*
 	for ( e->evaluate().exp ) {
 		s->evaluate();

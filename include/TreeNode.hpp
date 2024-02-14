@@ -83,6 +83,12 @@ typedef struct _SYM {
 	Type * t;
 } SYM;
 
+typedef struct _SCOPE {
+	map<string, SYM> table;
+	_SCOPE * parent = nullptr;
+} SCOPE;
+
+
 // Parent Abstract Class of Everything
 class TreeNode {
 	protected:
@@ -528,7 +534,8 @@ class ForStatement : public Statement {
 		Exp * e = nullptr;
 		Assign * a = nullptr;
 		Statement * s = nullptr;
-		ForStatement(VarDeclExp * vd, Exp * e, Assign * a, Statement * s) : vd(vd), e(e), a(a), s(s) {
+		ForStatement(VarDeclExp * vd, Exp * e, Assign * a, Statement * s) 
+			: vd(vd), e(e), a(a), s(s) {
 			//if (!e->isBoolRes()) {
 			//	e->reportError(" at token: \"" + e->token + "\" with for conditional");
 			//}
@@ -537,6 +544,7 @@ class ForStatement : public Statement {
 #ifdef ASSEM
 		void setTable(TableNode * t) {
 			//cerr << "setTable unimplmented in ForStatement" << endl; }
+		}
 		void assem(string * stmt_str, map<string, string*> *) {
 			cerr << "assem unimplmented in ForStatement" << endl; }
 #else
