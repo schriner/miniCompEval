@@ -5,7 +5,7 @@
                MainClass    ::=   "class" Identifier "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier ")" "{" Statement "}" "}"  
         ClassDeclaration    ::=   "class" Identifier ( "extends" Identifier )? "{" ( VarDeclaration )* ( MethodDeclaration )* "}"  
           VarDeclaration    ::=   Type Identifier ";"  
-VarDeclarationExpression    ::=   Type Identifier "=" Expression ";"  
+VarDeclarationExpression    ::=   Type Identifier "=" Expression 
        MethodDeclaration    ::=   "public" Type Identifier "(" ( Type Identifier ( "," Type Identifier )* )? ")" "{" ( VarDeclaration )* ( Statement )* "return" Expression ";" "}"  
                     Type    ::=   "boolean" ( "[" "]" )* 
                             |    "int" ( "[" "]" )*
@@ -13,7 +13,7 @@ VarDeclarationExpression    ::=   Type Identifier "=" Expression ";"
                             |    "boolean"
                             |    "int"
                             |    Identifier
-               Statement    ::=   "{" ( VarDeclaration )* ( Statement )* "}"
+               Statement    ::=   "{" ( VarDeclarationExpression ";" | VarDeclaration )* ( Statement )* "}"
                             |    "if" "(" Expression ")" Statement "else" Statement
                             |    "while" "(" Expression ")" Statement
                             |    "for" "(" VarDeclarationExpression ";" Expression ";" Identifier "=" Expression ")" Statement

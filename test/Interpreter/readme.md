@@ -12,7 +12,7 @@
 12. `interpreter_runtime_error.java`: Generates a ruhntime error with a missing instance variable
 13. `array_print_class_var.java`: Same as multiple print but with class instance variable functionality.
 14. `loop3.java`: Copy of loop2.java replacing the `while` statement with a `for`loop.
-15. `TODO: nested.java`: Tests variable declaration lists in nested scopes and variable declaration within `main` statment. Grammar rule: `"{" ( VarDeclaration )* ( Statement )* "}"`
+15. `nested.java`: Tests variable declaration lists in nested scopes and variable declaration within `main` statment. Grammar rule: `"{" ( VarDeclaration )* ( Statement )* "}"`
 
 16. `TODO:` `graphTraversal.java`: Test multiple classes, class instance variables, and arrays of class variables.
 17. `TODO:` Class Extends 
