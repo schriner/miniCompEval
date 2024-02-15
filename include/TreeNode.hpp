@@ -59,6 +59,7 @@ class IntLiteral;
 class StringLiteral;
 struct _SYM;
 
+// TODO(ss): use this for compairison operations within map<string, SYM> and update SCOPE and call_stack
 struct StringCmp {
 	bool operator()(string * lhs, string * rhs) const {
 		return !lhs->compare(*rhs);
