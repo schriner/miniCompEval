@@ -276,9 +276,9 @@ var_decl :
 
 var_decl_exp_list : /* Eliminate statement* */
 	var_decl_exp_list var_decl_exp SEMI { $1->append( $2 ); }
-	//| var_decl_exp_list var_decl { $1->append( $2 ); }
+	| var_decl_exp_list var_decl { $1->append( $2 ); }
 	| var_decl_exp SEMI { $$ = new VarDeclExpList( $1 ); }
-	//| var_decl { $$ = new VarDeclExpList( $1 ); }
+	| var_decl { $$ = new VarDeclExpList( $1 ); }
 	;
 
 var_decl_exp : 
