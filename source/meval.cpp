@@ -20,7 +20,6 @@ int yyparse(void);
 using namespace std;
 
 Program * programRoot = nullptr;
-TableNode * rootScope = nullptr;
 bool programTypeError = false;
 char * yyfilename;
 char * exe;
