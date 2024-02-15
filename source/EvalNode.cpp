@@ -67,7 +67,8 @@ void VarDeclExp::evaluate() {
 VAL MethodDecl::evaluate() {
 	// Used during an actual method call
 	programRoot->return_reg = {0};
-	map<string, SYM> * variable = new map<string, SYM>(); // assume no complex types
+	SCOPE * scope = new SCOPE();
+	map<string, SYM> * variable = &scope->table; // assume no complex types
 
 	if (f && programRoot->arg_stack
 			&& programRoot->arg_stack->e && f->t && f->i) {
@@ -82,7 +83,7 @@ VAL MethodDecl::evaluate() {
 			//cerr << variable[*param->i->id] << endl;
 		}
 	}
-	programRoot->scope_stack.push_back(variable);
+	programRoot->scope_stack.push_back(scope);
 	if (v && v->vdVector) {
 		for (auto var : *v->vdVector) {
 			// Type Handler
@@ -136,11 +137,11 @@ void IfStatement::evaluate() {
 void ForStatement::evaluate() {
 	// add variable to scope
 	// TODO nested scopes
-	/*
+	programRoot->push_nested_scope();
 	for ( e->evaluate().exp ) {
 		s->evaluate();
 	}
-	*/
+	programRoot->pop_nested_scope();
 }
 
 void WhileStatement::evaluate() {
@@ -501,20 +502,20 @@ VAL ObjectMethodCall::evaluate() {
  	
 	} else if (dynamic_cast<IdObj *>(o)){	
 		string * id = (dynamic_cast<IdObj *>(o)->i)->id;
-		map<string, SYM> * scope; // current scope with variable
+		map<string, SYM>::iterator scope; // current scope with variable
 		if (programRoot->scope_stack.back()->find(*id) != programRoot->scope_stack.back()->end()) {
-			scope = programRoot->scope_stack.back();
+			scope = programRoot->scope_stack.back()->find(*id);
 		} else if (programRoot->call_stack.back()->find(*id) != programRoot->scope_stack.back()->end()) {
-			scope = programRoot->call_stack.back();
+			scope = programRoot->call_stack.back()->find(*id);
 		} else {
 			abort();
 		}
-		ClassDecl * cl = programRoot->class_table[*(*(*scope)[*id].val.id)["class"].val.name];
-		programRoot->call_stack.push_back((*scope)[*id].val.id);
+		ClassDecl * cl = programRoot->class_table[*(*scope->second.val.id)["class"].val.name];
+		programRoot->call_stack.push_back(scope->second.val.id);
 		return cl->method_table[*i->id]->evaluate();
 		//cerr << "Err: Trying to make a method call with IdObj\n";
 	
-	} else if (dynamic_cast<ThisObj *>(o)){
+	} else if (dynamic_cast<ThisObj *>(o)) {
 		programRoot->call_stack.push_back((programRoot->call_stack.back()));
 		ClassDecl * cl = programRoot->class_table[*((*programRoot->call_stack.back())["class"]).val.name];
 		//cerr << "This: " << *(programRoot->call_stack.back()) << " " << *i->id << endl;

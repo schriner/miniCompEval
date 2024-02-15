@@ -85,23 +85,27 @@ typedef struct _SYM {
 
 typedef struct _SCOPE {
 	map<string, SYM> table;
-	_SCOPE * parent = nullptr;
-	_SCOPE * find(string id) {
+	_SCOPE * parent;
+	const map<string, SYM>::iterator end() {
+		return table.end();
+	}
+	map<string, SYM>::iterator find(string id) {
 		_SCOPE * s = this;
 		while (s) {
 			if (s->table.find(id) != s->table.end()) {
-				return s;
+				return s->table.find(id);
 			}
 			s = parent;
 		}
-		return nullptr;
-	}
-	const _SCOPE * end() {
-		return nullptr;
+		return end();
 	}
 	SYM& operator[](const string id) {
-		return find(id)->table[id];
+		return find(id)->second;
 	}
+	_SCOPE(_SCOPE * p)
+		: parent(p) {}
+	_SCOPE()
+		: parent(nullptr){}
 } SCOPE;
 
 
@@ -161,7 +165,15 @@ class Program : public TreeNode {
 		vector<map<string, SYM> *> call_stack; // Fixme(ss) call stack - object with variables
 		// stack of method calls scopes
 		// variables that survive for the life of a particular method call
-		vector<map<string, SYM> *> scope_stack; // something like a sym table
+		vector<SCOPE *> scope_stack; // something like a sym table
+		void push_nested_scope() {
+			SCOPE * scope = new SCOPE(scope_stack.back()->parent);
+			scope_stack[scope_stack.size() - 1] = scope;
+		}
+		void pop_nested_scope() {
+			scope_stack[scope_stack.size() - 1] = scope_stack[scope_stack.size() - 1]->parent;
+			scope_stack[scope_stack.size() - 1] = nullptr;
+		}
 		ExpList * arg_stack = nullptr;
 #ifdef ASSEM
 		vector<string * > * dataSection;
