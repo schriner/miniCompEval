@@ -18,5 +18,5 @@
 17. `TODO:` Class Extends 
 18. `TODO: multi_array_4d.java` Tests an array of 4 dim.
 
-TODO(ss): Automate Testing within this dir with javac output
-TODO(ss): Error Testing for undeclared variables and inproper argument signatures on variables 
+* TODO(ss): Automate Testing within this dir with javac output
+* TODO(ss): Error Testing for undeclared variables and inproper argument signatures on variables 
