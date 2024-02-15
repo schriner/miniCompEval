@@ -485,12 +485,12 @@ prime_type :
 	;
 
 statement_list : /* Eliminate statement* */
-	statement_list statement { $1->append( $2 ); }
+	statement_list statement { if ($2) $1->append( $2 ); }
 	| statement { $$ = new StatementList( $1 ); }
 	;
 
 statement : 
-	  O_BR C_BR /* No statement */ { BlockStatements(nullptr); }
+	  O_BR C_BR /* No statement */ { $$ = new BlockStatements(nullptr); }
 	| O_BR statement_list C_BR { 
 		$$ = new BlockStatements($2); } 
 	| O_BR var_decl_exp_list C_BR { 

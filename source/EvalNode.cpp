@@ -69,12 +69,11 @@ void VarDeclExpList::evaluate() {
 	if (!vdeVector) return;
 	for (auto vde = vdeVector->begin(); vde != vdeVector->end(); vde++) {
 		(*vde)->evaluate();
-		if (dynamic_cast<ReturnStatement *>(*vde)) { return; }
 	}
 }
 
 void VarDeclExp::evaluate() { 
-	a->evaluate();	
+	programRoot->scope_stack.back()->insert(*i->id, {a->e->evaluate(), t});
 }
 
 VAL MethodDecl::evaluate() {
@@ -149,7 +148,6 @@ void IfStatement::evaluate() {
 
 void ForStatement::evaluate() {
 	// add variable to scope
-	// TODO nested scopes
 	programRoot->push_nested_scope();
 	vd->evaluate();
 	while ( e->evaluate().exp ) {

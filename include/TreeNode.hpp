@@ -95,12 +95,15 @@ typedef struct _SCOPE {
 			if (s->table.find(id) != s->table.end()) {
 				return s->table.find(id);
 			}
-			s = parent;
+			s = s->parent;
 		}
 		return end();
 	}
 	SYM& operator[](const string id) {
 		return find(id)->second;
+	}
+	void insert(const string id, SYM s) {
+		table[id] = s;
 	}
 	_SCOPE(_SCOPE * p)
 		: parent(p) {}
@@ -167,12 +170,13 @@ class Program : public TreeNode {
 		// variables that survive for the life of a particular method call
 		vector<SCOPE *> scope_stack; // something like a sym table
 		void push_nested_scope() {
-			SCOPE * scope = new SCOPE(scope_stack.back()->parent);
+			SCOPE * scope = new SCOPE(scope_stack.back());
 			scope_stack[scope_stack.size() - 1] = scope;
 		}
 		void pop_nested_scope() {
+			auto tmp = scope_stack.back();
 			scope_stack[scope_stack.size() - 1] = scope_stack[scope_stack.size() - 1]->parent;
-			scope_stack[scope_stack.size() - 1] = nullptr;
+			delete tmp;
 		}
 		ExpList * arg_stack = nullptr;
 #ifdef ASSEM

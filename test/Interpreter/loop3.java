@@ -40,8 +40,14 @@ class Factorial {
     public int computeDec() {
         int prod;
         prod = 1;
+				//System.out.print(prod);
+				//System.out.print(" ");
         for (int multiplier = 1; multiplier <= f; multiplier = multiplier + 1) {
+						//System.out.println(multiplier);
             prod = prod * multiplier;
+						//System.out.print(prod);
+						//System.out.print(" ");
+						//System.out.println(multiplier);
         }
 				f = f - 1;
         return prod;
