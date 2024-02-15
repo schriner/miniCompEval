@@ -86,6 +86,22 @@ typedef struct _SYM {
 typedef struct _SCOPE {
 	map<string, SYM> table;
 	_SCOPE * parent = nullptr;
+	_SCOPE * find(string id) {
+		_SCOPE * s = this;
+		while (s) {
+			if (s->table.find(id) != s->table.end()) {
+				return s;
+			}
+			s = parent;
+		}
+		return nullptr;
+	}
+	const _SCOPE * end() {
+		return nullptr;
+	}
+	SYM& operator[](const string id) {
+		return find(id)->table[id];
+	}
 } SCOPE;
 
 
