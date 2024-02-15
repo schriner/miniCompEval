@@ -22,7 +22,6 @@ using namespace std;
 ofstream assemStream;
 Program * programRoot = nullptr;
 char * yyfilename = nullptr;
-TableNode * rootScope = nullptr;
 bool programTypeError = false;
 char * exe;
 

@@ -59,7 +59,7 @@ void ClassDeclList::traverse() {
 void ClassDeclSimple::traverse() {
 	i->traverse();
 	if (v) { v->traverse(); }
-	lowestT->reportBadMethodDecl();
+	//lowestT->reportBadMethodDecl();
 	if (m) { m->traverse(); }
 	PRINTDEBUGTREE("ClassDeclSimple");
 }
@@ -69,7 +69,7 @@ void ClassDeclExtends::traverse() {
 	i->traverse();
 	i2->traverse();
 	if (v) { v->traverse(); }
-	lowestT->reportBadMethodDecl();
+	//lowestT->reportBadMethodDecl();
 	if (m) { m->traverse(); }
 	PRINTDEBUGTREE("ClassDeclExtends");
 }
@@ -84,7 +84,7 @@ void VarDeclList::traverse() {
 	//if (dynamic_cast<ClassVar*>(lowestT->)){
 		//fprintf(stderr, "We have the correct table");
 	//}
-	lowestT->reportBadVarDecl();
+	//lowestT->reportBadVarDecl();
 	PRINTDEBUGTREE("VarDeclList");
 }
 // VarDecl //
@@ -96,7 +96,7 @@ void VarDecl::traverse() {
 
 
 // TableNode - YES I should have a different file for this// 
-void TableNode::reportBadVarDecl () {
+/*void TableNode::reportBadVarDecl () {
 	for (auto v = redecVarDecl->begin(); v < redecVarDecl->end(); v++) {
 		(*v)->reportError();
 	}
@@ -105,7 +105,7 @@ void TableNode::reportBadMethodDecl () {
 	for (auto m = redecMethodDecl->begin(); m < redecMethodDecl->end(); m++) {
 		(*m)->i->reportError();
 	}
-}
+}*/
 
 // MethodDecl //
 void MethodDecl::traverse() {
@@ -231,23 +231,23 @@ void Assign::traverse() {
 	expErr = false;
 	e->traverse();
 	if (expErr) { e->reportError(); return; }
-	TableNode * t = i->lowestT;
+	//TableNode * t = i->lowestT;
 	// Type Check 
-	while (t->table->find(*(i->id)) == t->table->end() ) {
+	/*while (t->table->find(*(i->id)) == t->table->end() ) {
 		// REPORT symbol not found
 		if (t->parent == NULL) {
 			i->reportError();
 			return;
 		}
 		t = t->parent;
-	}
+	}*/
 	{
 		// Check types
-		Data * d = t->table->find(*(i->id))->second;
-		if ( checkExpResult(d->type) ) {
-	  	i->reportError();
-			return;	
-		} 
+		//Data * d = t->table->find(*(i->id))->second;
+		//if ( checkExpResult(d->type) ) {
+	  //	i->reportError();
+		//	return;	
+		//} 
 	}
 	expErr = false;
 	PRINTDEBUGTREE("Assign");
@@ -601,9 +601,9 @@ void ObjectMethodCall::traverse(){
 void IdObj::traverse() {
 	i->traverse();
 	PRINTDEBUGTREE("IdObj");
-	TableNode * t = lowestT;
+	//TableNode * t = lowestT;
 	// Now we gonna check that type
-	while (t->table->find(*(i->id)) == t->table->end() ) {
+	/*while (t->table->find(*(i->id)) == t->table->end() ) {
 		// ok symbol not there REPORT
 		if (t->parent == NULL) {
 			expErr = true;
@@ -614,6 +614,7 @@ void IdObj::traverse() {
 	}
 	Data * d = t->table->find(*(i->id))->second;
 	updateExpResult( d->type );
+	*/
 }
 
 // ThisObj //
@@ -664,6 +665,7 @@ void IntLiteral::traverse() {
 	//fprintf(stderr, "At Leaf: %d\n", i);
 }
 
+/*
 #ifdef ASSEM
 void VarDecl::setTable(TableNode * ta){
 	lowestT = ta;
@@ -856,4 +858,4 @@ void ExpList::setTable(TableNode * t){
 	lowestT = t;
 	if (e) e->setTable(t);
 }
-#endif
+#endif*/
