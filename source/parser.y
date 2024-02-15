@@ -25,6 +25,7 @@ using namespace std;
 	VarDeclList * vdl;
 	VarDecl * vd;
 	VarDeclExp * vde;
+	VarDeclExpList * vdel;
 	MethodDeclList * mdl;
 	MethodDecl * md;
 	FormalList * fl;
@@ -71,29 +72,30 @@ string * typeStringHolder = nullptr;
 %}
 
 /* Need to use %type to declare different terminals as different things */
-%type<node> program 
-%type<main> main_class
-%type<cdl>  class_decl_list
-%type<cd>   class_decl
-%type<vdl>  var_decl_list
-%type<vd>   var_decl
-%type<vde>  var_decl_exp
-%type<mdl>  method_decl_list
-%type<md>   method_decl
-%type<fl>   formal_list
-%type<frl>  formal_rest_list
-%type<fr>   formal_rest
-%type<prt>  prime_type
-%type<type> type
-%type<tp_i> type_bracket_list
-%type<sl>   statement_list
-%type<s>    statement
-%type<i>    index
-%type<e>    full_exp or_term and_term eq_term gr_le_term add_term mul_term un_op exp
-%type<obj>  object
-%type<el>   exp_list
-%type<erl>  exp_rest_list
-%type<er>   exp_rest
+%type<node>  program 
+%type<main>  main_class
+%type<cdl>   class_decl_list
+%type<cd>    class_decl
+%type<vdl>   var_decl_list
+%type<vd>    var_decl
+%type<vde>   var_decl_exp
+%type<vdel>  var_decl_exp_list
+%type<mdl>   method_decl_list
+%type<md>    method_decl
+%type<fl>    formal_list
+%type<frl>   formal_rest_list
+%type<fr>    formal_rest
+%type<prt>   prime_type
+%type<type>  type
+%type<tp_i>  type_bracket_list
+%type<sl>    statement_list
+%type<s>     statement
+%type<i>     index
+%type<e>     full_exp or_term and_term eq_term gr_le_term add_term mul_term un_op exp
+%type<obj>   object
+%type<el>    exp_list
+%type<erl>   exp_rest_list
+%type<er>    exp_rest
 
 %token<in_l> INTEGER_LITERAL
 %token<st_l> STRING_LITERAL
@@ -272,33 +274,38 @@ var_decl :
 	}
 	;
 
+var_decl_exp_list : /* Eliminate statement* */
+	var_decl_exp_list var_decl_exp { $1->append( $2 ); }
+	| var_decl_exp { $$ = new VarDeclExpList( $1 ); }
+	;
+
 var_decl_exp : 
 	INT ID EQUAL full_exp { 
-		$$ = new VarDeclExp( new IntType(), $2 ); 
+		$$ = new VarDeclExp( new IntType(), $2, new Assign($2, $4)); 
 		//$$->data = new SimpleVar($2->id, "INT", new IntLiteral(0));
 	}
 	| BOOL ID EQUAL full_exp { 
-		$$ = new VarDeclExp( new BoolType(), $2 ); 
+		$$ = new VarDeclExp( new BoolType(), $2, new Assign($2, $4) ); 
 		//$$->data = new SimpleVar($2->id, "BOOL", new BoolLiteral(false));
 	}
 	| ID ID EQUAL full_exp { 
-		$$ = new VarDeclExp( new IdentType($1), $2 ); 
+		$$ = new VarDeclExp( new IdentType($1), $2, new Assign($2, $4) ); 
 		// TODO: FIXME 
 #ifdef ASSEM
 		$$->data = new RefVar($2->id, $1->id, nullptr);
 #endif
-	}
-	| INT type_bracket_list ID EQUAL full_exp {
+	} 
+	| INT type_bracket_list ID EQUAL NEW prime_type index {
 		$2->getLastNull()->t = new IntType();
-		$$ = new VarDeclExp( $2, $3 ); 
+		$$ = new VarDeclExp( $2, $3, new Assign( $3, new ExpObject( new NewTypeObj( $6, $7 )))); 
 	}
-	| BOOL type_bracket_list ID EQUAL full_exp { 
+	| BOOL type_bracket_list ID EQUAL NEW prime_type index { 
 		$2->getLastNull()->t = new BoolType();
-		$$ = new VarDeclExp( $2, $3 ); 
+		$$ = new VarDeclExp( $2, $3, new Assign( $3, new ExpObject( new NewTypeObj( $6, $7 ))) ); 
 	}
-	| ID type_bracket_list ID EQUAL full_exp { 
+	| ID type_bracket_list ID EQUAL NEW prime_type index { 
 		$2->getLastNull()->t = new IdentType($1);
-		$$ = new VarDeclExp( $2, $3 ); 
+		$$ = new VarDeclExp( $2, $3, new Assign( $3, new ExpObject( new NewTypeObj( $6, $7 ))) ); 
 	}
 	;
 
@@ -483,9 +490,14 @@ statement_list : /* Eliminate statement* */
 	;
 
 statement : 
-	O_BR statement_list C_BR { 
+	  O_BR C_BR /* No statement */ { BlockStatements(nullptr); }
+	| O_BR statement_list C_BR { 
 		$$ = new BlockStatements($2); } 
-	| O_BR C_BR /* No statement */ { $$ = new BlockStatements(nullptr); }
+	| O_BR var_decl_exp_list C_BR { 
+		// Do nothing if there are variable declarations but no statements 
+		$$ = new BlockStatements(nullptr); } 
+	| O_BR var_decl_exp_list statement_list C_BR { 
+		$$ = new BlockStatements($2, $3); } 
   | IF O_PAREN full_exp C_PAREN statement ELSE statement {
 		$$ = new IfStatement( $3, $5, $7 ); }
   | WHILE O_PAREN full_exp C_PAREN statement {

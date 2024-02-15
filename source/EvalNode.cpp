@@ -24,7 +24,11 @@ void Program::evaluate() {
 
 void MainClass::evaluate() {
 		programRoot->return_reg = {0};
+		SCOPE * scope = new SCOPE();
+		programRoot->scope_stack.push_back(scope);
 	  s->evaluate();
+		delete programRoot->scope_stack.back();
+		programRoot->scope_stack.pop_back();
 }
 
 void ClassDeclList::evaluate() {
@@ -60,8 +64,17 @@ void VarDeclList::evaluate() {
 void VarDecl::evaluate() { 
 	cerr << "TODO: VarDecl\n";
 }
+
+void VarDeclExpList::evaluate() {
+	if (!vdeVector) return;
+	for (auto vde = vdeVector->begin(); vde != vdeVector->end(); vde++) {
+		(*vde)->evaluate();
+		if (dynamic_cast<ReturnStatement *>(*vde)) { return; }
+	}
+}
+
 void VarDeclExp::evaluate() { 
-	cerr << "TODO: VarDeclExp\n";
+	a->evaluate();	
 }
 
 VAL MethodDecl::evaluate() {
@@ -138,8 +151,10 @@ void ForStatement::evaluate() {
 	// add variable to scope
 	// TODO nested scopes
 	programRoot->push_nested_scope();
-	for ( e->evaluate().exp ) {
+	vd->evaluate();
+	while ( e->evaluate().exp ) {
 		s->evaluate();
+		a->evaluate();
 	}
 	programRoot->pop_nested_scope();
 }

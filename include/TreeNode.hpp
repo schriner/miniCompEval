@@ -285,14 +285,36 @@ class VarDeclExp : public TreeNode {
 	public: 
 		Type * t = nullptr;
 		Ident * i = nullptr;
+		Assign * a = nullptr;
 		string * label = nullptr;
-		VarDeclExp(Type * t, Ident * i) : t(t), i(i) {} 
+		VarDeclExp(Type * t, Ident * i, Assign * a) : t(t), i(i), a(a) {} 
 		void traverse() { cerr << "traverse unimplmented in VarDeclExp" << endl; }
 		// TODO(ss): void evaluate();
 #ifdef ASSEM
 		//void setTable(TableNode * ta);
 		void assem(map<string, string*> *, map<string, string*> *) {
 			cerr << "assem unimplmented in VarDeclExp" << endl; }
+#else
+		void evaluate();
+#endif
+};
+
+class VarDeclExpList : public TreeNode {
+	public:
+		vector<VarDeclExp * > * vdeVector = nullptr;
+		VarDeclExpList(VarDeclExp * vde) {
+			vdeVector = new vector<VarDeclExp * >;
+			vdeVector->push_back(vde);
+		}
+		void append(VarDeclExp * vde) {
+			vdeVector->push_back(vde);
+		}
+		void traverse() {
+			cerr << "ERROR(unimplemented): assem VarDeclExpList";
+		}
+#ifdef ASSEM
+		void setTableNodes(TableNode * n) {};
+		void assem(string * stmt_str, map<string, string*> *) {cerr << "ERROR(unimplemented): assem VarDeclExpList"; }
 #else
 		void evaluate();
 #endif
@@ -508,8 +530,10 @@ class Statement : public TreeNode {
 class BlockStatements : public Statement {
 	// For: { StatementList }  -- SL = nullptr for: { } 
 	public:
+		VarDeclExpList * vdel = nullptr;
 		StatementList * s = nullptr;
-		BlockStatements(StatementList * s) : s(s) {}
+		BlockStatements(StatementList * s) : s(s), vdel(nullptr) {}
+		BlockStatements(VarDeclExpList * vdel, StatementList * s) : s(s), vdel(vdel) {}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
