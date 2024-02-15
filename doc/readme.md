@@ -13,7 +13,7 @@ VarDeclarationExpression    ::=   Type Identifier "=" Expression ";"
                             |    "boolean"
                             |    "int"
                             |    Identifier
-               Statement    ::=   "{" ( Statement )* "}"
+               Statement    ::=   "{" ( VarDeclaration )* ( Statement )* "}"
                             |    "if" "(" Expression ")" Statement "else" Statement
                             |    "while" "(" Expression ")" Statement
                             |    "for" "(" VarDeclarationExpression ";" Expression ";" Identifier "=" Expression ")" Statement
