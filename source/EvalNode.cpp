@@ -62,7 +62,7 @@ void VarDeclList::evaluate() {
 	cerr << "TODO: VarDeclList\n";
 }
 void VarDecl::evaluate() { 
-	cerr << "TODO: VarDecl\n";
+	programRoot->scope_stack.back()->insert(*i->id, {0, t});
 }
 
 void VarDeclExpList::evaluate() {
@@ -135,7 +135,10 @@ void MethodDeclList::evaluate() {
 //TODO(ss)(Array):void TypeIndexList::evaluate() {}
 
 void BlockStatements::evaluate() {
+	programRoot->push_nested_scope();
+	if (vdel) vdel->evaluate();
 	if (s) { s->evaluate(); }
+	programRoot->pop_nested_scope();
 }
 
 void IfStatement::evaluate() {

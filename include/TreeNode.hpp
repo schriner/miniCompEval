@@ -285,13 +285,26 @@ class ClassDeclExtends : public ClassDecl {
 };
 /* Abstract class ClassDecl End */
 
-class VarDeclExp : public TreeNode {
+class VarDecl : public TreeNode {
 	public: 
 		Type * t = nullptr;
 		Ident * i = nullptr;
-		Assign * a = nullptr;
 		string * label = nullptr;
-		VarDeclExp(Type * t, Ident * i, Assign * a) : t(t), i(i), a(a) {} 
+		VarDecl(Type * t, Ident * i) : t(t), i(i) {} 
+		void traverse();
+		// TODO(ss): void evaluate();
+#ifdef ASSEM
+		void setTable(TableNode * ta);
+		void assem(map<string, string*> *, map<string, string*> *);
+#else
+		virtual void evaluate();
+#endif
+};
+
+class VarDeclExp : public VarDecl {
+	public: 
+		Assign * a = nullptr;
+		VarDeclExp(Type * t, Ident * i, Assign * a) : VarDecl(t,i), a(a) {} 
 		void traverse() { cerr << "traverse unimplmented in VarDeclExp" << endl; }
 		// TODO(ss): void evaluate();
 #ifdef ASSEM
@@ -305,12 +318,12 @@ class VarDeclExp : public TreeNode {
 
 class VarDeclExpList : public TreeNode {
 	public:
-		vector<VarDeclExp * > * vdeVector = nullptr;
-		VarDeclExpList(VarDeclExp * vde) {
-			vdeVector = new vector<VarDeclExp * >;
+		vector<VarDecl * > * vdeVector = nullptr;
+		VarDeclExpList(VarDecl * vde) {
+			vdeVector = new vector<VarDecl * >;
 			vdeVector->push_back(vde);
 		}
-		void append(VarDeclExp * vde) {
+		void append(VarDecl * vde) {
 			vdeVector->push_back(vde);
 		}
 		void traverse() {
@@ -319,22 +332,6 @@ class VarDeclExpList : public TreeNode {
 #ifdef ASSEM
 		void setTableNodes(TableNode * n) {};
 		void assem(string * stmt_str, map<string, string*> *) {cerr << "ERROR(unimplemented): assem VarDeclExpList"; }
-#else
-		void evaluate();
-#endif
-};
-
-class VarDecl : public TreeNode {
-	public: 
-		Type * t = nullptr;
-		Ident * i = nullptr;
-		string * label = nullptr;
-		VarDecl(Type * t, Ident * i) : t(t), i(i) {} 
-		void traverse();
-		// TODO(ss): void evaluate();
-#ifdef ASSEM
-		void setTable(TableNode * ta);
-		void assem(map<string, string*> *, map<string, string*> *);
 #else
 		void evaluate();
 #endif
