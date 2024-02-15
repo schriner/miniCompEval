@@ -96,5 +96,10 @@ set_property (TEST EvalFactorial2
 	PROPERTY 
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
+add_test(NAME EvalFactorialFor COMMAND meval ${TEST_DIR}/Interpreter/loop3.java)
+set_property (TEST EvalFactorialFor 
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
 
 add_test(NAME EvalMultiplePrintCompiler COMMAND mjavac ${TEST_DIR}/Compiler/multiplePrint.java)
