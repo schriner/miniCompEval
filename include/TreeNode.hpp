@@ -36,6 +36,7 @@ extern bool programTypeError;
 
 // Forward Class Declarations 
 class MainClass;
+class Assign;
 class ClassDeclList;
 class ClassDecl;
 class VarDeclList;
@@ -81,6 +82,35 @@ typedef struct _SYM {
 	VAL val;
 	Type * t;
 } SYM;
+
+typedef struct _SCOPE {
+	map<string, SYM> table;
+	_SCOPE * parent;
+	const map<string, SYM>::iterator end() {
+		return table.end();
+	}
+	map<string, SYM>::iterator find(string id) {
+		_SCOPE * s = this;
+		while (s) {
+			if (s->table.find(id) != s->table.end()) {
+				return s->table.find(id);
+			}
+			s = s->parent;
+		}
+		return end();
+	}
+	SYM& operator[](const string id) {
+		return find(id)->second;
+	}
+	void insert(const string id, SYM s) {
+		table[id] = s;
+	}
+	_SCOPE(_SCOPE * p)
+		: parent(p) {}
+	_SCOPE()
+		: parent(nullptr){}
+} SCOPE;
+
 
 // Parent Abstract Class of Everything
 class TreeNode {
@@ -138,7 +168,16 @@ class Program : public TreeNode {
 		vector<map<string, SYM> *> call_stack; // Fixme(ss) call stack - object with variables
 		// stack of method calls scopes
 		// variables that survive for the life of a particular method call
-		vector<map<string, SYM> *> scope_stack; // something like a sym table
+		vector<SCOPE *> scope_stack; // something like a sym table
+		void push_nested_scope() {
+			SCOPE * scope = new SCOPE(scope_stack.back());
+			scope_stack[scope_stack.size() - 1] = scope;
+		}
+		void pop_nested_scope() {
+			auto tmp = scope_stack.back();
+			scope_stack[scope_stack.size() - 1] = scope_stack[scope_stack.size() - 1]->parent;
+			delete tmp;
+		}
 		ExpList * arg_stack = nullptr;
 #ifdef ASSEM
 		vector<string * > * dataSection;
@@ -245,6 +284,45 @@ class ClassDeclExtends : public ClassDecl {
 #endif
 };
 /* Abstract class ClassDecl End */
+
+class VarDeclExp : public TreeNode {
+	public: 
+		Type * t = nullptr;
+		Ident * i = nullptr;
+		Assign * a = nullptr;
+		string * label = nullptr;
+		VarDeclExp(Type * t, Ident * i, Assign * a) : t(t), i(i), a(a) {} 
+		void traverse() { cerr << "traverse unimplmented in VarDeclExp" << endl; }
+		// TODO(ss): void evaluate();
+#ifdef ASSEM
+		//void setTable(TableNode * ta);
+		void assem(map<string, string*> *, map<string, string*> *) {
+			cerr << "assem unimplmented in VarDeclExp" << endl; }
+#else
+		void evaluate();
+#endif
+};
+
+class VarDeclExpList : public TreeNode {
+	public:
+		vector<VarDeclExp * > * vdeVector = nullptr;
+		VarDeclExpList(VarDeclExp * vde) {
+			vdeVector = new vector<VarDeclExp * >;
+			vdeVector->push_back(vde);
+		}
+		void append(VarDeclExp * vde) {
+			vdeVector->push_back(vde);
+		}
+		void traverse() {
+			cerr << "ERROR(unimplemented): assem VarDeclExpList";
+		}
+#ifdef ASSEM
+		void setTableNodes(TableNode * n) {};
+		void assem(string * stmt_str, map<string, string*> *) {cerr << "ERROR(unimplemented): assem VarDeclExpList"; }
+#else
+		void evaluate();
+#endif
+};
 
 class VarDecl : public TreeNode {
 	public: 
@@ -456,8 +534,10 @@ class Statement : public TreeNode {
 class BlockStatements : public Statement {
 	// For: { StatementList }  -- SL = nullptr for: { } 
 	public:
+		VarDeclExpList * vdel = nullptr;
 		StatementList * s = nullptr;
-		BlockStatements(StatementList * s) : s(s) {}
+		BlockStatements(StatementList * s) : s(s), vdel(nullptr) {}
+		BlockStatements(VarDeclExpList * vdel, StatementList * s) : s(s), vdel(vdel) {}
 		void traverse();
 #ifdef ASSEM
 		void setTable(TableNode * t);
@@ -499,6 +579,30 @@ class WhileStatement : public Statement {
 #ifdef ASSEM
 		void setTable(TableNode * t);
 		void assem(string * stmt_str, map<string, string*> *);
+#else
+		void evaluate();
+#endif
+};
+class ForStatement : public Statement {
+	// For: for (e) s
+	public:
+		VarDeclExp * vd = nullptr; 
+		Exp * e = nullptr;
+		Assign * a = nullptr;
+		Statement * s = nullptr;
+		ForStatement(VarDeclExp * vd, Exp * e, Assign * a, Statement * s) 
+			: vd(vd), e(e), a(a), s(s) {
+			//if (!e->isBoolRes()) {
+			//	e->reportError(" at token: \"" + e->token + "\" with for conditional");
+			//}
+		}
+		void traverse();
+#ifdef ASSEM
+		void setTable(TableNode * t) {
+			//cerr << "setTable unimplmented in ForStatement" << endl; }
+		}
+		void assem(string * stmt_str, map<string, string*> *) {
+			cerr << "assem unimplmented in ForStatement" << endl; }
 #else
 		void evaluate();
 #endif

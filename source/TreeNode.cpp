@@ -181,6 +181,10 @@ void IfStatement::traverse() {
 	s_el->traverse();
 	PRINTDEBUGTREE("IfStatement");
 }
+// ForStatement //
+void ForStatement::traverse() {
+	PRINTDEBUGTREE("ForStatement");
+}
 
 // WhileStatement //
 void WhileStatement::traverse() {

@@ -111,9 +111,10 @@ extends { PRINTDEBUG(yytext); return EXTENDS; }
 length { PRINTDEBUG(yytext); return LENGTH; }
 System\.out\.println { PRINTDEBUG(yytext); return PRINT_STATE_LN; }
 System\.out\.print { PRINTDEBUG(yytext); return PRINT_STATE; }
-if { PRINTDEBUG(yytext); PRINTDEBUG("IF"); return IF; }
+if { PRINTDEBUG(yytext); return IF; }
 else { PRINTDEBUG(yytext); return ELSE; }
 while { PRINTDEBUG(yytext); return WHILE; }
+for { PRINTDEBUG(yytext); return FOR; }
 this { PRINTDEBUG(yytext); return THIS; }
 String { PRINTDEBUG(yytext); return STRING; }
 {ID} { PRINTDEBUG(yytext); yylval.id = new Ident(new string(yytext)); return ID; }

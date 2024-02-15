@@ -6,6 +6,7 @@ add_test(NAME ParseLoop COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/loop.java)
 add_test(NAME ParseArray COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/array.java)
 add_test(NAME ParseNumber COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/number.java)
 add_test(NAME ParseSimple COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/simple.java)
+add_test(NAME ParseFor COMMAND mjavac "-p" ${TEST_DIR}/Interpreter/loop3.java)
 
 add_test(NAME ParseErrorVariableInMain COMMAND mjavac "-p" ${TEST_DIR}/ParserError/loopCheck.java)
 set (passRegex "^${CMAKE_CURRENT_BINARY_DIR}/mjavac: syntax error at token: int\n${CMAKE_CURRENT_BINARY_DIR}/mjavac: ${TEST_DIR}/ParserError/loopCheck.java:5\n${CMAKE_CURRENT_BINARY_DIR}/:                 int a;\n")
@@ -92,6 +93,11 @@ set_property (TEST EvalArrayPrintClassVar
 add_test(NAME EvalFactorial2 COMMAND meval ${TEST_DIR}/Interpreter/loop2.java)
 set (passRegex "^Factorial of 10 is:3628800\nFactorial of 9 is:362880\nFactorial of 8 is:40320\nFactorial of 7 is:5040\nFactorial of 6 is:720\nFactorial of 5 is:120\nFactorial of 4 is:24\nFactorial of 3 is:6\nFactorial of 2 is:2\nFactorial of 1 is:1\nSuccess") 
 set_property (TEST EvalFactorial2 
+	PROPERTY 
+	PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME EvalFactorialFor COMMAND meval ${TEST_DIR}/Interpreter/loop3.java)
+set_property (TEST EvalFactorialFor 
 	PROPERTY 
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
