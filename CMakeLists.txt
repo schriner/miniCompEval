@@ -27,9 +27,9 @@ include_directories(include)
 include_directories(${AUTOGEN_FLEXBISON})
 
 set(mjavac_sources
-	"EvalNode.cpp"
+	"Evaluate.cpp"
 	"TreeNode.cpp"
-	"AssemNode.cpp"
+	"ARMv7.cpp"
 )
 list(TRANSFORM mjavac_sources PREPEND "source/")
 
@@ -39,6 +39,7 @@ add_executable(mjavac source/main.cpp ${mjavac_sources} ${parser})
 set_target_properties(mjavac PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DASSEM") 
 
 add_subdirectory(${TEST_DIR})
+#add_executable(mjavacllvm source/llvm.cpp ${mjavac_source} ${parser})
 
 if(PNG)
 	add_custom_command(

@@ -4,7 +4,7 @@
 /*
  * miniCompEval
  * Sonya Schriner
- * File: EvalNode.cpp
+ * File: Evaluate.cpp
  *
  */
 
