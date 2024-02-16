@@ -58,10 +58,7 @@ class Ident;
 class IntLiteral;
 class StringLiteral;
 
-using SYM = symTab::_SYMBOL<Type>;
-using ID_ARRAY = symTab::_ID_ARRAY<Type>;
-using VAL = symTab::_VALUE<Type>;
-using SCOPE = symTab::_BLOCK_SCOPE<Type>;
+using namespace Interpreter;
 
 // Parent Abstract Class of Everything
 class TreeNode {

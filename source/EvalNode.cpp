@@ -15,6 +15,7 @@
 using namespace std;
 
 extern Program * programRoot;
+//extern Evaluator * e;
 
 void Program::evaluate() {
 	  if (programTypeError) return;
