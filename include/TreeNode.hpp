@@ -13,7 +13,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include "TableNode.hpp"
+#include "Evaluate.hpp"
 
 #ifdef PRINTTREE
 #define PRINTDEBUGTREE(x) fprintf(stderr, "At Node: %s\n", (x));
@@ -58,16 +58,13 @@ class Ident;
 class IntLiteral;
 class StringLiteral;
 
-using SYM = symTab::_SYMBOL<Type>;
-using ID_ARRAY = symTab::_ID_ARRAY<Type>;
-using VAL = symTab::_VALUE<Type>;
-using SCOPE = symTab::_BLOCK_SCOPE<Type>;
+using namespace Interpreter;
 
 // Parent Abstract Class of Everything
 class TreeNode {
 	protected:
-		TreeNode() : lineRecord(yylineno), token(yytext) {
-		}
+		TreeNode() : 
+			lineRecord(yylineno), token(yytext) {}
 	public: 
 		int lineRecord = -1;
 		string token;
@@ -110,38 +107,13 @@ class Program : public TreeNode {
 		// Use these during AST generation for EXPR
 		// TODO(ss): notice variable redeclarations within a method scope
 		map<string, ClassDecl *> class_table;
-
-    // TODO(ss): Check memory management for this during evaluate
-		// Stack of class instance scopes for instance variables
-		// ["class"] entry within the map contains the classname for the given scope
-		vector<map<string, SYM> *> call_stack; // Fixme(ss) call stack - object with variables
-		// stack of method calls scopes
-		// variables that survive for the life of a particular method call
-		vector<SCOPE *> scope_stack; // something like a sym table
-		void push_nested_scope() {
-			SCOPE * scope = new SCOPE(scope_stack.back());
-			scope_stack[scope_stack.size() - 1] = scope;
-		}
-		void pop_nested_scope() {
-			auto tmp = scope_stack.back();
-			scope_stack[scope_stack.size() - 1] = scope_stack[scope_stack.size() - 1]->parent;
-			delete tmp;
-		}
-		ExpList * arg_stack = nullptr;
-#ifdef ASSEM
-		vector<string * > * dataSection;
-		vector<string * > * textSection;
-		Program (MainClass * m)
-			: m(m), c(nullptr), dataSection(nullptr), textSection(nullptr) {}
-		Program (MainClass * m, ClassDeclList * c)
-			: m(m), c(c), dataSection(nullptr), textSection(nullptr) {}
-		void assemArmv7();
-#else
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c) {}
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
-		VAL return_reg;
+#ifdef ASSEM
+		void assemArmv7();
+#else
 		void evaluate();
 #endif
 		void traverse(); 
@@ -196,7 +168,6 @@ class ClassDecl : public TreeNode {
 		virtual void assemArmv7() = 0;
 #else 
 		map<string, MethodDecl *> method_table;
-		map<string, SYM> var_table;
 		virtual void evaluate () {
 			cerr << "Class Decl Evaluate Unimplemented\n";
 		}

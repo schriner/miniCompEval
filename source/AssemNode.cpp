@@ -13,44 +13,37 @@
 #include <fstream>
 
 #include "TreeNode.hpp"
+#include "ARMv7.hpp"
 
 using namespace std;
+using namespace ARMv7;
 
 extern ofstream assemStream;
 extern Program * programRoot;
 
-
-int ifCnt = 0;
-int lCnt = 0;
-int strCnt = 0;
-int expCnt = 0;
-int regCnt = 0;
-
-vector< map<string, string*> * > nameTableStack;
-vector< map<string, string*> * > typeTableStack;
-
-void branchPrint(string * str, string * stmt_str);
-bool isIntLiteral(Exp * e);
-void getIntLiteral (Exp * e, string * s);
+//vector< map<string, string*> * > nameTableStack;
+//vector< map<string, string*> * > typeTableStack;
+AssemContext * context;
 
 void Program::assemArmv7() {
-  dataSection = new vector<string * >;
-  textSection = new vector<string * >;
-  textSection->push_back(new string(string(PRINTLN_EXP) + ": .asciz \"%d\\n\""));
-  textSection->push_back(new string(string(PRINT_EXP) + ": .asciz \"%d\""));
+	context = new AssemContext;
+  context->dataSection = new vector<string * >;
+  context->textSection = new vector<string * >;
+  context->textSection->push_back(new string(string(PRINTLN_EXP) + ": .asciz \"%d\\n\""));
+  context->textSection->push_back(new string(string(PRINT_EXP) + ": .asciz \"%d\""));
   m->assemArmv7();
   if (c) { c->assemArmv7(); }
 
   // .data: global variables here
   assemStream << ".data"<< endl;
-  for (auto d = dataSection->begin(); d < dataSection->end(); d++) {
+  for (auto d = context->dataSection->begin(); d < context->dataSection->end(); d++) {
     assemStream << "\t" << **d << endl;
   }
   assemStream << endl;
 
   // .text: write string constants here
   assemStream << ".text"<< endl;
-  for (auto t = textSection->begin(); t < textSection->end(); t++) {
+  for (auto t = context->textSection->begin(); t < context->textSection->end(); t++) {
     assemStream << "\t" << **t << endl;
   }
   assemStream << endl;
@@ -90,12 +83,12 @@ void ClassDeclList::assemArmv7() {
 
 void ClassDeclSimple::assemArmv7() {
   programRoot->c->instr->push_back(new string (*(i->id) + ":\n"));
-  nameTableStack.push_back(nameTable);
-  typeTableStack.push_back(typeTable);
+  context->nameTableStack.push_back(nameTable);
+  context->typeTableStack.push_back(typeTable);
   if (v) { v->assemArmv7(nameTable, typeTable); }
   if (m) { m->assemArmv7(i->id); }
-  typeTableStack.pop_back();
-  nameTableStack.pop_back();
+  context->typeTableStack.pop_back();
+  context->nameTableStack.pop_back();
 }
 
 void ClassDeclExtends::assemArmv7() {}
@@ -110,7 +103,7 @@ void VarDecl::assemArmv7( map<string, string * > * nameTable, map<string, string
     PrimeType * p = (PrimeType * ) t;
     if (dynamic_cast< BoolType* >( p )
         || dynamic_cast< IntType* >( p )) {
-      programRoot->dataSection->push_back(new string("sReg" + to_string(regCnt) + ": .word 0"));
+      context->dataSection->push_back(new string("sReg" + to_string(regCnt) + ": .word 0"));
       label = new string("sReg" + to_string(regCnt++));
       (*nameTable)[*(i->id)] = label;
       if (dynamic_cast< BoolType* >( p )) {
@@ -123,7 +116,7 @@ void VarDecl::assemArmv7( map<string, string * > * nameTable, map<string, string
     TypeIndexList * p = (TypeIndexList * ) t;
     if (dynamic_cast< BoolType* >( p->t )
         || dynamic_cast< IntType* >( p->t )) {
-      programRoot->dataSection->push_back(new string("sReg" + to_string(regCnt) + ": .word 0"));
+      context->dataSection->push_back(new string("sReg" + to_string(regCnt) + ": .word 0"));
       label = new string("sReg" + to_string(regCnt++));
       (*nameTable)[*(i->id)] = label;
       if (dynamic_cast< BoolType* >( p->t )) {
@@ -138,8 +131,8 @@ void MethodDecl::assemArmv7(string *objName) {
   // TODO: Make sure this is handled properly
   if (v) {v->assemArmv7(nameTable, typeTable);}
 
-  nameTableStack.push_back(nameTable);
-  typeTableStack.push_back(typeTable);
+  context->nameTableStack.push_back(nameTable);
+  context->typeTableStack.push_back(typeTable);
 
   programRoot->c->instr->push_back(new string (*objName + *(i->id) + ":\n\tpush {lr}\n\n"));
   string stmt_str("");
@@ -150,8 +143,8 @@ void MethodDecl::assemArmv7(string *objName) {
   programRoot->c->instr->push_back(new string (stmt_str + "\n\tmov r0, r1\n"));
   programRoot->c->instr->push_back(new string ("\n\tpop {pc}\n"));
 
-  typeTableStack.pop_back();
-  nameTableStack.pop_back();
+  context->typeTableStack.pop_back();
+  context->nameTableStack.pop_back();
 }
 
 void MethodDeclList::assemArmv7(string * objName) {
@@ -232,11 +225,11 @@ void Assign::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
   e->assemArmv7(&exp_str, nullptr);
   *stmt_str = *stmt_str + exp_str.substr(1) + "\n";
 
-  map<string, string*> * table = nameTableStack.back();
+  map<string, string*> * table = context->nameTableStack.back();
   if (table->find(*(i->id)) == table->end()
-      && nameTableStack.size() > 1) {
+      && context->nameTableStack.size() > 1) {
     //cout << "table working" << endl;
-    table = nameTableStack[nameTableStack.size() - 2];
+    table = context->nameTableStack[context->nameTableStack.size() - 2];
   }
   string * label = (*table)[*(i->id)];
   if (label) {
@@ -614,10 +607,10 @@ void ObjectMethodCall::assemArmv7(string * exp_str, string * branchLabel) {
 }
 
 void IdObj::assemArmv7(string * exp_str, string * branchLabel) {
-  map<string, string*> * table = nameTableStack.back();
+  map<string, string*> * table = context->nameTableStack.back();
   if (table->find(*(i->id)) == table->end()
-      && nameTableStack.size() > 1) {
-    table = nameTableStack[nameTableStack.size() - 2];
+      && context->nameTableStack.size() > 1) {
+    table = context->nameTableStack[context->nameTableStack.size() - 2];
   }
   string * label = (*table)[*(i->id)];
   if (label) {
@@ -629,11 +622,11 @@ void IdObj::assemArmv7(string * exp_str, string * branchLabel) {
 
 void NewTypeObj::assemArmv7(string * exp_str, string * branchLabel) {
   /*
-  map<string, string*> * table = nameTableStack.back();
+  map<string, string*> * table = context->nameTableStack.back();
   if (table->find(*(i->id)) == table->end()
-      && nameTableStack.size() > 1) {
+      && context->nameTableStack.size() > 1) {
     //cout << "table working" << endl;
-    table = nameTableStack[nameTableStack.size() - 2];
+    table = context->nameTableStack[context->nameTableStack.size() - 2];
   }
   string * label = (*table)[*(i->id)];
   if (label) {
@@ -643,7 +636,7 @@ void NewTypeObj::assemArmv7(string * exp_str, string * branchLabel) {
 }
 
 void StringLiteral::assemArmv7() {
-  programRoot->textSection->push_back(new string("str" + to_string(strCnt) + ": .asciz \"" + str->c_str() + "\""));
+  context->textSection->push_back(new string("str" + to_string(strCnt) + ": .asciz \"" + str->c_str() + "\""));
   label = new string("str" + to_string(strCnt++));
 }
 

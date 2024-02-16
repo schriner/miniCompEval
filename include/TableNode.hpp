@@ -10,7 +10,6 @@
 #ifndef TABLENODE_HPP
 #define TABLENODE_HPP
 #include <map>
-#include <vector>
 
 using std::string;
 using std::map;
@@ -76,7 +75,6 @@ struct _BLOCK_SCOPE {
   _BLOCK_SCOPE()
     : parent(nullptr){}
 };
-
-}
+} // namespace symTab
 
 #endif

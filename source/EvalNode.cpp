@@ -9,26 +9,26 @@
  */
 
 #include "TreeNode.hpp"
+#include "Evaluate.hpp"
 
 // TODO(ss): Type check during AST generation 
 
 using namespace std;
+using namespace Interpreter;
 
 extern Program * programRoot;
+InterpreterContext * context;
 
 void Program::evaluate() {
-	  if (programTypeError) return;
-		if (c) c->evaluate();
-		m->evaluate();
+	context = new InterpreterContext;		
+  if (programTypeError) return;
+	if (c) c->evaluate();
+	m->evaluate();
 }
 
 void MainClass::evaluate() {
-		programRoot->return_reg = {0};
-		SCOPE * scope = new SCOPE();
-		programRoot->scope_stack.push_back(scope);
-	  s->evaluate();
-		delete programRoot->scope_stack.back();
-		programRoot->scope_stack.pop_back();
+	context->return_reg = {0};
+  s->evaluate();
 }
 
 void ClassDeclList::evaluate() {
@@ -43,12 +43,12 @@ void ClassDeclSimple::evaluate() {
 	for (auto md : *m->mdVector) {
 		method_table[*md->i->id] = md;
 	}
-	var_table["class"] = {{.name = i->id}, nullptr};
+	context->var_table[*i->id]["class"] = {{.name = i->id}, nullptr};
 	//cerr << *i->id << endl;
 	if (v && v->vdVector) { 
 		for (auto var : *v->vdVector) {
 			// Type Handler
-			if (var) var_table[*var->i->id] = {0, var->t};
+			if (var) context->var_table[*i->id][*var->i->id] = {0, var->t};
 
 		}
 	}
@@ -61,15 +61,14 @@ void ClassDeclExtends::evaluate() {
 	for (auto md : *m->mdVector) {
 		method_table[*md->i->id] = md;
 	}
-	var_table["class"] = {{.name = i->id}, nullptr};
-	var_table["extends"] = {{.name = i2->id}, nullptr};
-	//cerr << *i->id << endl;
+	context->var_table[*i->id]["class"] = {{.name = i->id}, nullptr};
+	context->var_table[*i->id]["extends"] = {{.name = i2->id}, nullptr};
 	if (v && v->vdVector) { 
 		for (auto var : *v->vdVector) {
 			// Type Handler
 			if (var) {
 				// TODO: check for duplicate variable in parent class
-				var_table[*var->i->id] = {0, var->t};
+				context->var_table[*i->id][*var->i->id] = {0, var->t};
 			}
 		}
 	}
@@ -79,7 +78,7 @@ void VarDeclList::evaluate() {
 	cerr << "TODO: VarDeclList\n";
 }
 void VarDecl::evaluate() { 
-	programRoot->scope_stack.back()->insert(*i->id, {0, t});
+	context->scope_stack.back()->insert(*i->id, {0, t});
 }
 
 void VarDeclExpList::evaluate() {
@@ -90,29 +89,29 @@ void VarDeclExpList::evaluate() {
 }
 
 void VarDeclExp::evaluate() { 
-	programRoot->scope_stack.back()->insert(*i->id, {a->e->evaluate(), t});
+	context->scope_stack.back()->insert(*i->id, {a->e->evaluate(), t});
 }
 
 VAL MethodDecl::evaluate() {
 	// Used during an actual method call
-	programRoot->return_reg = {0};
+	context->return_reg = {0};
 	SCOPE * scope = new SCOPE();
-	map<string, SYM> * variable = &scope->table; // assume no complex types
+	MAP * variable = &scope->table; // assume no complex types
 
-	if (f && programRoot->arg_stack
-			&& programRoot->arg_stack->e && f->t && f->i) {
-			(*variable)[*f->i->id] = {programRoot->arg_stack->e->evaluate(), f->t}; 
+	if (f && context->arg_stack
+			&& context->arg_stack->e && f->t && f->i) {
+			(*variable)[*f->i->id] = {context->arg_stack->e->evaluate(), f->t}; 
 			//cerr << *f->i->id << " " << variable[*f->i->id].val.exp_array << endl;
 	}
-	if (f && programRoot->arg_stack->erlVector && f->frVector) {
+	if (f && context->arg_stack->erlVector && f->frVector) {
 		auto i_erl = 0;
 		for (auto param : *f->frVector) {
 			//cerr << *param->i->id << " : ";
-			(*variable)[*param->i->id] = {(*programRoot->arg_stack->erlVector)[i_erl++]->evaluate(), param->t};
+			(*variable)[*param->i->id] = {(*context->arg_stack->erlVector)[i_erl++]->evaluate(), param->t};
 			//cerr << variable[*param->i->id] << endl;
 		}
 	}
-	programRoot->scope_stack.push_back(scope);
+	context->scope_stack.push_back(scope);
 	if (v && v->vdVector) {
 		for (auto var : *v->vdVector) {
 			// Type Handler
@@ -122,21 +121,21 @@ VAL MethodDecl::evaluate() {
 		}
 	}
 	if (s) s->evaluate();
-	if (programRoot->return_reg.exp) {
+	if (context->return_reg.exp) {
 		// Check if it is an early return with value 0;
-		programRoot->arg_stack = nullptr;
-		delete programRoot->scope_stack.back();
-		programRoot->scope_stack.pop_back();
-	  programRoot->call_stack.pop_back();
-		return programRoot->return_reg;
+		context->arg_stack = nullptr;
+		delete context->scope_stack.back();
+		context->scope_stack.pop_back();
+	  context->call_stack.pop_back();
+		return context->return_reg;
 	}
 
-	programRoot->arg_stack = nullptr;
-	programRoot->return_reg = e->evaluate();
-	delete programRoot->scope_stack.back();
-	programRoot->scope_stack.pop_back();
-	programRoot->call_stack.pop_back();
-	return programRoot->return_reg;
+	context->arg_stack = nullptr;
+	context->return_reg = e->evaluate();
+	delete context->scope_stack.back();
+	context->scope_stack.pop_back();
+	context->call_stack.pop_back();
+	return context->return_reg;
 }
 void MethodDeclList::evaluate() {
 	cerr << "TODO: MethodDeclList\n";
@@ -152,10 +151,10 @@ void MethodDeclList::evaluate() {
 //TODO(ss)(Array):void TypeIndexList::evaluate() {}
 
 void BlockStatements::evaluate() {
-	programRoot->push_nested_scope();
+	context->push_nested_scope();
 	if (vdel) vdel->evaluate();
 	if (s) { s->evaluate(); }
-	programRoot->pop_nested_scope();
+	context->pop_nested_scope();
 }
 
 void IfStatement::evaluate() {
@@ -168,13 +167,13 @@ void IfStatement::evaluate() {
 
 void ForStatement::evaluate() {
 	// add variable to scope
-	programRoot->push_nested_scope();
+	context->push_nested_scope();
 	vd->evaluate();
 	while ( e->evaluate().exp ) {
 		s->evaluate();
 		a->evaluate();
 	}
-	programRoot->pop_nested_scope();
+	context->pop_nested_scope();
 }
 
 void WhileStatement::evaluate() {
@@ -202,22 +201,22 @@ void PrintString::evaluate() {
 void Assign::evaluate() { 
   //TODO(ss)
 	/* TypeCheck */
-	if ( programRoot->scope_stack.size() != 0 && 
-			(programRoot->scope_stack.back()->find(*i->id) != programRoot->scope_stack.back()->end())) {
-		(*programRoot->scope_stack.back())[*i->id].val = (e->evaluate());
-	} else if (programRoot->call_stack.back()->find(*i->id) != programRoot->call_stack.back()->end()) {
-		(*programRoot->call_stack.back())[*i->id].val = (e->evaluate());
+	if ( context->scope_stack.size() != 0 && 
+			(context->scope_stack.back()->find(*i->id) != context->scope_stack.back()->end())) {
+		(*context->scope_stack.back())[*i->id].val = (e->evaluate());
+	} else if (context->call_stack.back()->find(*i->id) != context->call_stack.back()->end()) {
+		(*context->call_stack.back())[*i->id].val = (e->evaluate());
 	} else {
 		reportError(" token \"" + *i->id + "\"", "Assign::evaluate() runtime error");
 	}
 }
 
 void IndexAssign::evaluate() {
-	map<string, SYM>::iterator s;
-	if (s = programRoot->scope_stack.back()->find(*i->id);
-			s == programRoot->scope_stack.back()->end()) {
-		if (s = programRoot->call_stack.back()->find(*i->id);
-				s == programRoot->call_stack.back()->end()) {
+	MAP::iterator s;
+	if (s = context->scope_stack.back()->find(*i->id);
+			s == context->scope_stack.back()->end()) {
+		if (s = context->call_stack.back()->find(*i->id);
+				s == context->call_stack.back()->end()) {
 			reportError("", "IndexAssign::evaluate() runtime error");
 		}
 	}
@@ -247,9 +246,9 @@ void IndexAssign::evaluate() {
 
 void ReturnStatement::evaluate() {
 	cerr <<  "ReturnStatement\n";
-	if (!e) { programRoot->return_reg = {100}; return; }
+	if (!e) { context->return_reg = {100}; return; }
 	cerr << e->evaluate().exp << "ReturnStatement\n" << endl;
-	programRoot->return_reg = e->evaluate();
+	context->return_reg = e->evaluate();
 }
 
 void StatementList::evaluate() {
@@ -358,15 +357,15 @@ VAL ArrayAccess::evaluate() {
 	int * array = nullptr;
 	ID_ARRAY * id_array = nullptr;
 	
-	if (auto s = programRoot->scope_stack.back()->find(*i->id);
-			s != programRoot->scope_stack.back()->end()) {
+	if (auto s = context->scope_stack.back()->find(*i->id);
+			s != context->scope_stack.back()->end()) {
 		if (!dynamic_cast<IdentType * >(s->second.t)) {
 			array = s->second.val.exp_array;
 		} else {
 			id_array = s->second.val.id_array;
 		}
-	} else if (auto s = programRoot->call_stack.back()->find(*i->id);
-			s != programRoot->call_stack.back()->end()) {
+	} else if (auto s = context->call_stack.back()->find(*i->id);
+			s != context->call_stack.back()->end()) {
 		if (!dynamic_cast<IdentType * >(s->second.t)) {
 			array = s->second.val.exp_array;
 		} else {
@@ -405,11 +404,11 @@ VAL ArrayAccess::evaluate() {
 }
 VAL Length::evaluate() {
 	// Check that this id is an array
-	map<string, SYM>::iterator s;
-	if (s = programRoot->scope_stack.back()->find(*i->id);
-			s == programRoot->scope_stack.back()->end()) {
-		if (s = programRoot->call_stack.back()->find(*i->id);
-				s == programRoot->call_stack.back()->end()) {
+	MAP::iterator s;
+	if (s = context->scope_stack.back()->find(*i->id);
+			s == context->scope_stack.back()->end()) {
+		if (s = context->call_stack.back()->find(*i->id);
+				s == context->call_stack.back()->end()) {
 			reportError("", "Calling ArrayAccess on uninit array");
 		} 
 	}
@@ -422,11 +421,11 @@ VAL Length::evaluate() {
 
 VAL ArrayAccessLength::evaluate() {
 	// Check that this id is an array
-	map<string, SYM>::iterator s;
-	if (s = programRoot->scope_stack.back()->find(*i->id);
-			s == programRoot->scope_stack.back()->end()) {
-		if (s = programRoot->call_stack.back()->find(*i->id);
-				s == programRoot->call_stack.back()->end()) {
+	MAP::iterator s;
+	if (s = context->scope_stack.back()->find(*i->id);
+			s == context->scope_stack.back()->end()) {
+		if (s = context->call_stack.back()->find(*i->id);
+				s == context->call_stack.back()->end()) {
 			reportError("", "Calling ArrayAccess on uninit array");
 		} 
 	}
@@ -463,10 +462,10 @@ VAL False::evaluate() {
 VAL ExpObject::evaluate() {
 	if (IdObj * id = dynamic_cast<IdObj *>(o)) {
 		string * _id = id->i->id;
-		if (programRoot->scope_stack.back()->find(*_id) != programRoot->scope_stack.back()->end()) {
-			return (*programRoot->scope_stack.back())[*_id].val;
-		} else if (programRoot->call_stack.back()->find(*_id) != programRoot->call_stack.back()->end()) {
-			return (*programRoot->call_stack.back())[*_id].val;
+		if (context->scope_stack.back()->find(*_id) != context->scope_stack.back()->end()) {
+			return (*context->scope_stack.back())[*_id].val;
+		} else if (context->call_stack.back()->find(*_id) != context->call_stack.back()->end()) {
+			return (*context->call_stack.back())[*_id].val;
 		} else {
 			reportError(*_id, "ExpObject::evaluate() runtime error with id: ");
 		}
@@ -474,10 +473,10 @@ VAL ExpObject::evaluate() {
 	} else if (NewIdObj * obj = dynamic_cast<NewIdObj *>(o)) {
 		string * _id = obj->i->id;
 		ClassDecl * cl = programRoot->class_table[*obj->i->id];
-		return {.id = (new map<string, SYM>(cl->var_table))}; // push classname
+		return {.id = (new MAP(context->var_table[*_id]))}; // push classname
 	
 	} else if (dynamic_cast<ThisObj *>(o)) {
-		return {.id = programRoot->call_stack.back()};
+		return {.id = context->call_stack.back()};
 	
 	} else if (NewTypeObj * nto = dynamic_cast<NewTypeObj *>(o)) {
 		// (New Array)
@@ -522,49 +521,49 @@ VAL ExpObject::evaluate() {
 VAL ObjectMethodCall::evaluate() {
 	// look up the method
 	// place the result somewhere
-	programRoot->arg_stack = nullptr;
-	if (e) programRoot->arg_stack = e;
+	context->arg_stack = nullptr;
+	if (e) context->arg_stack = e;
 	if (dynamic_cast<NewIdObj *>(o)) {
 		// look up the method in the table and traverse
 		// var decl for a class
 		ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
-		programRoot->call_stack.push_back( new map<string, SYM>(cl->var_table) ); // push classname
+		context->call_stack.push_back( new MAP(context->var_table[*cl->i->id]) ); // push classname
 		for (ClassDecl * parent = cl; dynamic_cast<ClassDeclExtends *>(parent); ) {
-			parent = programRoot->class_table[*parent->var_table["extends"].val.name];
-			programRoot->call_stack.back()->insert(
-					parent->var_table.begin(), parent->var_table.end()
+			parent = programRoot->class_table[*context->var_table[*parent->i->id]["extends"].val.name];
+			context->call_stack.back()->insert(
+					context->var_table[*parent->i->id].begin(), context->var_table[*parent->i->id].end()
 			);
 		}
 		return cl->method_table[*i->id]->evaluate();
  	
 	} else if (dynamic_cast<IdObj *>(o)){	
 		string * id = (dynamic_cast<IdObj *>(o)->i)->id;
-		map<string, SYM>::iterator scope; // current scope with variable
-		if (programRoot->scope_stack.back()->find(*id) != programRoot->scope_stack.back()->end()) {
-			scope = programRoot->scope_stack.back()->find(*id);
-		} else if (programRoot->call_stack.back()->find(*id) != programRoot->scope_stack.back()->end()) {
-			scope = programRoot->call_stack.back()->find(*id);
+		MAP::iterator scope; // current scope with variable
+		if (context->scope_stack.back()->find(*id) != context->scope_stack.back()->end()) { 
+			scope = context->scope_stack.back()->find(*id);
+		} else if (context->call_stack.back()->find(*id) != context->scope_stack.back()->end()) {
+			scope = context->call_stack.back()->find(*id);
 		} else {
 			abort();
 		}
 
 		ClassDecl * cl = programRoot->class_table[*(*scope->second.val.id)["class"].val.name];
-		programRoot->call_stack.push_back(scope->second.val.id);
+		context->call_stack.push_back(scope->second.val.id);
 		while (dynamic_cast<ClassDeclExtends *>(cl) && cl->method_table.find(*i->id) == cl->method_table.end()) {
-			cl = programRoot->class_table[*cl->var_table["extends"].val.name];
-			programRoot->call_stack.back()->insert(
-					cl->var_table.begin(), cl->var_table.end()
+			cl = programRoot->class_table[*context->var_table[*cl->i->id]["extends"].val.name];
+			context->call_stack.back()->insert(
+					context->var_table[*cl->i->id].begin(), context->var_table[*cl->i->id].end()
 			);
 		}
 		return cl->method_table[*i->id]->evaluate();
 	
 	} else if (dynamic_cast<ThisObj *>(o)) {
-		programRoot->call_stack.push_back((programRoot->call_stack.back()));
-		ClassDecl * cl = programRoot->class_table[*((*programRoot->call_stack.back())["class"]).val.name];
+		context->call_stack.push_back((context->call_stack.back()));
+		ClassDecl * cl = programRoot->class_table[*((*context->call_stack.back())["class"]).val.name];
 		while (dynamic_cast<ClassDeclExtends *>(cl) && cl->method_table.find(*i->id) == cl->method_table.end()) {
-			cl = programRoot->class_table[*cl->var_table["extends"].val.name];
-			programRoot->call_stack.back()->insert(
-					cl->var_table.begin(), cl->var_table.end()
+			cl = programRoot->class_table[*context->var_table[*cl->i->id]["extends"].val.name];
+			context->call_stack.back()->insert(
+					context->var_table[*cl->i->id].begin(), context->var_table[*cl->i->id].end()
 			);
 		}
 		return cl->method_table[*i->id]->evaluate();
