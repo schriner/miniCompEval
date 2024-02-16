@@ -75,6 +75,6 @@ struct _BLOCK_SCOPE {
   _BLOCK_SCOPE()
     : parent(nullptr){}
 };
-} // namespace symTabEvalute
+} // namespace symTab
 
 #endif
