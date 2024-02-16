@@ -13,7 +13,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include "TableNode.hpp"
+#include "Evaluate.hpp"
 
 #ifdef PRINTTREE
 #define PRINTDEBUGTREE(x) fprintf(stderr, "At Node: %s\n", (x));
@@ -126,6 +126,7 @@ class Program : public TreeNode {
 		}
 		ExpList * arg_stack = nullptr;
 #ifdef ASSEM
+		// TODO move assem to another namespace and create a context variable
 		vector<string * > * dataSection;
 		vector<string * > * textSection;
 		Program (MainClass * m)

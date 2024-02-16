@@ -9,15 +9,18 @@
  */
 
 #include "TreeNode.hpp"
+#include "Evaluate.hpp"
 
 // TODO(ss): Type check during AST generation 
 
 using namespace std;
+using namespace Interpreter;
 
 extern Program * programRoot;
-//extern Evaluator * e;
+InterpreterContext * prog;
 
 void Program::evaluate() {
+		prog = new InterpreterContext;		
 	  if (programTypeError) return;
 		if (c) c->evaluate();
 		m->evaluate();

@@ -10,11 +10,9 @@
 #ifndef TABLENODE_HPP
 #define TABLENODE_HPP
 #include <map>
-#include <vector>
 
 using std::string;
 using std::map;
-using std::vector;
 
 namespace symTab {
 
@@ -78,35 +76,5 @@ struct _BLOCK_SCOPE {
     : parent(nullptr){}
 };
 } // namespace symTabEvalute
-
-class Type;
-namespace Interpreter {
-
-using SYM = symTab::_SYMBOL<Type>;
-using ID_ARRAY = symTab::_ID_ARRAY<Type>;
-using VAL = symTab::_VALUE<Type>;
-using SCOPE = symTab::_BLOCK_SCOPE<Type>;
-
-
-template <typename Type>
-struct InterpreterContext {
-
-	vector<map<string, SYM> *> call_stack;
-	vector<SCOPE *> scope_stack;
-	VAL return_reg;
-	//ExpList * arg_stack = nullptr;
-	
-	void push_nested_scope() {
-		SCOPE * scope = new SCOPE(scope_stack.back());
-		scope_stack[scope_stack.size() - 1] = scope;
-	}
-	void pop_nested_scope() {
-		auto tmp = scope_stack.back();
-		scope_stack[scope_stack.size() - 1] = scope_stack[scope_stack.size() - 1]->parent;
-		delete tmp;
-	}
-};
-
-} // namespace
 
 #endif
