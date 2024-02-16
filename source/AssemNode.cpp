@@ -33,13 +33,13 @@ void branchPrint(string * str, string * stmt_str);
 bool isIntLiteral(Exp * e);
 void getIntLiteral (Exp * e, string * s);
 
-void Program::assem() {
+void Program::assemArmv7() {
   dataSection = new vector<string * >;
   textSection = new vector<string * >;
   textSection->push_back(new string(string(PRINTLN_EXP) + ": .asciz \"%d\\n\""));
   textSection->push_back(new string(string(PRINT_EXP) + ": .asciz \"%d\""));
-  m->assem();
-  if (c) { c->assem(); }
+  m->assemArmv7();
+  if (c) { c->assemArmv7(); }
 
   // .data: global variables here
   assemStream << ".data"<< endl;
@@ -75,37 +75,37 @@ void Program::assem() {
   }
 }
 
-void MainClass::assem() {
+void MainClass::assemArmv7() {
   instr = new vector<string * >;
   string str("");
-  s->assem(&str, nullptr);
+  s->assemArmv7(&str, nullptr);
   instr->push_back( new string(str) );
 }
 
-void ClassDeclList::assem() {
+void ClassDeclList::assemArmv7() {
   for (auto c = cdVector->begin(); c < cdVector->end(); c++) {
-    (*c)->assem();
+    (*c)->assemArmv7();
   }
 }
 
-void ClassDeclSimple::assem() {
+void ClassDeclSimple::assemArmv7() {
   programRoot->c->instr->push_back(new string (*(i->id) + ":\n"));
   nameTableStack.push_back(nameTable);
   typeTableStack.push_back(typeTable);
-  if (v) { v->assem(nameTable, typeTable); }
-  if (m) { m->assem(i->id); }
+  if (v) { v->assemArmv7(nameTable, typeTable); }
+  if (m) { m->assemArmv7(i->id); }
   typeTableStack.pop_back();
   nameTableStack.pop_back();
 }
 
-void ClassDeclExtends::assem() {}
+void ClassDeclExtends::assemArmv7() {}
 
-void VarDeclList::assem( map<string, string *> * nameTable, map<string, string*> * typeTable) {
+void VarDeclList::assemArmv7( map<string, string *> * nameTable, map<string, string*> * typeTable) {
   for (auto v = vdVector->begin(); v < vdVector->end(); v++) {
-    (*v)->assem(nameTable, typeTable);
+    (*v)->assemArmv7(nameTable, typeTable);
   }
 }
-void VarDecl::assem( map<string, string * > * nameTable, map<string, string*> * typeTable) {
+void VarDecl::assemArmv7( map<string, string * > * nameTable, map<string, string*> * typeTable) {
   if (dynamic_cast< PrimeType* >( t )){
     PrimeType * p = (PrimeType * ) t;
     if (dynamic_cast< BoolType* >( p )
@@ -134,19 +134,19 @@ void VarDecl::assem( map<string, string * > * nameTable, map<string, string*> * 
     }
   }
 }
-void MethodDecl::assem(string *objName) {
+void MethodDecl::assemArmv7(string *objName) {
   // TODO: Make sure this is handled properly
-  if (v) {v->assem(nameTable, typeTable);}
+  if (v) {v->assemArmv7(nameTable, typeTable);}
 
   nameTableStack.push_back(nameTable);
   typeTableStack.push_back(typeTable);
 
   programRoot->c->instr->push_back(new string (*objName + *(i->id) + ":\n\tpush {lr}\n\n"));
   string stmt_str("");
-  s->assem(&stmt_str, nameTable);
+  s->assemArmv7(&stmt_str, nameTable);
   programRoot->c->instr->push_back(new string ("\t" + stmt_str + "\n"));
   stmt_str = string("");
-  if (s) { e->assem(&stmt_str, nullptr); }
+  if (s) { e->assemArmv7(&stmt_str, nullptr); }
   programRoot->c->instr->push_back(new string (stmt_str + "\n\tmov r0, r1\n"));
   programRoot->c->instr->push_back(new string ("\n\tpop {pc}\n"));
 
@@ -154,82 +154,82 @@ void MethodDecl::assem(string *objName) {
   nameTableStack.pop_back();
 }
 
-void MethodDeclList::assem(string * objName) {
+void MethodDeclList::assemArmv7(string * objName) {
   for (auto m = mdVector->begin(); m < mdVector->end(); m++) {
-    (*m)->assem(objName);
+    (*m)->assemArmv7(objName);
   }
 }
 
-void BlockStatements::assem(string * stmt_str, map<string, string*> * nameTable) {
-  s->assem(stmt_str, nameTable);
+void BlockStatements::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
+  s->assemArmv7(stmt_str, nameTable);
 }
 
-void IfStatement::assem(string * stmt_str, map<string, string*> * nameTable) {
+void IfStatement::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
   string label("if" + to_string(ifCnt));
-  e->assem(stmt_str, &label);
+  e->assemArmv7(stmt_str, &label);
 
   *stmt_str = *stmt_str + "\t";
-  s_if->assem(stmt_str, nameTable);
+  s_if->assemArmv7(stmt_str, nameTable);
 
   *stmt_str = stmt_str->substr(0, stmt_str->length() - 1) + "\tb el" + to_string(ifCnt);
   *stmt_str = *stmt_str + "\n" + label + ":\n\t";
 
-  s_el->assem(stmt_str, nameTable);
+  s_el->assemArmv7(stmt_str, nameTable);
   label = string("el" + to_string(ifCnt));
   *stmt_str = *stmt_str + label + ":\n";
 
   ifCnt++;
 }
 
-void WhileStatement::assem(string * stmt_str, map<string, string*> * nameTable) {
+void WhileStatement::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
   string label("lp" + to_string(lCnt) + ":\n");
   *stmt_str = stmt_str->substr(0, stmt_str->length() - 1) + label;
 
   label = string("d" + to_string(lCnt) );
-  e->assem(stmt_str, &label);
+  e->assemArmv7(stmt_str, &label);
 
   *stmt_str = *stmt_str + "\t";
-  s->assem(stmt_str, nameTable);
+  s->assemArmv7(stmt_str, nameTable);
   *stmt_str = stmt_str->substr(0, stmt_str->length() - 1) + "\tb lp" + to_string(lCnt) + "\nd" + to_string(lCnt) + ":\n";
 
   lCnt++;
 }
 
-void PrintLineExp::assem(string * stmt_str, map<string, string*> * nameTable) {
+void PrintLineExp::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
   // need to put the format string somewhere
   string e_str("");
-  e->assem(&e_str, nullptr);
+  e->assemArmv7(&e_str, nullptr);
   string s("ldr r0, =");
   s = e_str + "\t" + s + PRINTLN_EXP + "\n\tbl printf\n";
   *stmt_str = *stmt_str + s.substr(1);
 }
 
-void PrintLineString::assem(string * stmt_str, map<string, string*> * nameTable) {
+void PrintLineString::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
   // Adding \n to string here and creating a mem leak
   string * str = new string(*(s->str) + "\\n");
   //cout << str->c_str() << endl;
   s->str = str;
 
-  s->assem(); // adds stuff to text section + creates label
+  s->assemArmv7(); // adds stuff to text section + creates label
   branchPrint(s->label, stmt_str);
 }
 
-void PrintExp::assem(string * stmt_str, map<string, string*> * nameTable) {
+void PrintExp::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
   string e_str("");
-  e->assem(&e_str, nullptr);
+  e->assemArmv7(&e_str, nullptr);
   string s("ldr r0, =");
   s = e_str + "\t" + s + PRINT_EXP + "\n\tbl printf\n";
   *stmt_str = *stmt_str + s.substr(1);
 }
 
-void PrintString::assem(string * stmt_str, map<string, string*> * nameTable) {
-  s->assem();
+void PrintString::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
+  s->assemArmv7();
   branchPrint(s->label, stmt_str);
 }
 
-void Assign::assem(string * stmt_str, map<string, string*> * nameTable) {
+void Assign::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
   string exp_str = "";
-  e->assem(&exp_str, nullptr);
+  e->assemArmv7(&exp_str, nullptr);
   *stmt_str = *stmt_str + exp_str.substr(1) + "\n";
 
   map<string, string*> * table = nameTableStack.back();
@@ -245,38 +245,38 @@ void Assign::assem(string * stmt_str, map<string, string*> * nameTable) {
   }
 }
 
-void IndexAssign::assem(string * stmt_str, map<string, string*> *nT) {}
+void IndexAssign::assemArmv7(string * stmt_str, map<string, string*> *nT) {}
 
-void ReturnStatement::assem(string * stmt_str, map<string, string*> *nT) {
-  e->assem(stmt_str, nullptr);
+void ReturnStatement::assemArmv7(string * stmt_str, map<string, string*> *nT) {
+  e->assemArmv7(stmt_str, nullptr);
   *stmt_str = *stmt_str + "\n\tmov r0, r1\n\tpop {pc}\n";
 }
 
-void StatementList::assem(string * stmt_str, map<string, string*> * nameTable) {
+void StatementList::assemArmv7(string * stmt_str, map<string, string*> * nameTable) {
   string str("");
   for (auto s = sVector->begin(); s < sVector->end(); s++) {
-    //str = str + "\t" + (*s)->assem()->c_str() + "\n";
+    //str = str + "\t" + (*s)->assemArmv7()->c_str() + "\n";
     str = str + "\t";
-    (*s)->assem(&str, nameTable);
+    (*s)->assemArmv7(&str, nameTable);
     str = str + "\n";
   }
   *stmt_str = *stmt_str + str.substr(1);
   //return new string(str.substr(1));
 }
 
-void Or::assem(string * exp_str, string * branchLabel) {
+void Or::assemArmv7(string * exp_str, string * branchLabel) {
   string label1( "e_or_S" + to_string(expCnt++) );
   string label2( "e_or_E" + to_string(expCnt++) );
 
   if (!branchLabel) {
-    e1->assem(exp_str, nullptr);
+    e1->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tpush {r1}\n";
   } else {
-    e1->assem(exp_str, &label1);
+    e1->assemArmv7(exp_str, &label1);
     *exp_str = *exp_str + "\tb " + label2 + "\n" + label1 + ":\n";
   }
 
-  e2->assem(exp_str, branchLabel);
+  e2->assemArmv7(exp_str, branchLabel);
   if (!branchLabel) {
     *exp_str = *exp_str + "\tpop {r2}\n\torr r1, r1, r2\n";
   } else {
@@ -284,13 +284,13 @@ void Or::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void And::assem(string * exp_str, string * branchLabel) {
+void And::assemArmv7(string * exp_str, string * branchLabel) {
   string label( "e" + to_string(expCnt++) );
-  e1->assem(exp_str, branchLabel);
+  e1->assemArmv7(exp_str, branchLabel);
   if (!branchLabel) {
     *exp_str = *exp_str + "\tpush {r1}\n";
   }
-  e2->assem(exp_str, branchLabel);
+  e2->assemArmv7(exp_str, branchLabel);
   if (!branchLabel) {
     *exp_str = *exp_str + "\tpop {r2}\n\tand r1, r1, r2\n";
   } else {
@@ -298,10 +298,10 @@ void And::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void Equal::assem(string * exp_str, string * branchLabel) {
-  e1->assem(exp_str, nullptr); // has to b int
+void Equal::assemArmv7(string * exp_str, string * branchLabel) {
+  e1->assemArmv7(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
-  e2->assem(exp_str, nullptr); // has to b int
+  e2->assemArmv7(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tbne " + *branchLabel + "\n";
@@ -310,10 +310,10 @@ void Equal::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void NotEqual::assem(string * exp_str, string * branchLabel) {
-  e1->assem(exp_str, nullptr); // has to b int
+void NotEqual::assemArmv7(string * exp_str, string * branchLabel) {
+  e1->assemArmv7(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
-  e2->assem(exp_str, nullptr); // has to b int
+  e2->assemArmv7(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tbeq " + *branchLabel + "\n";
@@ -322,10 +322,10 @@ void NotEqual::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void Lesser::assem(string * exp_str, string * branchLabel) {
-  e1->assem(exp_str, nullptr); // has to b int
+void Lesser::assemArmv7(string * exp_str, string * branchLabel) {
+  e1->assemArmv7(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
-  e2->assem(exp_str, nullptr); // has to b int
+  e2->assemArmv7(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tbge " + *branchLabel + "\n";
@@ -334,10 +334,10 @@ void Lesser::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void Greater::assem(string * exp_str, string * branchLabel) {
-    e1->assem(exp_str, nullptr); // has to b int
+void Greater::assemArmv7(string * exp_str, string * branchLabel) {
+    e1->assemArmv7(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, nullptr); // has to b int
+    e2->assemArmv7(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n\t";
   if (branchLabel) {
     *exp_str = *exp_str + "ble " + *branchLabel + "\n";
@@ -346,10 +346,10 @@ void Greater::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void LessEqual::assem(string * exp_str, string * branchLabel) {
-  e1->assem(exp_str, nullptr); // has to b int
+void LessEqual::assemArmv7(string * exp_str, string * branchLabel) {
+  e1->assemArmv7(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpush {r1}\n";
-  e2->assem(exp_str, nullptr); // has to b int
+  e2->assemArmv7(exp_str, nullptr); // has to b int
   *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tbgt " + *branchLabel + "\n";
@@ -358,10 +358,10 @@ void LessEqual::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void GreatEqual::assem(string * exp_str, string * branchLabel) {
-    e1->assem(exp_str, nullptr); // has to b int
+void GreatEqual::assemArmv7(string * exp_str, string * branchLabel) {
+    e1->assemArmv7(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, nullptr); // has to b int
+    e2->assemArmv7(exp_str, nullptr); // has to b int
     *exp_str = *exp_str + "\tpop {r2}\n\tcmp r2, r1\n";
   if (branchLabel) {
     *exp_str = *exp_str + "\tblt " + *branchLabel + "\n";
@@ -370,13 +370,13 @@ void GreatEqual::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void Add::assem(string * exp_str, string * branchLabel) {
+void Add::assemArmv7(string * exp_str, string * branchLabel) {
     //if (dynamic_cast<LitInt *>( e1 )) {
     if (isIntLiteral(e1)) {
         std::string lit_string("");
         getIntLiteral (e1, &lit_string);
         //LitInt * expr = (LitInt *) e1;
-        e2->assem(exp_str, nullptr);
+        e2->assemArmv7(exp_str, nullptr);
         *exp_str = *exp_str + "\tadd r1, r1, " + lit_string + "\n";
         //*exp_str = *exp_str + "\tadd r1, r1, #" + to_string(expr->i->i) + "\n";
     //} else if (dynamic_cast<LitInt *>( e2 )) {
@@ -384,40 +384,40 @@ void Add::assem(string * exp_str, string * branchLabel) {
         //LitInt * expr = (LitInt *) e2;
         std::string lit_string("");
         getIntLiteral (e2, &lit_string);
-        e1->assem(exp_str, nullptr);
+        e1->assemArmv7(exp_str, nullptr);
         *exp_str = *exp_str + "\tadd r1, r1, " + lit_string + "\n";
     } else {
-        e1->assem(exp_str, nullptr);
+        e1->assemArmv7(exp_str, nullptr);
         *exp_str = *exp_str + "\tpush {r1}\n";
-        e2->assem(exp_str, nullptr);
+        e2->assemArmv7(exp_str, nullptr);
         *exp_str = *exp_str + "\tpop {r2}\n\tadd r1, r2, r1\n";
     }
 }
 
 
-void Subtract::assem(string * exp_str, string * branchLabel) {
+void Subtract::assemArmv7(string * exp_str, string * branchLabel) {
   if ( isIntLiteral( e2 ) ) {
     std::string lit_string("");
     getIntLiteral (e2, &lit_string);
-    e1->assem(exp_str, nullptr);
+    e1->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tsub r1, r1, " + lit_string + "\n";
   } else if ( isIntLiteral( e1 ) ) {
     std::string lit_string("");
     getIntLiteral (e1, &lit_string);
-    e2->assem(exp_str, nullptr);
+    e2->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tmov r2, " + lit_string + "\n\tsub r1, r2, r1\n";
   } else {
-    e1->assem(exp_str, nullptr);
+    e1->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, nullptr);
+    e2->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tpop {r2}\n\tsub r1, r2, r1\n";
   }
 }
 
-void Divide::assem(string * exp_str, string * branchLabel) {
-    e1->assem(exp_str, nullptr);
+void Divide::assemArmv7(string * exp_str, string * branchLabel) {
+    e1->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, nullptr);
+    e2->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tpop {r2}\n\tmov r0, #0\n";
     *exp_str = *exp_str + "\tmov r4, #0\n\tcmp r2, #0\n\tbge div" + to_string(lCnt) + "\n\tmov r4, #1\n\trsb r2, #0\n";
     *exp_str = *exp_str + "div" + to_string(lCnt) + ":\n\tcmp r2, r1\n\tblt d" + to_string(lCnt) + "\n";
@@ -427,7 +427,7 @@ void Divide::assem(string * exp_str, string * branchLabel) {
     lCnt++;
 }
 
-void Multiply::assem(string * exp_str, string * branchLabel) {
+void Multiply::assemArmv7(string * exp_str, string * branchLabel) {
   if (isIntLiteral( e1 ) && isIntLiteral( e2 )) {
     // Both are positive int literals
     string lit_string("");
@@ -440,24 +440,24 @@ void Multiply::assem(string * exp_str, string * branchLabel) {
   } else if (isIntLiteral( e1 )) { // op1 is a literal
     std::string lit_string("");
     getIntLiteral (e1, &lit_string);
-    e2->assem(exp_str, nullptr);
+    e2->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tmov r2, " + lit_string + "\n";
     *exp_str = *exp_str + "\tmul r1, r2, r1\n";
   } else if (isIntLiteral( e2 )) { // op 2 is a literal
     std::string lit_string("");
     getIntLiteral (e2, &lit_string);
-    e1->assem(exp_str, nullptr);
+    e1->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tmov r2, " + lit_string + "\n";
     *exp_str = *exp_str + "\tmul r1, r2, r1\n";
   } else { // Neither are int pos int literals
-    e1->assem(exp_str, nullptr);
+    e1->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tpush {r1}\n";
-    e2->assem(exp_str, nullptr);
+    e2->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\tpop {r2}\n\tmul r1, r2, r1\n";
   }
 }
 
-void Not::assem(string * exp_str, string * branchLabel) {
+void Not::assemArmv7(string * exp_str, string * branchLabel) {
   if (dynamic_cast<True *>( e )){ // if !true = false
     // False always branches
     if (branchLabel) {
@@ -472,7 +472,7 @@ void Not::assem(string * exp_str, string * branchLabel) {
     }
   } else if (dynamic_cast<Not *>( e )) { // Eliminate Assembly Generation for !!
     Not * expr = (Not * ) e;
-    expr->e->assem(exp_str, branchLabel);
+    expr->e->assemArmv7(exp_str, branchLabel);
   } else if ( dynamic_cast< ParenExp * >( e ) ) { // if !()
     Exp * nExp = nullptr;
     ParenExp * p = (ParenExp *) e;
@@ -483,7 +483,7 @@ void Not::assem(string * exp_str, string * branchLabel) {
     }
     if (dynamic_cast<Not *>(nExp)) {
       Not * expr = (Not * ) nExp;
-      expr->e->assem(exp_str, branchLabel);
+      expr->e->assemArmv7(exp_str, branchLabel);
     } else if (dynamic_cast<False *>( nExp )) {
       // Do Nothing - true will always execute the first part of the statement
       if (!branchLabel){
@@ -498,37 +498,37 @@ void Not::assem(string * exp_str, string * branchLabel) {
       }
     } else {
       if (!branchLabel) {
-        nExp->assem(exp_str, branchLabel);
+        nExp->assemArmv7(exp_str, branchLabel);
         *exp_str = *exp_str + "\teor r1, r1, #1\n";
       } else {
         string label("not" + to_string(expCnt++));
-        nExp->assem(exp_str, &label);
+        nExp->assemArmv7(exp_str, &label);
         *exp_str = *exp_str + "\tb " + *branchLabel + "\n"+ label + ":\n";
       }
     }
   } else {
     if (!branchLabel) {
-      e->assem(exp_str, nullptr);
+      e->assemArmv7(exp_str, nullptr);
       *exp_str = *exp_str + "\teor r1, r1, #1\n";
     } else {
       string label("not" + to_string(expCnt++));
-      e->assem(exp_str, &label);
+      e->assemArmv7(exp_str, &label);
       *exp_str = *exp_str + "\tb " + *branchLabel + "\n"+ label + ":\n";
     }
   }
 }
 
-void Pos::assem(string * exp_str, string * branchLabel) {
-  e->assem(exp_str, nullptr);
+void Pos::assemArmv7(string * exp_str, string * branchLabel) {
+  e->assemArmv7(exp_str, nullptr);
 }
 
-void Neg::assem(string * exp_str, string * branchLabel) {
+void Neg::assemArmv7(string * exp_str, string * branchLabel) {
   if (dynamic_cast<LitInt *>( e )) {
     LitInt * expr = (LitInt *) e;
     *exp_str = *exp_str + "\tmov r1, #-"+ to_string(expr->i->i) + "\n";
   } else if (dynamic_cast<Neg *>( e )) {
     Neg * expr = (Neg *) e;
-    expr->e->assem(exp_str, nullptr);
+    expr->e->assemArmv7(exp_str, nullptr);
   } else if (dynamic_cast< ParenExp * >( e )
               || dynamic_cast< Pos * >( e ) ) { // eliminate paren
 
@@ -561,34 +561,34 @@ void Neg::assem(string * exp_str, string * branchLabel) {
       *exp_str = *exp_str + "\tmov r1, #-"+ to_string(expr->i->i) + "\n";
     } else if (dynamic_cast<Neg *>(nExp)) { // it was another neg
       Neg * expr = (Neg *) nExp;
-      expr->e->assem(exp_str, nullptr);
+      expr->e->assemArmv7(exp_str, nullptr);
     } else { // something else
-      nExp->assem(exp_str, nullptr);
+      nExp->assemArmv7(exp_str, nullptr);
       *exp_str = *exp_str + "\trsb r1, r1, #0\n";
     }
   } else {
-    e->assem(exp_str, nullptr);
+    e->assemArmv7(exp_str, nullptr);
     *exp_str = *exp_str + "\trsb r1, r1, #0\n";
     //*exp_str = *exp_str + "\tmov r2, #-1\n\tmul r1, r1, r2\n";
   }
 }
 
-void ParenExp::assem(string * exp_str, string * branchLabel) {
-  e->assem(exp_str, branchLabel);
+void ParenExp::assemArmv7(string * exp_str, string * branchLabel) {
+  e->assemArmv7(exp_str, branchLabel);
 }
 
-void LitInt::assem(string * exp_str, string * branchLabel) {
+void LitInt::assemArmv7(string * exp_str, string * branchLabel) {
   *exp_str = *exp_str + "\tmov r1, #"+ to_string(i->i) + "\n";
 }
 
-void True::assem(string * exp_str, string * branchLabel) {
+void True::assemArmv7(string * exp_str, string * branchLabel) {
   // Do Nothing - true will always execute the first part of the statement
   if (branchLabel == nullptr){
     *exp_str = *exp_str + "\tmov r1, #1\n";
   }
 }
 
-void False::assem(string * exp_str, string * branchLabel) {
+void False::assemArmv7(string * exp_str, string * branchLabel) {
   // False always branches
   if (branchLabel == nullptr){
     *exp_str = *exp_str + "\tmov r1, #0\n";
@@ -597,11 +597,11 @@ void False::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void ExpObject::assem(string * exp_str, string * branchLabel) {
-  o->assem(exp_str, branchLabel);
+void ExpObject::assemArmv7(string * exp_str, string * branchLabel) {
+  o->assemArmv7(exp_str, branchLabel);
 }
 
-void ObjectMethodCall::assem(string * exp_str, string * branchLabel) {
+void ObjectMethodCall::assemArmv7(string * exp_str, string * branchLabel) {
   if ( dynamic_cast<NewIdObj * >(o) ) {
     NewIdObj * obj = (NewIdObj * ) o;
     *exp_str = *exp_str + "\tbl " + *(obj->i->id) + *(i->id) + "\n";
@@ -613,7 +613,7 @@ void ObjectMethodCall::assem(string * exp_str, string * branchLabel) {
   }
 }
 
-void IdObj::assem(string * exp_str, string * branchLabel) {
+void IdObj::assemArmv7(string * exp_str, string * branchLabel) {
   map<string, string*> * table = nameTableStack.back();
   if (table->find(*(i->id)) == table->end()
       && nameTableStack.size() > 1) {
@@ -627,7 +627,7 @@ void IdObj::assem(string * exp_str, string * branchLabel) {
   //*stmt_str = *stmt_str + "\tstr r1, [r0]" +  "\n";
 }
 
-void NewTypeObj::assem(string * exp_str, string * branchLabel) {
+void NewTypeObj::assemArmv7(string * exp_str, string * branchLabel) {
   /*
   map<string, string*> * table = nameTableStack.back();
   if (table->find(*(i->id)) == table->end()
@@ -642,7 +642,7 @@ void NewTypeObj::assem(string * exp_str, string * branchLabel) {
   }*/
 }
 
-void StringLiteral::assem() {
+void StringLiteral::assemArmv7() {
   programRoot->textSection->push_back(new string("str" + to_string(strCnt) + ": .asciz \"" + str->c_str() + "\""));
   label = new string("str" + to_string(strCnt++));
 }
