@@ -26,15 +26,15 @@ int expCnt = 0;
 int regCnt = 0;
 
 struct AssemContext {
-	//ofstream * assemStream;
+	//TODO(ss) ofstream * assemStream;
 	vector<string * > * dataSection;
 	vector<string * > * textSection;
 	
 
 	//TODO(ss) move me
 	//ClassDeclSimple 
-	//nameTable = new map<string, string*>;
-	//typeTable = new map<string, string*>;
+	//map<string|ClassDecl, map<string, string*>> nameTable = new map<string, string*>;
+	//map<string|ClassDecl, map<string, string*>> typeTable = new map<string, string*>;
 
 	vector< map<string, string*> * > nameTableStack;
 	vector< map<string, string*> * > typeTableStack;
