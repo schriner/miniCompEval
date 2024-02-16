@@ -43,12 +43,12 @@ void ClassDeclSimple::evaluate() {
 	for (auto md : *m->mdVector) {
 		method_table[*md->i->id] = md;
 	}
-	var_table["class"] = {{.name = i->id}, nullptr};
+	context->var_table[*i->id]["class"] = {{.name = i->id}, nullptr};
 	//cerr << *i->id << endl;
 	if (v && v->vdVector) { 
 		for (auto var : *v->vdVector) {
 			// Type Handler
-			if (var) var_table[*var->i->id] = {0, var->t};
+			if (var) context->var_table[*i->id][*var->i->id] = {0, var->t};
 
 		}
 	}
@@ -61,15 +61,14 @@ void ClassDeclExtends::evaluate() {
 	for (auto md : *m->mdVector) {
 		method_table[*md->i->id] = md;
 	}
-	var_table["class"] = {{.name = i->id}, nullptr};
-	var_table["extends"] = {{.name = i2->id}, nullptr};
-	//cerr << *i->id << endl;
+	context->var_table[*i->id]["class"] = {{.name = i->id}, nullptr};
+	context->var_table[*i->id]["extends"] = {{.name = i2->id}, nullptr};
 	if (v && v->vdVector) { 
 		for (auto var : *v->vdVector) {
 			// Type Handler
 			if (var) {
 				// TODO: check for duplicate variable in parent class
-				var_table[*var->i->id] = {0, var->t};
+				context->var_table[*i->id][*var->i->id] = {0, var->t};
 			}
 		}
 	}
@@ -474,7 +473,7 @@ VAL ExpObject::evaluate() {
 	} else if (NewIdObj * obj = dynamic_cast<NewIdObj *>(o)) {
 		string * _id = obj->i->id;
 		ClassDecl * cl = programRoot->class_table[*obj->i->id];
-		return {.id = (new MAP(cl->var_table))}; // push classname
+		return {.id = (new MAP(context->var_table[*_id]))}; // push classname
 	
 	} else if (dynamic_cast<ThisObj *>(o)) {
 		return {.id = context->call_stack.back()};
@@ -528,11 +527,11 @@ VAL ObjectMethodCall::evaluate() {
 		// look up the method in the table and traverse
 		// var decl for a class
 		ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
-		context->call_stack.push_back( new MAP(cl->var_table) ); // push classname
+		context->call_stack.push_back( new MAP(context->var_table[*cl->i->id]) ); // push classname
 		for (ClassDecl * parent = cl; dynamic_cast<ClassDeclExtends *>(parent); ) {
-			parent = programRoot->class_table[*parent->var_table["extends"].val.name];
+			parent = programRoot->class_table[*context->var_table[*parent->i->id]["extends"].val.name];
 			context->call_stack.back()->insert(
-					parent->var_table.begin(), parent->var_table.end()
+					context->var_table[*parent->i->id].begin(), context->var_table[*parent->i->id].end()
 			);
 		}
 		return cl->method_table[*i->id]->evaluate();
@@ -551,9 +550,9 @@ VAL ObjectMethodCall::evaluate() {
 		ClassDecl * cl = programRoot->class_table[*(*scope->second.val.id)["class"].val.name];
 		context->call_stack.push_back(scope->second.val.id);
 		while (dynamic_cast<ClassDeclExtends *>(cl) && cl->method_table.find(*i->id) == cl->method_table.end()) {
-			cl = programRoot->class_table[*cl->var_table["extends"].val.name];
+			cl = programRoot->class_table[*context->var_table[*cl->i->id]["extends"].val.name];
 			context->call_stack.back()->insert(
-					cl->var_table.begin(), cl->var_table.end()
+					context->var_table[*cl->i->id].begin(), context->var_table[*cl->i->id].end()
 			);
 		}
 		return cl->method_table[*i->id]->evaluate();
@@ -562,9 +561,9 @@ VAL ObjectMethodCall::evaluate() {
 		context->call_stack.push_back((context->call_stack.back()));
 		ClassDecl * cl = programRoot->class_table[*((*context->call_stack.back())["class"]).val.name];
 		while (dynamic_cast<ClassDeclExtends *>(cl) && cl->method_table.find(*i->id) == cl->method_table.end()) {
-			cl = programRoot->class_table[*cl->var_table["extends"].val.name];
+			cl = programRoot->class_table[*context->var_table[*cl->i->id]["extends"].val.name];
 			context->call_stack.back()->insert(
-					cl->var_table.begin(), cl->var_table.end()
+					context->var_table[*cl->i->id].begin(), context->var_table[*cl->i->id].end()
 			);
 		}
 		return cl->method_table[*i->id]->evaluate();

@@ -29,20 +29,19 @@ using SCOPE = symTab::_BLOCK_SCOPE<Type>;
 using MAP = map<string, SYM>;
 
 struct InterpreterContext {
+	// TODO(ss): Check memory management for this during evaluate
   // merge these
 
-	// TODO(ss): Check memory management for this during evaluate
 	// Stack of class instance scopes for instance variables
 	// ["class"] entry within the map contains the classname for the given scope
-  vector<MAP *> call_stack;
-// stack of method calls scopes
-// variables that survive for the life of a particular method call
-  vector<SCOPE *> scope_stack{new SCOPE()}; // something like a sym table
+	vector<MAP *> call_stack;
+	// stack of method calls scopes
+	// variables that survive for the life of a particular method call
+	vector<SCOPE *> scope_stack{new SCOPE()}; // something like a sym table
+	map<string, map<string, SYM>> var_table; // classname -> (var -> symbol)
 
   VAL return_reg; // std::optional
   ExpList * arg_stack = nullptr;
-  //TODO: std::optional<VAL> return_reg;
-  //TODO: std::optional<ExpList *> arg_stack = nullptr;
 
   void push_nested_scope() {
     SCOPE * scope = new SCOPE(scope_stack.back());

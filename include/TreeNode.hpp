@@ -175,7 +175,6 @@ class ClassDecl : public TreeNode {
 		virtual void assemArmv7() = 0;
 #else 
 		map<string, MethodDecl *> method_table;
-		map<string, SYM> var_table;
 		virtual void evaluate () {
 			cerr << "Class Decl Evaluate Unimplemented\n";
 		}
