@@ -213,7 +213,7 @@ void Assign::evaluate() {
 }
 
 void IndexAssign::evaluate() {
-	map<string, _SYM>::iterator s;
+	map<string, SYM>::iterator s;
 	if (s = programRoot->scope_stack.back()->find(*i->id);
 			s == programRoot->scope_stack.back()->end()) {
 		if (s = programRoot->call_stack.back()->find(*i->id);
@@ -405,7 +405,7 @@ VAL ArrayAccess::evaluate() {
 }
 VAL Length::evaluate() {
 	// Check that this id is an array
-	map<string, _SYM>::iterator s;
+	map<string, SYM>::iterator s;
 	if (s = programRoot->scope_stack.back()->find(*i->id);
 			s == programRoot->scope_stack.back()->end()) {
 		if (s = programRoot->call_stack.back()->find(*i->id);
@@ -422,7 +422,7 @@ VAL Length::evaluate() {
 
 VAL ArrayAccessLength::evaluate() {
 	// Check that this id is an array
-	map<string, _SYM>::iterator s;
+	map<string, SYM>::iterator s;
 	if (s = programRoot->scope_stack.back()->find(*i->id);
 			s == programRoot->scope_stack.back()->end()) {
 		if (s = programRoot->call_stack.back()->find(*i->id);

@@ -111,20 +111,13 @@ string * typeStringHolder = nullptr;
 %%
 
 program : 
- main_class class_decl_list { // TODO: add main + decl to table 
+ main_class class_decl_list {
  		delete programRoot;
 		programRoot = new Program($1, $2);
-#ifdef ASSEM
-		// for all c class_decl: c->root
-#endif 
-		//programRoot->traverse();
 	}
 	| main_class { 
  		delete programRoot;
 		programRoot = new Program($1, nullptr); 
-#ifdef ASSEM
-#endif
-		//programRoot->traverse();
 	}
 	;
 
@@ -132,80 +125,70 @@ main_class :
 	CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement C_BR C_BR { 
 		// Dummy node to construct table for type checking
 		programRoot = new Program(nullptr, nullptr);
-
 		$$ = new MainClass($2, $12, $15); 
-#ifdef ASSEM
-#endif
-		// TODO: Add the contents of statement $15 to main scope
 	}
 	;
 
-class_decl_list : /* Eliminate class_decl*  */
-	class_decl_list class_decl { $1->append( $2 ); }
-	| class_decl { $$ = new ClassDeclList( $1 ); }
+class_decl_list :
+	/* Eliminate class_decl*  */
+	class_decl_list class_decl {
+		$1->append( $2 );
+	}
+	| class_decl {
+		$$ = new ClassDeclList( $1 );
+	}
 	;
 
 class_decl : 
-	CLASS ID O_BR var_decl_list method_decl_list C_BR /* with method_decl_list */ { 
-		$$ = new ClassDeclSimple($2, $4, $5); // TODO: Add to class_decl table
-#ifdef ASSEM
-#endif
+		CLASS ID O_BR var_decl_list method_decl_list C_BR
+		/* with method_decl_list */ { 
+		$$ = new ClassDeclSimple($2, $4, $5); 
 	}
-  | CLASS ID EXTENDS ID O_BR var_decl_list method_decl_list C_BR /* with method_decl_list */ { 
+  | CLASS ID EXTENDS ID O_BR var_decl_list method_decl_list C_BR
+		/* with method_decl_list */ { 
 		$$ = new ClassDeclExtends($2, $4, $6, $7); 
-#ifdef ASSEM
-#endif
 	}
 	| CLASS ID O_BR var_decl_list C_BR { 
 		$$ = new ClassDeclSimple($2, $4, nullptr); 
-#ifdef ASSEM
-#endif
 	}
   | CLASS ID EXTENDS ID O_BR var_decl_list C_BR { 
 		$$ = new ClassDeclExtends($2, $4, $6, nullptr); 
-#ifdef ASSEM
-#endif
 	}
 	/* No var_decl */
-	| CLASS ID O_BR method_decl_list C_BR /* with method_decl_list */ { $$ = new ClassDeclSimple($2, nullptr, $4); 
-#ifdef ASSEM
-#endif
+	| CLASS ID O_BR method_decl_list C_BR 
+		/* with method_decl_list */ { 
+		$$ = new ClassDeclSimple($2, nullptr, $4); 
 	}
-  | CLASS ID EXTENDS ID O_BR method_decl_list C_BR /* with method_decl_list */ { 
+  | CLASS ID EXTENDS ID O_BR method_decl_list C_BR 
+		/* with method_decl_list */ { 
 		$$ = new ClassDeclExtends($2, $4, nullptr, $6); 
-#ifdef ASSEM
-#endif
 	}
 	| CLASS ID O_BR C_BR { 
 		$$ = new ClassDeclSimple($2, nullptr, nullptr); 
-#ifdef ASSEM
-#endif
 	}
   | CLASS ID EXTENDS ID O_BR C_BR { 
 		$$ = new ClassDeclExtends($2, $4, nullptr, nullptr); 
-#ifdef ASSEM
-#endif
 	};
 
-var_decl_list : /* Eliminate var_decl* */
-	var_decl_list var_decl { $1->append( $2 ); }
-	| var_decl { $$ = new VarDeclList( $1 ); }
+var_decl_list :
+	/* Eliminate var_decl* */
+	var_decl_list var_decl {
+		$1->append( $2 );
+	}
+	| var_decl {
+		$$ = new VarDeclList( $1 );
+	}
 	;
 
 var_decl : 
 	INT ID SEMI { 
 		$$ = new VarDecl( new IntType(), $2 ); 
-		//$$->data = new SimpleVar($2->id, "INT", new IntLiteral(0));
 	}
 	| BOOL ID SEMI { 
 		$$ = new VarDecl( new BoolType(), $2 ); 
-		//$$->data = new SimpleVar($2->id, "BOOL", new BoolLiteral(false));
 	}
 	| ID ID SEMI { 
 		$$ = new VarDecl( new IdentType($1), $2 ); 
-		// TODO: FIXME 
-#ifdef ASSEM
-#endif
 	}
 	| INT type_bracket_list ID SEMI {
 		$2->getLastNull()->t = new IntType();
@@ -222,26 +205,29 @@ var_decl :
 	;
 
 var_decl_exp_list : /* Eliminate statement* */
-	var_decl_exp_list var_decl_exp SEMI { $1->append( $2 ); }
-	| var_decl_exp_list var_decl { $1->append( $2 ); }
-	| var_decl_exp SEMI { $$ = new VarDeclExpList( $1 ); }
-	| var_decl { $$ = new VarDeclExpList( $1 ); }
+	var_decl_exp_list var_decl_exp SEMI {
+		$1->append( $2 );
+	}
+	| var_decl_exp_list var_decl {
+		$1->append( $2 );
+	}
+	| var_decl_exp SEMI {
+		$$ = new VarDeclExpList( $1 );
+	}
+	| var_decl {
+		$$ = new VarDeclExpList( $1 );
+	}
 	;
 
 var_decl_exp : 
 	INT ID EQUAL full_exp { 
 		$$ = new VarDeclExp( new IntType(), $2, new Assign($2, $4)); 
-		//$$->data = new SimpleVar($2->id, "INT", new IntLiteral(0));
 	}
 	| BOOL ID EQUAL full_exp { 
 		$$ = new VarDeclExp( new BoolType(), $2, new Assign($2, $4) ); 
-		//$$->data = new SimpleVar($2->id, "BOOL", new BoolLiteral(false));
 	}
 	| ID ID EQUAL full_exp { 
 		$$ = new VarDeclExp( new IdentType($1), $2, new Assign($2, $4) ); 
-		// TODO: FIXME 
-#ifdef ASSEM
-#endif
 	} 
 	| INT type_bracket_list ID EQUAL NEW prime_type index {
 		$2->getLastNull()->t = new IntType();
@@ -258,98 +244,93 @@ var_decl_exp :
 	;
 
 type_bracket_list :
-	type_bracket_list O_SQ C_SQ { $$ = new TypeIndexList( $1 ); }
-	| O_SQ C_SQ { $$ = new TypeIndexList( nullptr ); }
+	type_bracket_list O_SQ C_SQ { 
+		$$ = new TypeIndexList( $1 );
+	}
+	| O_SQ C_SQ {
+		$$ = new TypeIndexList( nullptr );
+	}
 	;
 
 method_decl_list : /* Eliminate method_decl* */
 	method_decl_list method_decl { 
 		$$ = $1; 
 		$1->append( $2 ); 
-#ifdef ASSEM
-#endif
 	}
-	| method_decl { $$ = new MethodDeclList( $1 ); 
-#ifdef ASSEM
-#endif
+	| method_decl {
+		$$ = new MethodDeclList( $1 ); 
 	}
 	;
 
 method_decl : 
 	PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR 
-	{ // TODO: Apend to table
-		// DONE: set nodes for -, -, -, - , -, - 
+	{ 
 		$$ = new MethodDecl($2, $3, $5, $8, $9, $11);  
-#ifdef ASSEM
-#endif
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR 
-	{ $$ = new MethodDecl($2, $3, nullptr, $7, $8, $10); 
-#ifdef ASSEM
-#endif
+	{
+		$$ = new MethodDecl($2, $3, nullptr, $7, $8, $10); 
 	}
 	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR /* no var_decl */
-	{ $$ = new MethodDecl($2, $3, $5, nullptr, $8, $10); 
-#ifdef ASSEM
-#endif
+	{ 
+		$$ = new MethodDecl($2, $3, $5, nullptr, $8, $10); 
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR /* no var_decl */
-	{ $$ = new MethodDecl($2, $3, nullptr, nullptr, $7, $9); 
-#ifdef ASSEM
-#endif
+	{ 
+		$$ = new MethodDecl($2, $3, nullptr, nullptr, $7, $9); 
 	}
 	/* No Statement List */
 	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-	{ $$ = new MethodDecl($2, $3, $5, $8, nullptr, $10); 
-#ifdef ASSEM
-#endif
+	{
+		$$ = new MethodDecl($2, $3, $5, $8, nullptr, $10); 
 	}
 	| PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-	{ $$ = new MethodDecl($2, $3, nullptr, $7, nullptr, $9); 
-#ifdef ASSEM
-#endif
+	{ 
+		$$ = new MethodDecl($2, $3, nullptr, $7, nullptr, $9); 
 	}
-	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR  RETURN full_exp SEMI C_BR /* no var_decl */
-	{ $$ = new MethodDecl($2, $3, $5, nullptr, nullptr, $9); 
-#ifdef ASSEM
-#endif
+	| PUBLIC type ID O_PAREN formal_list C_PAREN O_BR  RETURN full_exp SEMI C_BR
+		/* no var_decl */
+	{
+		$$ = new MethodDecl($2, $3, $5, nullptr, nullptr, $9); 
 	}
-	| PUBLIC type ID O_PAREN C_PAREN O_BR  RETURN full_exp SEMI C_BR /* no var_decl */
-	{ $$ = new MethodDecl($2, $3, nullptr, nullptr, nullptr, $8); 
-#ifdef ASSEM
-#endif
+	| PUBLIC type ID O_PAREN C_PAREN O_BR  RETURN full_exp SEMI C_BR
+		/* no var_decl */
+	{
+		$$ = new MethodDecl($2, $3, nullptr, nullptr, nullptr, $8); 
 	}
 	;
 
 formal_list : 
 	type ID formal_rest_list { 
 		$$ = new FormalList( $1, $2, $3 ); 
-#ifdef ASSEM
-#endif
 	}
 	| type ID { 
 		$$ = new FormalList( $1, $2 ); 
-#ifdef ASSEM
-#endif
 	}
 	;
 
 formal_rest_list : /* Eliminate formal_rest* */
-	formal_rest_list formal_rest { $1->push_back( $2 ); }
-	| formal_rest /* empty rule */ { $$ = new vector<FormalRest * >{nullptr, $1}; }
+	formal_rest_list formal_rest {
+		$1->push_back( $2 );
+	}
+	| formal_rest /* empty rule */ {
+		$$ = new vector<FormalRest * >{nullptr, $1};
+	}
 	;
 
 formal_rest :
 	COMMA type ID { 
 		$$ = new FormalRest( $2, $3 ); 
-#ifdef ASSEM
-#endif
 	}
 	;
 
 type : 
-	prime_type { $$ = dynamic_cast<Type *> ($1) ; }
-	| type O_SQ C_SQ { $$ = new TypeIndexList( $1 ); }
+	prime_type {
+		$$ = dynamic_cast<Type *> ($1) ;
+	}
+	| type O_SQ C_SQ {
+		$$ = new TypeIndexList( $1 );
+	}
 	;
 
 prime_type :
@@ -368,42 +349,67 @@ prime_type :
 	;
 
 statement_list : /* Eliminate statement* */
-	statement_list statement { if ($2) $1->append( $2 ); }
-	| statement { $$ = new StatementList( $1 ); }
+	statement_list statement {
+		if ($2) $1->append( $2 );
+	}
+	| statement {
+		$$ = new StatementList( $1 );
+	}
 	;
 
 statement : 
-	  O_BR C_BR /* No statement */ { $$ = new BlockStatements(nullptr); }
+	  O_BR C_BR /* No statement */ {
+		$$ = new BlockStatements(nullptr);
+	}
 	| O_BR statement_list C_BR { 
-		$$ = new BlockStatements($2); } 
+		$$ = new BlockStatements($2);
+	} 
 	| O_BR var_decl_exp_list C_BR { 
 		// Do nothing if there are variable declarations but no statements 
-		$$ = new BlockStatements(nullptr); } 
+		$$ = new BlockStatements(nullptr);
+	} 
 	| O_BR var_decl_exp_list statement_list C_BR { 
-		$$ = new BlockStatements($2, $3); } 
+		$$ = new BlockStatements($2, $3);
+	} 
   | IF O_PAREN full_exp C_PAREN statement ELSE statement {
-		$$ = new IfStatement( $3, $5, $7 ); }
+		$$ = new IfStatement( $3, $5, $7 );
+	}
   | WHILE O_PAREN full_exp C_PAREN statement {
-		$$ = new WhileStatement( $3, $5 ); }
+		$$ = new WhileStatement( $3, $5 );
+	}
   | FOR O_PAREN var_decl_exp SEMI full_exp SEMI ID EQUAL full_exp C_PAREN statement {
 		$$ = new ForStatement( $3, $5, new Assign( $7, $9), $11 );
 	}
-  | PRINT_STATE O_PAREN full_exp C_PAREN SEMI
-		{ $$ = new PrintExp( $3 ); }
-  | PRINT_STATE O_PAREN STRING_LITERAL C_PAREN SEMI
-		{ $$ = new PrintString( $3 ); }
-  | PRINT_STATE_LN O_PAREN full_exp C_PAREN SEMI
-		{ $$ = new PrintLineExp( $3 ); }
-  | PRINT_STATE_LN O_PAREN STRING_LITERAL C_PAREN SEMI
-		{ $$ = new PrintLineString( $3 ); }
-  | ID EQUAL full_exp SEMI { $$ = new Assign( $1, $3 ); }
-  | ID index EQUAL full_exp SEMI { $$ = new IndexAssign( $1, $2, $4); }
-  | RETURN full_exp SEMI { $$ = new ReturnStatement( $2 ); }
+  | PRINT_STATE O_PAREN full_exp C_PAREN SEMI { 
+		$$ = new PrintExp( $3 );
+	}
+  | PRINT_STATE O_PAREN STRING_LITERAL C_PAREN SEMI { 
+		$$ = new PrintString( $3 );
+	}
+  | PRINT_STATE_LN O_PAREN full_exp C_PAREN SEMI {
+		$$ = new PrintLineExp( $3 );
+	}
+  | PRINT_STATE_LN O_PAREN STRING_LITERAL C_PAREN SEMI { 
+		$$ = new PrintLineString( $3 );
+	}
+  | ID EQUAL full_exp SEMI {
+		$$ = new Assign( $1, $3 );
+	}
+  | ID index EQUAL full_exp SEMI {
+		$$ = new IndexAssign( $1, $2, $4);
+	}
+  | RETURN full_exp SEMI {
+		$$ = new ReturnStatement( $2 );
+	}
 	;
 
 index : 
-	O_SQ full_exp C_SQ { $$ = new SingleIndex( $2 ); }
-	| index O_SQ full_exp C_SQ { $$ = new MultipleIndices( $1, $3 ); }
+	O_SQ full_exp C_SQ { 
+		$$ = new SingleIndex( $2 );
+	}
+	| index O_SQ full_exp C_SQ {
+		$$ = new MultipleIndices( $1, $3 );
+	}
 	; 
 	
 full_exp : /* Full expression */
@@ -412,85 +418,153 @@ full_exp : /* Full expression */
 
 or_term : /* or has the lowest presedence */
 	and_term
-	| or_term OR and_term { $$ = new Or( $1, $3 ); }
+	| or_term OR and_term {
+		$$ = new Or( $1, $3 );
+	}
 	;
 
 and_term : /* and has a higher presedence than or */
 	eq_term
-	| and_term AND eq_term { $$ = new And( $1, $3 ); }
+	| and_term AND eq_term {
+		$$ = new And( $1, $3 ); 
+	}
 	;
 
 eq_term : /* Equal to operations */
 	gr_le_term
-	| eq_term EQEQ gr_le_term { $$ = new Equal( $1, $3 ); }
-	| eq_term N_EQ gr_le_term { $$ = new NotEqual( $1, $3 ); }
+	| eq_term EQEQ gr_le_term {
+		$$ = new Equal( $1, $3 );
+	}
+	| eq_term N_EQ gr_le_term {
+		$$ = new NotEqual( $1, $3 );
+	}
 	;
 
 gr_le_term : /* Greater than less than ops */ 
 	add_term
-	| gr_le_term LESS add_term { $$ = new Lesser( $1, $3 ); }
-	| gr_le_term GREAT add_term { $$ = new Greater( $1, $3 ); }
-	| gr_le_term L_EQ add_term { $$ = new LessEqual( $1, $3 ); }
-	| gr_le_term G_EQ add_term { $$ = new GreatEqual( $1, $3 ); }
+	| gr_le_term LESS add_term { 
+		$$ = new Lesser( $1, $3 ); 
+	}
+	| gr_le_term GREAT add_term { 
+		$$ = new Greater( $1, $3 );
+	}
+	| gr_le_term L_EQ add_term { 
+		$$ = new LessEqual( $1, $3 ); 
+	}
+	| gr_le_term G_EQ add_term { 
+		$$ = new GreatEqual( $1, $3 );
+	}
 	;
 
 add_term : /* Expression with + - op */
 	mul_term 
-	| add_term PLUS mul_term { $$ = new Add( $1, $3 ); }
-	| add_term MINUS mul_term { $$ = new Subtract( $1, $3 ); }
+	| add_term PLUS mul_term {
+		$$ = new Add( $1, $3 );
+	}
+	| add_term MINUS mul_term {
+		$$ = new Subtract( $1, $3 );
+	}
 	;
 
 mul_term : /* Expression with multiplication or division */
 	un_op
-	| mul_term DIV un_op { $$ = new Divide( $1, $3 ); }
-	| mul_term MUL un_op { $$ = new Multiply( $1, $3 ); }
+	| mul_term DIV un_op { 
+		$$ = new Divide( $1, $3 );
+	}
+	| mul_term MUL un_op { 
+		$$ = new Multiply( $1, $3 );
+	}
 	;
 
 un_op : /* Expression with op */
 	exp
-	| NOT un_op { $$ = new Not( $2 ); }
-	| PLUS un_op { $$ = new Pos( $2 ); }
-	| MINUS un_op { $$ = new Neg( $2 ); }
+	| NOT un_op {
+		$$ = new Not( $2 );
+	}
+	| PLUS un_op { 
+		$$ = new Pos( $2 );
+	}
+	| MINUS un_op { 
+		$$ = new Neg( $2 ); 
+	}
 	;
 
 exp : 
-	ID { $$ = new ExpObject(new IdObj( $1 )); } 
-	| ID index { $$ = new ArrayAccess( $1, $2 ); }
-	| ID DOT LENGTH { $$ = new Length( $1 ); }
-	| ID index DOT LENGTH { $$ = new ArrayAccessLength( $1, $2 ); }
-	| INTEGER_LITERAL { $$ = new LitInt( $1 ); }
-	| TRUE { $$ = new True(); }
-	| FALSE { $$ = new False(); }
-	| object { $$ = new ExpObject( $1 ); }
-	| ID DOT ID O_PAREN exp_list C_PAREN 
-	  { $$ = new ObjectMethodCall( new IdObj( $1 ), $3, $5 ); }
-	| object DOT ID O_PAREN exp_list C_PAREN 
-		{ $$ = new ObjectMethodCall( $1, $3, $5 ); }
-	| ID DOT ID O_PAREN C_PAREN 
-		{ $$ = new ObjectMethodCall( new IdObj( $1 ), $3, nullptr ); }
-	| object DOT ID O_PAREN C_PAREN 
-		{ $$ = new ObjectMethodCall( $1, $3, nullptr ); }
-	| O_PAREN full_exp C_PAREN { $$ = new ParenExp( $2 ); }
+	  ID { 
+		$$ = new ExpObject(new IdObj( $1 ));
+	} 
+	| ID index { 
+		$$ = new ArrayAccess( $1, $2 );
+	}
+	| ID DOT LENGTH {
+		$$ = new Length( $1 ); 
+	}
+	| ID index DOT LENGTH { 
+		$$ = new ArrayAccessLength( $1, $2 ); 
+	}
+	| INTEGER_LITERAL { 
+		$$ = new LitInt( $1 ); 
+	}
+	| TRUE {
+		$$ = new True(); 
+	}
+	| FALSE {
+		$$ = new False(); 
+	}
+	| object {
+		$$ = new ExpObject( $1 ); 
+	}
+	| ID DOT ID O_PAREN exp_list C_PAREN { 
+		$$ = new ObjectMethodCall( new IdObj( $1 ), $3, $5 ); 
+	}
+	| object DOT ID O_PAREN exp_list C_PAREN { 
+		$$ = new ObjectMethodCall( $1, $3, $5 ); 
+	}
+	| ID DOT ID O_PAREN C_PAREN { 
+		$$ = new ObjectMethodCall( new IdObj( $1 ), $3, nullptr ); 
+	}
+	| object DOT ID O_PAREN C_PAREN { 
+		$$ = new ObjectMethodCall( $1, $3, nullptr ); 
+	}
+	| O_PAREN full_exp C_PAREN {
+		$$ = new ParenExp( $2 ); 
+	}
 	;
 
 object : 
-	THIS { $$ = new ThisObj(); } 
-	| NEW ID O_PAREN C_PAREN { $$ = new NewIdObj( $2 ); }
-	| NEW prime_type index { $$ = new NewTypeObj( $2, $3 ); }
+	THIS {
+		$$ = new ThisObj();
+	} 
+	| NEW ID O_PAREN C_PAREN {
+		$$ = new NewIdObj( $2 );
+	}
+	| NEW prime_type index {
+		$$ = new NewTypeObj( $2, $3 );
+	}
 	;
 
 exp_rest_list : /* Eliminate exp_rest* */
-	exp_rest_list exp_rest { $1->push_back( $2 ); }
-	| exp_rest { $$ = new vector<Exp * > {nullptr, $1 }; }
+	exp_rest_list exp_rest {
+		$1->push_back( $2 );
+	}
+	| exp_rest {
+		$$ = new vector<Exp * > {nullptr, $1 };
+	}
 	;
 
 exp_list : 
-	full_exp exp_rest_list { $$ = new ExpList( $1, $2 ); }
-	| full_exp { $$ = new ExpList( $1 ); }
+	full_exp exp_rest_list {
+		$$ = new ExpList( $1, $2 );
+	}
+	| full_exp {
+		$$ = new ExpList( $1 );
+	}
 	;
 
 exp_rest : 
-	COMMA full_exp { $$ = $2 ; }
+	COMMA full_exp {
+		$$ = $2 ;
+	}
 	;
 
 %%
