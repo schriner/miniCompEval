@@ -26,11 +26,18 @@ using ID_ARRAY = symTab::_ID_ARRAY<Type>;
 using VAL = symTab::_VALUE<Type>;
 using SYM = symTab::_SYMBOL<Type>;
 using SCOPE = symTab::_BLOCK_SCOPE<Type>;
+using MAP = map<string, SYM>;
 
 struct InterpreterContext {
   // merge these
-  vector<map<string, SYM> *> call_stack;
-  vector<SCOPE *> scope_stack{new SCOPE()};
+
+	// TODO(ss): Check memory management for this during evaluate
+	// Stack of class instance scopes for instance variables
+	// ["class"] entry within the map contains the classname for the given scope
+  vector<MAP *> call_stack;
+// stack of method calls scopes
+// variables that survive for the life of a particular method call
+  vector<SCOPE *> scope_stack{new SCOPE()}; // something like a sym table
 
   VAL return_reg; // std::optional
   ExpList * arg_stack = nullptr;

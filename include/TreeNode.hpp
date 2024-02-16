@@ -107,24 +107,6 @@ class Program : public TreeNode {
 		// Use these during AST generation for EXPR
 		// TODO(ss): notice variable redeclarations within a method scope
 		map<string, ClassDecl *> class_table;
-
-    // TODO(ss): Check memory management for this during evaluate
-		// Stack of class instance scopes for instance variables
-		// ["class"] entry within the map contains the classname for the given scope
-		vector<map<string, SYM> *> call_stack; // Fixme(ss) call stack - object with variables
-		// stack of method calls scopes
-		// variables that survive for the life of a particular method call
-		vector<SCOPE *> scope_stack; // something like a sym table
-		void push_nested_scope() {
-			SCOPE * scope = new SCOPE(scope_stack.back());
-			scope_stack[scope_stack.size() - 1] = scope;
-		}
-		void pop_nested_scope() {
-			auto tmp = scope_stack.back();
-			scope_stack[scope_stack.size() - 1] = scope_stack[scope_stack.size() - 1]->parent;
-			delete tmp;
-		}
-		ExpList * arg_stack = nullptr;
 #ifdef ASSEM
 		// TODO move assem to another namespace and create a context variable
 		vector<string * > * dataSection;
@@ -139,7 +121,6 @@ class Program : public TreeNode {
 			: m(m), c(c) {}
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
-		VAL return_reg;
 		void evaluate();
 #endif
 		void traverse(); 
