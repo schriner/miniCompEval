@@ -20,6 +20,7 @@ int yyparse(void);
 using namespace std;
 
 ofstream assemStream;
+//ARMv7::AssemContext * context;
 Program * programRoot = nullptr;
 char * yyfilename = nullptr;
 bool programTypeError = false;
@@ -86,6 +87,8 @@ int main( int argc, char** argv ) {
 	yyparse();
 
 	// Generate Assembly : 
+	//context = new ARMv7::AssemContext;
+	//context->assemStream = &assemStream;
 	programRoot->assemArmv7();
 	if (argc != 3) assemStream.close();
 

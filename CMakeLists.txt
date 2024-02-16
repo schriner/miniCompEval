@@ -30,7 +30,6 @@ set(mjavac_sources
 	"EvalNode.cpp"
 	"TreeNode.cpp"
 	"AssemNode.cpp"
-	"util_assem.cpp"
 )
 list(TRANSFORM mjavac_sources PREPEND "source/")
 

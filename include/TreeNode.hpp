@@ -63,8 +63,8 @@ using namespace Interpreter;
 // Parent Abstract Class of Everything
 class TreeNode {
 	protected:
-		TreeNode() : lineRecord(yylineno), token(yytext) {
-		}
+		TreeNode() : 
+			lineRecord(yylineno), token(yytext) {}
 	public: 
 		int lineRecord = -1;
 		string token;
@@ -107,20 +107,13 @@ class Program : public TreeNode {
 		// Use these during AST generation for EXPR
 		// TODO(ss): notice variable redeclarations within a method scope
 		map<string, ClassDecl *> class_table;
-#ifdef ASSEM
-		// TODO move assem to another namespace and create a context variable
-		vector<string * > * dataSection;
-		vector<string * > * textSection;
-		Program (MainClass * m)
-			: m(m), c(nullptr), dataSection(nullptr), textSection(nullptr) {}
-		Program (MainClass * m, ClassDeclList * c)
-			: m(m), c(c), dataSection(nullptr), textSection(nullptr) {}
-		void assemArmv7();
-#else
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c) {}
 		Program (MainClass * m)
 			: m(m), c(nullptr) {}
+#ifdef ASSEM
+		void assemArmv7();
+#else
 		void evaluate();
 #endif
 		void traverse(); 
