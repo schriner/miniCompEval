@@ -56,7 +56,24 @@ void ClassDeclSimple::evaluate() {
 	// cerr << "TODO Var Decl\n";
 }
 
-//TODO(ss): void ClassDeclExtends::evaluate() {}
+void ClassDeclExtends::evaluate() {
+	programRoot->class_table[*i->id] = this;
+	for (auto md : *m->mdVector) {
+		method_table[*md->i->id] = md;
+	}
+	var_table["class"] = {{.name = i->id}, nullptr};
+	var_table["extends"] = {{.name = i2->id}, nullptr};
+	//cerr << *i->id << endl;
+	if (v && v->vdVector) { 
+		for (auto var : *v->vdVector) {
+			// Type Handler
+			if (var) {
+				// TODO: check for duplicate variable in parent class
+				var_table[*var->i->id] = {0, var->t};
+			}
+		}
+	}
+}
 
 void VarDeclList::evaluate() {
 	cerr << "TODO: VarDeclList\n";
@@ -510,10 +527,14 @@ VAL ObjectMethodCall::evaluate() {
 	if (dynamic_cast<NewIdObj *>(o)) {
 		// look up the method in the table and traverse
 		// var decl for a class
-		//programRoot->call_stack.push_back((dynamic_cast<NewIdObj *>(o)->i)->id); // push classname
 		ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
-		programRoot->call_stack.push_back(new map<string, SYM>(cl->var_table) ); // push classname
-		//cerr << *i->id << ":" << *(dynamic_cast<NewIdObj *>(o)->i)->id << endl;
+		programRoot->call_stack.push_back( new map<string, SYM>(cl->var_table) ); // push classname
+		for (ClassDecl * parent = cl; dynamic_cast<ClassDeclExtends *>(parent); ) {
+			parent = programRoot->class_table[*parent->var_table["extends"].val.name];
+			programRoot->call_stack.back()->insert(
+					parent->var_table.begin(), parent->var_table.end()
+			);
+		}
 		return cl->method_table[*i->id]->evaluate();
  	
 	} else if (dynamic_cast<IdObj *>(o)){	
@@ -526,21 +547,31 @@ VAL ObjectMethodCall::evaluate() {
 		} else {
 			abort();
 		}
+
 		ClassDecl * cl = programRoot->class_table[*(*scope->second.val.id)["class"].val.name];
 		programRoot->call_stack.push_back(scope->second.val.id);
+		while (dynamic_cast<ClassDeclExtends *>(cl) && cl->method_table.find(*i->id) == cl->method_table.end()) {
+			cl = programRoot->class_table[*cl->var_table["extends"].val.name];
+			programRoot->call_stack.back()->insert(
+					cl->var_table.begin(), cl->var_table.end()
+			);
+		}
 		return cl->method_table[*i->id]->evaluate();
-		//cerr << "Err: Trying to make a method call with IdObj\n";
 	
 	} else if (dynamic_cast<ThisObj *>(o)) {
 		programRoot->call_stack.push_back((programRoot->call_stack.back()));
 		ClassDecl * cl = programRoot->class_table[*((*programRoot->call_stack.back())["class"]).val.name];
-		//cerr << "This: " << *(programRoot->call_stack.back()) << " " << *i->id << endl;
+		while (dynamic_cast<ClassDeclExtends *>(cl) && cl->method_table.find(*i->id) == cl->method_table.end()) {
+			cl = programRoot->class_table[*cl->var_table["extends"].val.name];
+			programRoot->call_stack.back()->insert(
+					cl->var_table.begin(), cl->var_table.end()
+			);
+		}
 		return cl->method_table[*i->id]->evaluate();
 
-		//cerr << "Err: Trying to make a method call with ThisObj\n";
-		//ClassDecl * cl = programRoot->class_table[*(dynamic_cast<NewIdObj *>(o)->i)->id];
 	} else if (dynamic_cast<NewTypeObj *>(o)){
 		cerr << "Err: Trying to make a method call with NewTypeObj\n";
+
 	} else {
 		cerr << "Methodcall" << endl;
 	}

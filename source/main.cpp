@@ -86,7 +86,7 @@ int main( int argc, char** argv ) {
 	yyparse();
 
 	// Generate Assembly : 
-	programRoot->assem();
+	programRoot->assemArmv7();
 	if (argc != 3) assemStream.close();
 
 }

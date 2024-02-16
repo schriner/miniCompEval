@@ -130,7 +130,7 @@ class Program : public TreeNode {
 			: m(m), c(nullptr), dataSection(nullptr), textSection(nullptr) {}
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c), dataSection(nullptr), textSection(nullptr) {}
-		void assem();
+		void assemArmv7();
 #else
 		Program (MainClass * m, ClassDeclList * c)
 			: m(m), c(c) {}
@@ -152,7 +152,7 @@ class MainClass : public TreeNode {
 			: i1(i1), i2(i2), s(s) {}
 		void traverse();
 #ifdef ASSEM
-		void assem();
+		void assemArmv7();
 #else
 		void evaluate();
 #endif
@@ -173,7 +173,7 @@ class ClassDeclList : public TreeNode {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem();
+		void assemArmv7();
 #else
 		void evaluate();
 #endif
@@ -188,7 +188,7 @@ class ClassDecl : public TreeNode {
 		ClassDecl (Ident * i, VarDeclList * v,  MethodDeclList * m)
 			: i(i), v(v), m(m) {}
 #ifdef ASSEM
-		virtual void assem() = 0;
+		virtual void assemArmv7() = 0;
 #else 
 		map<string, MethodDecl *> method_table;
 		map<string, SYM> var_table;
@@ -197,6 +197,7 @@ class ClassDecl : public TreeNode {
 		}
 #endif
 };
+
 class ClassDeclSimple : public ClassDecl {
 	public:
 		ClassDeclSimple (Ident * i, VarDeclList * v,  MethodDeclList * m)
@@ -210,11 +211,12 @@ class ClassDeclSimple : public ClassDecl {
 #ifdef ASSEM
 		map<string, string*> * nameTable = nullptr; // id -> symRegLabel
 		map<string, string*> * typeTable = nullptr; // id -> symRegLabel
-		virtual void assem();
+		virtual void assemArmv7();
 #else
 		void evaluate();
 #endif
 };
+
 class ClassDeclExtends : public ClassDecl {
 	public:
 		Ident * i2 = nullptr;
@@ -222,9 +224,9 @@ class ClassDeclExtends : public ClassDecl {
 			: ClassDecl(i1, v, m), i2(i2) {}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem();
+		virtual void assemArmv7();
 #else
-		 //void evaluate();
+		 void evaluate();
 #endif
 };
 /* Abstract class ClassDecl End */
@@ -238,7 +240,7 @@ class VarDecl : public TreeNode {
 		void traverse();
 		// TODO(ss): void evaluate();
 #ifdef ASSEM
-		void assem(map<string, string*> *, map<string, string*> *);
+		void assemArmv7(map<string, string*> *, map<string, string*> *);
 #else
 		virtual void evaluate();
 #endif
@@ -251,8 +253,8 @@ class VarDeclExp : public VarDecl {
 		void traverse() { cerr << "traverse unimplmented in VarDeclExp" << endl; }
 		// TODO(ss): void evaluate();
 #ifdef ASSEM
-		void assem(map<string, string*> *, map<string, string*> *) {
-			cerr << "assem unimplmented in VarDeclExp" << endl; }
+		void assemArmv7(map<string, string*> *, map<string, string*> *) {
+			cerr << "assemArmv7 unimplmented in VarDeclExp" << endl; }
 #else
 		void evaluate();
 #endif
@@ -269,10 +271,10 @@ class VarDeclExpList : public TreeNode {
 			vdeVector->push_back(vde);
 		}
 		void traverse() {
-			cerr << "ERROR(unimplemented): assem VarDeclExpList";
+			cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList";
 		}
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *) {cerr << "ERROR(unimplemented): assem VarDeclExpList"; }
+		void assemArmv7(string * stmt_str, map<string, string*> *) {cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList"; }
 #else
 		void evaluate();
 #endif
@@ -287,7 +289,7 @@ class VarDeclList : public TreeNode {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(map<string, string*> *, map<string, string*> *);
+		void assemArmv7(map<string, string*> *, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -312,7 +314,7 @@ class MethodDecl : public TreeNode {
 		} 
 		void traverse();
 #ifdef ASSEM
-		void assem(string * objName);
+		void assemArmv7(string * objName);
 #else
 		VAL evaluate();
 #endif
@@ -330,7 +332,7 @@ class MethodDeclList : public TreeNode {
 		}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * objName);
+		virtual void assemArmv7(string * objName);
 #else
 		void evaluate();
 #endif
@@ -425,7 +427,7 @@ class Exp : public TreeNode {
 		bool isBoolRes(); 
 		virtual ~Exp() = default;
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel) {
+		virtual void assemArmv7(string * exp_str, string * branchLabel) {
 			*exp_str = *exp_str + "\n\tError(Debug):Next Assem expr unimplemented ";
 		} 
 #else
@@ -441,7 +443,7 @@ class Exp : public TreeNode {
 class Statement : public TreeNode { 
 	public:
 #ifdef ASSEM
-		virtual void assem(string * stmt_str, map<string, string*> *) {
+		virtual void assemArmv7(string * stmt_str, map<string, string*> *) {
 			cerr << "\nUnimplemented Statement in assemble" << endl;
 		}
 #else
@@ -459,7 +461,7 @@ class BlockStatements : public Statement {
 		BlockStatements(VarDeclExpList * vdel, StatementList * s) : s(s), vdel(vdel) {}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -477,7 +479,7 @@ class IfStatement : public Statement {
 			}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -494,7 +496,7 @@ class WhileStatement : public Statement {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -514,7 +516,7 @@ class ForStatement : public Statement {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *) {
+		void assemArmv7(string * stmt_str, map<string, string*> *) {
 			cerr << "assem unimplmented in ForStatement" << endl; }
 #else
 		void evaluate();
@@ -527,7 +529,7 @@ class PrintLineExp : public Statement {
 		PrintLineExp(Exp * e) : e(e) {}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -539,7 +541,7 @@ class PrintLineString : public Statement {
 		PrintLineString (StringLiteral * s) : s(s) {}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -551,7 +553,7 @@ class PrintExp : public Statement {
 		PrintExp (Exp * e) : e(e) {}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -563,7 +565,7 @@ class PrintString : public Statement {
 		PrintString (StringLiteral * s) : s(s) {}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -579,7 +581,7 @@ class Assign : public Statement {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -596,7 +598,7 @@ class IndexAssign : public Statement {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -612,7 +614,7 @@ class ReturnStatement : public Statement {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -631,7 +633,7 @@ class StatementList : public TreeNode {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * stmt_str, map<string, string*> *);
+		void assemArmv7(string * stmt_str, map<string, string*> *);
 #else
 		void evaluate();
 #endif
@@ -722,7 +724,7 @@ class Or : public BoolResExp {
 		} 
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel);
+		void assemArmv7(string * exp_str, string * branchLabel);
 #else
 		VAL evaluate(); 
 #endif
@@ -739,7 +741,7 @@ class And : public BoolResExp {
 		} 
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel);
+		void assemArmv7(string * exp_str, string * branchLabel);
 #else
 		VAL evaluate(); 
 #endif
@@ -752,7 +754,7 @@ class Equal : public BoolResExp {
 		} 
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -765,7 +767,7 @@ class NotEqual : public BoolResExp {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -783,7 +785,7 @@ class Lesser : public BoolResExp {
 		} 
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -801,7 +803,7 @@ class Greater : public BoolResExp {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -818,7 +820,7 @@ class LessEqual : public BoolResExp {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -835,7 +837,7 @@ class GreatEqual : public BoolResExp {
 		}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -845,7 +847,7 @@ class Add : public IntResExp {
 		Add(Exp * e1, Exp * e2) : IntResExp(e1, e2, '+') {} 
 		void traverse();
 #ifdef ASSEM
-	  void assem(string * exp_str, string * branchLabel); 
+	  void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -855,7 +857,7 @@ class Subtract : public IntResExp {
 		Subtract(Exp * e1, Exp * e2) : IntResExp(e1, e2, '-') {}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -865,7 +867,7 @@ class Divide : public IntResExp {
 		Divide(Exp * e1, Exp * e2) : IntResExp(e1, e2, '/') {}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -875,7 +877,7 @@ class Multiply : public IntResExp {
 		Multiply(Exp * e1, Exp * e2) : IntResExp(e1, e2, '*') {}
 		void traverse();
 #ifdef ASSEM
-		void assem(string * exp_str, string * branchLabel); 
+		void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -891,7 +893,7 @@ class Not : public UnaryExp {
 		}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -905,7 +907,7 @@ class Pos : public UnaryExp {
 		}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -919,7 +921,7 @@ class Neg : public UnaryExp {
 		}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -930,7 +932,7 @@ class ParenExp : public UnaryExp {
 		ParenExp(Exp * e) : UnaryExp(e) {}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -985,7 +987,7 @@ class LitInt : public Exp {
 		LitInt(IntLiteral * i) : i(i) {}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel);
+		virtual void assemArmv7(string * exp_str, string * branchLabel);
 #else
 		VAL evaluate(); 
 #endif
@@ -994,7 +996,7 @@ class True : public Exp {
 	public:
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -1003,7 +1005,7 @@ class False : public Exp {
 	public:
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate(); 
 #endif
@@ -1016,7 +1018,7 @@ class ExpObject : public Exp {
 		}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate();
 #endif
@@ -1031,7 +1033,7 @@ class ObjectMethodCall : public Exp {
 		}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		VAL evaluate();
 #endif
@@ -1042,7 +1044,7 @@ class ObjectMethodCall : public Exp {
 class Object : public TreeNode {
 	public:
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel){
+		virtual void assemArmv7(string * exp_str, string * branchLabel){
 			cerr << "Object function unimplemented" << endl;
 		}
 #endif
@@ -1053,7 +1055,7 @@ class IdObj : public Object {
 		IdObj(Ident * i) : i(i) {}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		//TODO: void evaluate();
 #endif
@@ -1086,7 +1088,7 @@ class NewTypeObj : public Object {
 		}
 		void traverse();
 #ifdef ASSEM
-		virtual void assem(string * exp_str, string * branchLabel); 
+		virtual void assemArmv7(string * exp_str, string * branchLabel); 
 #else
 		void evaluate();
 #endif
@@ -1135,7 +1137,7 @@ class StringLiteral : public TreeNode {
 		StringLiteral(string * str) : str(str) {}
 		void traverse();
 #ifdef ASSEM
-		void assem();
+		void assemArmv7();
 #endif
 };
 
