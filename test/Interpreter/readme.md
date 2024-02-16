@@ -13,10 +13,12 @@
 13. `array_print_class_var.java`: Same as multiple print but with class instance variable functionality.
 14. `loop3.java`: Copy of loop2.java replacing the `while` statement with a `for`loop.
 15. `nested.java`: Tests variable declaration lists in nested scopes and variable declaration within `main` statment. Grammar rule: `"{" ( VarDeclaration )* ( Statement )* "}"`
+16. `extends.java`: `array_print_class_var.java` revised to use the keyword `extends` with one nested class.
+17. `extends2.java`: `loop2.java` revised to use the keyword `extends` with one nested class. 
 
-16. `TODO:` `graphTraversal.java`: Test multiple classes, class instance variables, and arrays of class variables.
-17. `TODO:` Class Extends 
-18. `TODO: multi_array_4d.java` Tests an array of 4 dim.
+18. `TODO:` `graphTraversal.java`: Test multiple classes, class instance variables, and arrays of class variables.
+19. `TODO:` Class Extends with more than one nested class  
+20. `TODO: multi_array_4d.java` Tests an array of 4 dim.
 
 * TODO(ss): Automate Testing within this dir with javac output
 * TODO(ss): Error Testing for undeclared variables and inproper argument signatures on variables 
