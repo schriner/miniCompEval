@@ -77,6 +77,8 @@ struct _BLOCK_SCOPE {
     : parent(nullptr){}
 };
 
+// Define Evaluate Context Here
+
 }
 
 #endif

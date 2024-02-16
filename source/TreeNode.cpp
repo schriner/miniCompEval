@@ -15,21 +15,12 @@
 #include <fstream>
 
 #include "TreeNode.hpp"
+#include "Traverse.hpp"
 
 using namespace std;
+using namespace traverse;
 
 extern Program * programRoot;
-
-bool expErr = false;
-bool isBool = false;
-const char * b_res = "BOOL";
-const char * i_res = "INT";
-const char * o_res = "OBJ";
-
-void updateExpResult (const char * r);
-void updateExpResult (string * r);
-bool checkExpResult (const char * exp);
-bool checkExpResult (string * r);
 
 // Program //
 void Program::traverse() {
