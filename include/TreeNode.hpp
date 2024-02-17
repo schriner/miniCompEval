@@ -214,7 +214,6 @@ class VarDecl : public TreeNode {
 		string * label = nullptr;
 		VarDecl(Type * t, Ident * i) : t(t), i(i) {} 
 		void traverse();
-		// TODO(ss): void evaluate();
 #ifdef ASSEM
 		void assemArmv7(map<string, string*> *, map<string, string*> *);
 #else
@@ -227,10 +226,10 @@ class VarDeclExp : public VarDecl {
 		Assign * a = nullptr;
 		VarDeclExp(Type * t, Ident * i, Assign * a) : VarDecl(t,i), a(a) {} 
 		void traverse() { cerr << "traverse unimplmented in VarDeclExp" << endl; }
-		// TODO(ss): void evaluate();
 #ifdef ASSEM
 		void assemArmv7(map<string, string*> *, map<string, string*> *) {
-			cerr << "assemArmv7 unimplmented in VarDeclExp" << endl; }
+			cerr << "assemArmv7 unimplmented in VarDeclExp" << endl; 
+		}
 #else
 		void evaluate();
 #endif
@@ -250,7 +249,9 @@ class VarDeclExpList : public TreeNode {
 			cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList";
 		}
 #ifdef ASSEM
-		void assemArmv7(string * stmt_str, map<string, string*> *) {cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList"; }
+		void assemArmv7(string * stmt_str, map<string, string*> *) {
+			cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList";
+		}
 #else
 		void evaluate();
 #endif

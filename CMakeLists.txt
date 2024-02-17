@@ -38,6 +38,9 @@ add_executable(meval source/meval.cpp ${mjavac_sources} ${parser})
 add_executable(mjavac source/main.cpp ${mjavac_sources} ${parser})
 set_target_properties(mjavac PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DASSEM") 
 
+find_package(LLVM CONFIG REQUIRED)
+include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
+
 add_subdirectory(${TEST_DIR})
 add_executable(mjavacllvm source/mjavacllvm.cpp source/LLVM.cpp source/Evaluate.cpp source/TreeNode.cpp ${parser})
 
