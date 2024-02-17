@@ -15,6 +15,7 @@
 using namespace std;
 using namespace llvm;
 
+// Emit Compilable LLVM IR
 void GenerateIR(Program * root) {
 	// root->m
 	// for (auto classdecl : root->c) {

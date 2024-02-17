@@ -12,7 +12,7 @@
 #include "TreeNode.hpp"
 
 
-#define INPUT_FORMAT "Expected: mjavacllvm <inputfile>.java"//[ -p | -o <output_file> | --stdout ] <inputfile>.java"
+#define INPUT_FORMAT "Expected: mjavacllvm [ -o <output_file> | --stdout ] <inputfile>.java"
 #define PARSING_ERROR(x) { fprintf(stderr, "mjavac: %s\n%s\n\n", (x), INPUT_FORMAT); abort(); }
 
 int yyparse(void);
@@ -31,7 +31,9 @@ int main( int argc, char** argv ) {
 	exe = argv[0];
 
 	// Pass fp to yy
-	if (argc == 2 && string(argv[1]).find(".java") != string::npos) {
+	// -o <output_file> | --stdout
+	// <inputfile>.bc
+	if (argc == 3 && string(argv[1]).find(".java") != string::npos) {
 		yyin = fopen(argv[1], "r");
 		yyfilename = argv[2];
 
