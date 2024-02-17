@@ -17,7 +17,8 @@ From the build directory:
 mjavacllvm [-p | -o <output_file> | --stdout ] <inputfile>.java
 ```
 Functionality is tested for the files contained within:
-* Supported
+* Test via compiling bitcode and comparing output with `java`
+* Supported:
 * TODO:
 
 ## mjavac:  Code Generator for ARM 32 bit assembly 
