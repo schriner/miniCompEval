@@ -39,7 +39,7 @@ add_executable(mjavac source/main.cpp ${mjavac_sources} ${parser})
 set_target_properties(mjavac PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DASSEM") 
 
 add_subdirectory(${TEST_DIR})
-#add_executable(mjavacllvm source/llvm.cpp ${mjavac_source} ${parser})
+add_executable(mjavacllvm source/mjavacllvm.cpp source/LLVM.cpp source/Evaluate.cpp source/TreeNode.cpp ${parser})
 
 if(PNG)
 	add_custom_command(

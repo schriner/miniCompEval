@@ -58,7 +58,7 @@ class Ident;
 class IntLiteral;
 class StringLiteral;
 
-using namespace Interpreter;
+using Interpreter::VAL;
 
 // Parent Abstract Class of Everything
 class TreeNode {
