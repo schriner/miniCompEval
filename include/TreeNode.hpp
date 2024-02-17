@@ -280,14 +280,18 @@ class MethodDecl : public TreeNode {
 		VarDeclList * v = nullptr; 
 		StatementList * s = nullptr;
 		Exp * e = nullptr;
+#ifdef ASSEM
 		map<string, string*> * nameTable = nullptr; // id -> symRegLabel
 		map<string, string*> * typeTable = nullptr; // id -> symRegLabel
+#endif
 
 		MethodDecl(Type * t, Ident * i, FormalList * f, 
 				VarDeclList * v, StatementList * s, Exp * e)
 			: t(t), i(i), f(f), v(v), s(s), e(e) {
+#ifdef ASSEM
 			nameTable = new map<string, string*>;
 			typeTable = new map<string, string*>;
+#endif
 		} 
 		void traverse();
 #ifdef ASSEM

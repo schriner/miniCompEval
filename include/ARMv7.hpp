@@ -35,6 +35,9 @@ struct AssemContext {
 	//ClassDeclSimple 
 	//map<string|ClassDecl, map<string, string*>> nameTable = new map<string, string*>;
 	//map<string|ClassDecl, map<string, string*>> typeTable = new map<string, string*>;
+	//MethodDecl
+	//map<string, string*> * nameTable = nullptr; // id -> symRegLabel
+	//map<string, string*> * typeTable = nullptr; // id -> symRegLabel
 
 	vector< map<string, string*> * > nameTableStack;
 	vector< map<string, string*> * > typeTableStack;
