@@ -15,7 +15,11 @@
 using namespace std;
 using namespace llvm;
 
-void GenerateIR() {
+void GenerateIR(Program * root) {
+	// root->m
+	// for (auto classdecl : root->c) {
+	// }
+
 	LLVMContext Context;
 
   // Create some module to put our function into it.
