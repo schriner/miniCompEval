@@ -1,5 +1,5 @@
 
-# A compiler and interpreter for the MiniJava syntax: [![CMake on a single platform](https://github.com/schriner/miniCompEval/actions/workflows/cmake-single-platform.yml/badge.svg?branch=master)](https://github.com/schriner/miniCompEval/actions/workflows/cmake-single-platform.yml)
+# A Code Generator and interpreter for the MiniJava syntax: [![CMake on a single platform](https://github.com/schriner/miniCompEval/actions/workflows/cmake-single-platform.yml/badge.svg?branch=master)](https://github.com/schriner/miniCompEval/actions/workflows/cmake-single-platform.yml)
 
 ## meval:  Interpreter
 From the build directory: 
@@ -10,7 +10,17 @@ meval [-o <output_file>] <inputfile>.java
 Functionality is tested for the files contained within: [`test/Interpreter`](test/Interpreter)
 * class method calls, variables, recursion with arguments, class variable delarations, keyword `extends`, multi dimensional arrays, `if`/`while`/`for` control flow, and variable declarations within `{` `}` statements
 
-## mjavac: Compiler to ARM 32 bit assembly 
+## mjavacllvm:  Generator for LLVM Bitcode
+From the build directory: 
+
+```
+mjavacllvm [-p | -o <output_file> | --stdout ] <inputfile>.java
+```
+Functionality is tested for the files contained within:
+* Supported
+* TODO:
+
+## mjavac:  Code Generator for ARM 32 bit assembly 
 From the build directory: 
 
 ```
