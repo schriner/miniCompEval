@@ -29,258 +29,280 @@ Grammar
    20         | BOOL type_bracket_list ID SEMI
    21         | ID type_bracket_list ID SEMI
 
-   22 type_bracket_list: type_bracket_list O_SQ C_SQ
-   23                  | O_SQ C_SQ
+   22 var_decl_exp_list: var_decl_exp_list var_decl_exp SEMI
+   23                  | var_decl_exp_list var_decl
+   24                  | var_decl_exp SEMI
+   25                  | var_decl
 
-   24 method_decl_list: method_decl_list method_decl
-   25                 | method_decl
+   26 var_decl_exp: INT ID EQUAL full_exp
+   27             | BOOL ID EQUAL full_exp
+   28             | ID ID EQUAL full_exp
+   29             | INT type_bracket_list ID EQUAL NEW prime_type index
+   30             | BOOL type_bracket_list ID EQUAL NEW prime_type index
+   31             | ID type_bracket_list ID EQUAL NEW prime_type index
 
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   27            | PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   28            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   29            | PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   31            | PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   32            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
-   33            | PUBLIC type ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR
+   32 type_bracket_list: type_bracket_list O_SQ C_SQ
+   33                  | O_SQ C_SQ
 
-   34 formal_list: type ID formal_rest_list
-   35            | type ID
+   34 method_decl_list: method_decl_list method_decl
+   35                 | method_decl
 
-   36 formal_rest_list: formal_rest_list formal_rest
-   37                 | formal_rest
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   37            | PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   38            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   39            | PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   41            | PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   42            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
+   43            | PUBLIC type ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR
 
-   38 formal_rest: COMMA type ID
+   44 formal_list: type ID formal_rest_list
+   45            | type ID
 
-   39 type: prime_type
-   40     | type O_SQ C_SQ
+   46 formal_rest_list: formal_rest_list formal_rest
+   47                 | formal_rest
 
-   41 prime_type: INT
-   42           | BOOL
-   43           | ID
+   48 formal_rest: COMMA type ID
 
-   44 statement_list: statement_list statement
-   45               | statement
+   49 type: prime_type
+   50     | type O_SQ C_SQ
 
-   46 statement: O_BR statement_list C_BR
-   47          | O_BR C_BR
-   48          | IF O_PAREN full_exp C_PAREN statement ELSE statement
-   49          | WHILE O_PAREN full_exp C_PAREN statement
-   50          | PRINT_STATE O_PAREN full_exp C_PAREN SEMI
-   51          | PRINT_STATE O_PAREN STRING_LITERAL C_PAREN SEMI
-   52          | PRINT_STATE_LN O_PAREN full_exp C_PAREN SEMI
-   53          | PRINT_STATE_LN O_PAREN STRING_LITERAL C_PAREN SEMI
-   54          | ID EQUAL full_exp SEMI
-   55          | ID index EQUAL full_exp SEMI
-   56          | RETURN full_exp SEMI
+   51 prime_type: INT
+   52           | BOOL
+   53           | ID
 
-   57 index: O_SQ full_exp C_SQ
-   58      | index O_SQ full_exp C_SQ
+   54 statement_list: statement_list statement
+   55               | statement
 
-   59 full_exp: or_term
+   56 statement: O_BR C_BR
+   57          | O_BR statement_list C_BR
+   58          | O_BR var_decl_exp_list C_BR
+   59          | O_BR var_decl_exp_list statement_list C_BR
+   60          | IF O_PAREN full_exp C_PAREN statement ELSE statement
+   61          | WHILE O_PAREN full_exp C_PAREN statement
+   62          | FOR O_PAREN var_decl_exp SEMI full_exp SEMI ID EQUAL full_exp C_PAREN statement
+   63          | PRINT_STATE O_PAREN full_exp C_PAREN SEMI
+   64          | PRINT_STATE O_PAREN STRING_LITERAL C_PAREN SEMI
+   65          | PRINT_STATE_LN O_PAREN full_exp C_PAREN SEMI
+   66          | PRINT_STATE_LN O_PAREN STRING_LITERAL C_PAREN SEMI
+   67          | ID EQUAL full_exp SEMI
+   68          | ID index EQUAL full_exp SEMI
+   69          | RETURN full_exp SEMI
 
-   60 or_term: and_term
-   61        | or_term OR and_term
+   70 index: O_SQ full_exp C_SQ
+   71      | index O_SQ full_exp C_SQ
 
-   62 and_term: eq_term
-   63         | and_term AND eq_term
+   72 full_exp: or_term
 
-   64 eq_term: gr_le_term
-   65        | eq_term EQEQ gr_le_term
-   66        | eq_term N_EQ gr_le_term
+   73 or_term: and_term
+   74        | or_term OR and_term
 
-   67 gr_le_term: add_term
-   68           | gr_le_term LESS add_term
-   69           | gr_le_term GREAT add_term
-   70           | gr_le_term L_EQ add_term
-   71           | gr_le_term G_EQ add_term
+   75 and_term: eq_term
+   76         | and_term AND eq_term
 
-   72 add_term: mul_term
-   73         | add_term PLUS mul_term
-   74         | add_term MINUS mul_term
+   77 eq_term: gr_le_term
+   78        | eq_term EQEQ gr_le_term
+   79        | eq_term N_EQ gr_le_term
 
-   75 mul_term: un_op
-   76         | mul_term DIV un_op
-   77         | mul_term MUL un_op
+   80 gr_le_term: add_term
+   81           | gr_le_term LESS add_term
+   82           | gr_le_term GREAT add_term
+   83           | gr_le_term L_EQ add_term
+   84           | gr_le_term G_EQ add_term
 
-   78 un_op: exp
-   79      | NOT un_op
-   80      | PLUS un_op
-   81      | MINUS un_op
+   85 add_term: mul_term
+   86         | add_term PLUS mul_term
+   87         | add_term MINUS mul_term
 
-   82 exp: ID
-   83    | ID index
-   84    | ID DOT LENGTH
-   85    | ID index DOT LENGTH
-   86    | INTEGER_LITERAL
-   87    | TRUE
-   88    | FALSE
-   89    | object
-   90    | ID DOT ID O_PAREN exp_list C_PAREN
-   91    | object DOT ID O_PAREN exp_list C_PAREN
-   92    | ID DOT ID O_PAREN C_PAREN
-   93    | object DOT ID O_PAREN C_PAREN
-   94    | O_PAREN full_exp C_PAREN
+   88 mul_term: un_op
+   89         | mul_term DIV un_op
+   90         | mul_term MUL un_op
 
-   95 object: THIS
-   96       | NEW ID O_PAREN C_PAREN
-   97       | NEW prime_type index
+   91 un_op: exp
+   92      | NOT un_op
+   93      | PLUS un_op
+   94      | MINUS un_op
 
-   98 exp_rest_list: exp_rest_list exp_rest
-   99              | exp_rest
+   95 exp: ID
+   96    | ID index
+   97    | ID DOT LENGTH
+   98    | ID index DOT LENGTH
+   99    | INTEGER_LITERAL
+  100    | TRUE
+  101    | FALSE
+  102    | object
+  103    | ID DOT ID O_PAREN exp_list C_PAREN
+  104    | object DOT ID O_PAREN exp_list C_PAREN
+  105    | ID DOT ID O_PAREN C_PAREN
+  106    | object DOT ID O_PAREN C_PAREN
+  107    | O_PAREN full_exp C_PAREN
 
-  100 exp_list: full_exp exp_rest_list
-  101         | full_exp
+  108 object: THIS
+  109       | NEW ID O_PAREN C_PAREN
+  110       | NEW prime_type index
 
-  102 exp_rest: COMMA full_exp
+  111 exp_rest_list: exp_rest_list exp_rest
+  112              | exp_rest
+
+  113 exp_list: full_exp exp_rest_list
+  114         | full_exp
+
+  115 exp_rest: COMMA full_exp
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
     error (256)
-    THIS (258) 95
-    NEW (259) 96 97
-    EXTENDS (260) 7 9 11 13
-    RETURN (261) 26 27 28 29 30 31 32 33 56
-    LENGTH (262) 84 85
-    PRINT_STATE (263) 50 51
-    PRINT_STATE_LN (264) 52 53
-    IF (265) 48
-    ELSE (266) 48
-    WHILE (267) 49
-    STRING (268) 3
-    CLASS (269) 3 6 7 8 9 10 11 12 13
-    MAIN (270) 3
-    STATIC (271) 3
-    VOID (272) 3
-    PUBLIC (273) 3 26 27 28 29 30 31 32 33
-    SEMI (274) 16 17 18 19 20 21 26 27 28 29 30 31 32 33 50 51 52 53 54 55 56
-    COMMA (275) 38 102
-    NOT (276) 79
-    PLUS (277) 73 80
-    MINUS (278) 74 81
-    EQUAL (279) 54 55
-    TRUE (280) 87
-    FALSE (281) 88
-    DOT (282) 84 85 90 91 92 93
-    O_PAREN (283) 3 26 27 28 29 30 31 32 33 48 49 50 51 52 53 90 91 92 93 94 96
-    C_PAREN (284) 3 26 27 28 29 30 31 32 33 48 49 50 51 52 53 90 91 92 93 94 96
-    O_BR (285) 3 6 7 8 9 10 11 12 13 26 27 28 29 30 31 32 33 46 47
-    C_BR (286) 3 6 7 8 9 10 11 12 13 26 27 28 29 30 31 32 33 46 47
-    O_SQ (287) 3 22 23 40 57 58
-    C_SQ (288) 3 22 23 40 57 58
-    STRING_LITERAL <st_l> (289) 51 53
-    INTEGER_LITERAL <in_l> (290) 86
-    ID <id> (291) 3 6 7 8 9 10 11 12 13 16 17 18 19 20 21 26 27 28 29 30 31 32 33 34 35 38 43 54 55 82 83 84 85 90 91 92 93 96
-    INT (292) 16 19 41
-    BOOL (293) 17 20 42
-    AND (294) 63
-    OR (295) 61
-    G_EQ (296) 71
-    L_EQ (297) 70
-    EQEQ (298) 65
-    N_EQ (299) 66
-    GREAT (300) 69
-    LESS (301) 68
-    MUL (302) 77
-    DIV (303) 76
+    INTEGER_LITERAL <in_l> (258) 99
+    STRING_LITERAL <st_l> (259) 64 66
+    ID <id> (260) 3 6 7 8 9 10 11 12 13 16 17 18 19 20 21 26 27 28 29 30 31 36 37 38 39 40 41 42 43 44 45 48 53 62 67 68 95 96 97 98 103 104 105 106 109
+    THIS (261) 108
+    NEW (262) 29 30 31 109 110
+    EXTENDS (263) 7 9 11 13
+    RETURN (264) 36 37 38 39 40 41 42 43 69
+    LENGTH (265) 97 98
+    PRINT_STATE (266) 63 64
+    PRINT_STATE_LN (267) 65 66
+    IF (268) 60
+    ELSE (269) 60
+    FOR (270) 62
+    WHILE (271) 61
+    STRING (272) 3
+    CLASS (273) 3 6 7 8 9 10 11 12 13
+    MAIN (274) 3
+    STATIC (275) 3
+    VOID (276) 3
+    PUBLIC (277) 3 36 37 38 39 40 41 42 43
+    SEMI (278) 16 17 18 19 20 21 22 24 36 37 38 39 40 41 42 43 62 63 64 65 66 67 68 69
+    COMMA (279) 48 115
+    NOT (280) 92
+    PLUS (281) 86 93
+    MINUS (282) 87 94
+    EQUAL (283) 26 27 28 29 30 31 62 67 68
+    TRUE (284) 100
+    FALSE (285) 101
+    DOT (286) 97 98 103 104 105 106
+    O_PAREN (287) 3 36 37 38 39 40 41 42 43 60 61 62 63 64 65 66 103 104 105 106 107 109
+    C_PAREN (288) 3 36 37 38 39 40 41 42 43 60 61 62 63 64 65 66 103 104 105 106 107 109
+    O_BR (289) 3 6 7 8 9 10 11 12 13 36 37 38 39 40 41 42 43 56 57 58 59
+    C_BR (290) 3 6 7 8 9 10 11 12 13 36 37 38 39 40 41 42 43 56 57 58 59
+    O_SQ (291) 3 32 33 50 70 71
+    C_SQ (292) 3 32 33 50 70 71
+    INT (293) 16 19 26 29 51
+    BOOL (294) 17 20 27 30 52
+    AND (295) 76
+    OR (296) 74
+    G_EQ (297) 84
+    L_EQ (298) 83
+    EQEQ (299) 78
+    N_EQ (300) 79
+    GREAT (301) 82
+    LESS (302) 81
+    MUL (303) 90
+    DIV (304) 89
 
 
 Nonterminals, with rules where they appear
 
-    $accept (49)
+    $accept (50)
         on left: 0
-    program <node> (50)
+    program <node> (51)
         on left: 1 2
         on right: 0
-    main_class <main> (51)
+    main_class <main> (52)
         on left: 3
         on right: 1 2
-    class_decl_list <cdl> (52)
+    class_decl_list <cdl> (53)
         on left: 4 5
         on right: 1 4
-    class_decl <cd> (53)
+    class_decl <cd> (54)
         on left: 6 7 8 9 10 11 12 13
         on right: 4 5
-    var_decl_list <vdl> (54)
+    var_decl_list <vdl> (55)
         on left: 14 15
-        on right: 6 7 8 9 14 26 27 30 31
-    var_decl <vd> (55)
+        on right: 6 7 8 9 14 36 37 40 41
+    var_decl <vd> (56)
         on left: 16 17 18 19 20 21
-        on right: 14 15
-    type_bracket_list <tp_i> (56)
-        on left: 22 23
-        on right: 19 20 21 22
-    method_decl_list <mdl> (57)
-        on left: 24 25
-        on right: 6 7 10 11 24
-    method_decl <md> (58)
-        on left: 26 27 28 29 30 31 32 33
-        on right: 24 25
-    formal_list <fl> (59)
+        on right: 14 15 23 25
+    var_decl_exp_list <vdel> (57)
+        on left: 22 23 24 25
+        on right: 22 23 58 59
+    var_decl_exp <vde> (58)
+        on left: 26 27 28 29 30 31
+        on right: 22 24 62
+    type_bracket_list <tp_i> (59)
+        on left: 32 33
+        on right: 19 20 21 29 30 31 32
+    method_decl_list <mdl> (60)
         on left: 34 35
-        on right: 26 28 30 32
-    formal_rest_list <frl> (60)
-        on left: 36 37
-        on right: 34 36
-    formal_rest <fr> (61)
-        on left: 38
-        on right: 36 37
-    type <type> (62)
-        on left: 39 40
-        on right: 26 27 28 29 30 31 32 33 34 35 38 40
-    prime_type <prt> (63)
-        on left: 41 42 43
-        on right: 39 97
-    statement_list <sl> (64)
+        on right: 6 7 10 11 34
+    method_decl <md> (61)
+        on left: 36 37 38 39 40 41 42 43
+        on right: 34 35
+    formal_list <fl> (62)
         on left: 44 45
-        on right: 26 27 28 29 44 46
-    statement <s> (65)
-        on left: 46 47 48 49 50 51 52 53 54 55 56
-        on right: 3 44 45 48 49
-    index <i> (66)
-        on left: 57 58
-        on right: 55 58 83 85 97
-    full_exp <e> (67)
-        on left: 59
-        on right: 26 27 28 29 30 31 32 33 48 49 50 52 54 55 56 57 58 94 100 101 102
-    or_term <e> (68)
-        on left: 60 61
-        on right: 59 61
-    and_term <e> (69)
-        on left: 62 63
-        on right: 60 61 63
-    eq_term <e> (70)
-        on left: 64 65 66
-        on right: 62 63 65 66
-    gr_le_term <e> (71)
-        on left: 67 68 69 70 71
-        on right: 64 65 66 68 69 70 71
-    add_term <e> (72)
-        on left: 72 73 74
-        on right: 67 68 69 70 71 73 74
-    mul_term <e> (73)
-        on left: 75 76 77
-        on right: 72 73 74 76 77
-    un_op <e> (74)
-        on left: 78 79 80 81
-        on right: 75 76 77 79 80 81
-    exp <e> (75)
-        on left: 82 83 84 85 86 87 88 89 90 91 92 93 94
-        on right: 78
-    object <obj> (76)
-        on left: 95 96 97
-        on right: 89 91 93
-    exp_rest_list <erl> (77)
-        on left: 98 99
-        on right: 98 100
-    exp_list <el> (78)
-        on left: 100 101
-        on right: 90 91
-    exp_rest <er> (79)
-        on left: 102
-        on right: 98 99
+        on right: 36 38 40 42
+    formal_rest_list <frl> (63)
+        on left: 46 47
+        on right: 44 46
+    formal_rest <fr> (64)
+        on left: 48
+        on right: 46 47
+    type <type> (65)
+        on left: 49 50
+        on right: 36 37 38 39 40 41 42 43 44 45 48 50
+    prime_type <prt> (66)
+        on left: 51 52 53
+        on right: 29 30 31 49 110
+    statement_list <sl> (67)
+        on left: 54 55
+        on right: 36 37 38 39 54 57 59
+    statement <s> (68)
+        on left: 56 57 58 59 60 61 62 63 64 65 66 67 68 69
+        on right: 3 54 55 60 61 62
+    index <i> (69)
+        on left: 70 71
+        on right: 29 30 31 68 71 96 98 110
+    full_exp <e> (70)
+        on left: 72
+        on right: 26 27 28 36 37 38 39 40 41 42 43 60 61 62 63 65 67 68 69 70 71 107 113 114 115
+    or_term <e> (71)
+        on left: 73 74
+        on right: 72 74
+    and_term <e> (72)
+        on left: 75 76
+        on right: 73 74 76
+    eq_term <e> (73)
+        on left: 77 78 79
+        on right: 75 76 78 79
+    gr_le_term <e> (74)
+        on left: 80 81 82 83 84
+        on right: 77 78 79 81 82 83 84
+    add_term <e> (75)
+        on left: 85 86 87
+        on right: 80 81 82 83 84 86 87
+    mul_term <e> (76)
+        on left: 88 89 90
+        on right: 85 86 87 89 90
+    un_op <e> (77)
+        on left: 91 92 93 94
+        on right: 88 89 90 92 93 94
+    exp <e> (78)
+        on left: 95 96 97 98 99 100 101 102 103 104 105 106 107
+        on right: 91
+    object <obj> (79)
+        on left: 108 109 110
+        on right: 102 104 106
+    exp_rest_list <erl> (80)
+        on left: 111 112
+        on right: 111 113
+    exp_list <el> (81)
+        on left: 113 114
+        on right: 103 104
+    exp_rest <er> (82)
+        on left: 115
+        on right: 111 112
 
 
 State 0
@@ -420,9 +442,9 @@ State 14
    10           | CLASS ID O_BR • method_decl_list C_BR
    12           | CLASS ID O_BR • C_BR
 
-    PUBLIC  shift, and go to state 17
-    C_BR    shift, and go to state 18
-    ID      shift, and go to state 19
+    ID      shift, and go to state 17
+    PUBLIC  shift, and go to state 18
+    C_BR    shift, and go to state 19
     INT     shift, and go to state 20
     BOOL    shift, and go to state 21
 
@@ -451,39 +473,39 @@ State 16
 
 State 17
 
-   26 method_decl: PUBLIC • type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   27            | PUBLIC • type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   28            | PUBLIC • type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   29            | PUBLIC • type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC • type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   31            | PUBLIC • type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   32            | PUBLIC • type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
-   33            | PUBLIC • type ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR
+   18 var_decl: ID • ID SEMI
+   21         | ID • type_bracket_list ID SEMI
 
     ID    shift, and go to state 28
-    INT   shift, and go to state 29
-    BOOL  shift, and go to state 30
+    O_SQ  shift, and go to state 29
 
-    type        go to state 31
-    prime_type  go to state 32
+    type_bracket_list  go to state 30
 
 
 State 18
 
-   12 class_decl: CLASS ID O_BR C_BR •
+   36 method_decl: PUBLIC • type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   37            | PUBLIC • type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   38            | PUBLIC • type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   39            | PUBLIC • type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC • type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   41            | PUBLIC • type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   42            | PUBLIC • type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
+   43            | PUBLIC • type ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR
 
-    $default  reduce using rule 12 (class_decl)
+    ID    shift, and go to state 31
+    INT   shift, and go to state 32
+    BOOL  shift, and go to state 33
+
+    type        go to state 34
+    prime_type  go to state 35
 
 
 State 19
 
-   18 var_decl: ID • ID SEMI
-   21         | ID • type_bracket_list ID SEMI
+   12 class_decl: CLASS ID O_BR C_BR •
 
-    O_SQ  shift, and go to state 33
-    ID    shift, and go to state 34
-
-    type_bracket_list  go to state 35
+    $default  reduce using rule 12 (class_decl)
 
 
 State 20
@@ -491,8 +513,8 @@ State 20
    16 var_decl: INT • ID SEMI
    19         | INT • type_bracket_list ID SEMI
 
-    O_SQ  shift, and go to state 33
     ID    shift, and go to state 36
+    O_SQ  shift, and go to state 29
 
     type_bracket_list  go to state 37
 
@@ -502,8 +524,8 @@ State 21
    17 var_decl: BOOL • ID SEMI
    20         | BOOL • type_bracket_list ID SEMI
 
-    O_SQ  shift, and go to state 33
     ID    shift, and go to state 38
+    O_SQ  shift, and go to state 29
 
     type_bracket_list  go to state 39
 
@@ -514,9 +536,9 @@ State 22
     8           | CLASS ID O_BR var_decl_list • C_BR
    14 var_decl_list: var_decl_list • var_decl
 
-    PUBLIC  shift, and go to state 17
+    ID      shift, and go to state 17
+    PUBLIC  shift, and go to state 18
     C_BR    shift, and go to state 40
-    ID      shift, and go to state 19
     INT     shift, and go to state 20
     BOOL    shift, and go to state 21
 
@@ -535,9 +557,9 @@ State 23
 State 24
 
    10 class_decl: CLASS ID O_BR method_decl_list • C_BR
-   24 method_decl_list: method_decl_list • method_decl
+   34 method_decl_list: method_decl_list • method_decl
 
-    PUBLIC  shift, and go to state 17
+    PUBLIC  shift, and go to state 18
     C_BR    shift, and go to state 43
 
     method_decl  go to state 44
@@ -545,9 +567,9 @@ State 24
 
 State 25
 
-   25 method_decl_list: method_decl •
+   35 method_decl_list: method_decl •
 
-    $default  reduce using rule 25 (method_decl_list)
+    $default  reduce using rule 35 (method_decl_list)
 
 
 State 26
@@ -564,9 +586,9 @@ State 27
    11           | CLASS ID EXTENDS ID O_BR • method_decl_list C_BR
    13           | CLASS ID EXTENDS ID O_BR • C_BR
 
-    PUBLIC  shift, and go to state 17
+    ID      shift, and go to state 17
+    PUBLIC  shift, and go to state 18
     C_BR    shift, and go to state 46
-    ID      shift, and go to state 19
     INT     shift, and go to state 20
     BOOL    shift, and go to state 21
 
@@ -578,69 +600,69 @@ State 27
 
 State 28
 
-   43 prime_type: ID •
+   18 var_decl: ID ID • SEMI
 
-    $default  reduce using rule 43 (prime_type)
+    SEMI  shift, and go to state 49
 
 
 State 29
 
-   41 prime_type: INT •
+   33 type_bracket_list: O_SQ • C_SQ
 
-    $default  reduce using rule 41 (prime_type)
+    C_SQ  shift, and go to state 50
 
 
 State 30
 
-   42 prime_type: BOOL •
+   21 var_decl: ID type_bracket_list • ID SEMI
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
 
-    $default  reduce using rule 42 (prime_type)
+    ID    shift, and go to state 51
+    O_SQ  shift, and go to state 52
 
 
 State 31
 
-   26 method_decl: PUBLIC type • ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   27            | PUBLIC type • ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   28            | PUBLIC type • ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   29            | PUBLIC type • ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC type • ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   31            | PUBLIC type • ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   32            | PUBLIC type • ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
-   33            | PUBLIC type • ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR
-   40 type: type • O_SQ C_SQ
+   53 prime_type: ID •
 
-    O_SQ  shift, and go to state 49
-    ID    shift, and go to state 50
+    $default  reduce using rule 53 (prime_type)
 
 
 State 32
 
-   39 type: prime_type •
+   51 prime_type: INT •
 
-    $default  reduce using rule 39 (type)
+    $default  reduce using rule 51 (prime_type)
 
 
 State 33
 
-   23 type_bracket_list: O_SQ • C_SQ
+   52 prime_type: BOOL •
 
-    C_SQ  shift, and go to state 51
+    $default  reduce using rule 52 (prime_type)
 
 
 State 34
 
-   18 var_decl: ID ID • SEMI
+   36 method_decl: PUBLIC type • ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   37            | PUBLIC type • ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   38            | PUBLIC type • ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   39            | PUBLIC type • ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC type • ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   41            | PUBLIC type • ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   42            | PUBLIC type • ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
+   43            | PUBLIC type • ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR
+   50 type: type • O_SQ C_SQ
 
-    SEMI  shift, and go to state 52
+    ID    shift, and go to state 53
+    O_SQ  shift, and go to state 54
 
 
 State 35
 
-   21 var_decl: ID type_bracket_list • ID SEMI
-   22 type_bracket_list: type_bracket_list • O_SQ C_SQ
+   49 type: prime_type •
 
-    O_SQ  shift, and go to state 53
-    ID    shift, and go to state 54
+    $default  reduce using rule 49 (type)
 
 
 State 36
@@ -653,10 +675,10 @@ State 36
 State 37
 
    19 var_decl: INT type_bracket_list • ID SEMI
-   22 type_bracket_list: type_bracket_list • O_SQ C_SQ
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
 
-    O_SQ  shift, and go to state 53
     ID    shift, and go to state 56
+    O_SQ  shift, and go to state 52
 
 
 State 38
@@ -669,10 +691,10 @@ State 38
 State 39
 
    20 var_decl: BOOL type_bracket_list • ID SEMI
-   22 type_bracket_list: type_bracket_list • O_SQ C_SQ
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
 
-    O_SQ  shift, and go to state 53
     ID    shift, and go to state 58
+    O_SQ  shift, and go to state 52
 
 
 State 40
@@ -692,9 +714,9 @@ State 41
 State 42
 
     6 class_decl: CLASS ID O_BR var_decl_list method_decl_list • C_BR
-   24 method_decl_list: method_decl_list • method_decl
+   34 method_decl_list: method_decl_list • method_decl
 
-    PUBLIC  shift, and go to state 17
+    PUBLIC  shift, and go to state 18
     C_BR    shift, and go to state 59
 
     method_decl  go to state 44
@@ -709,9 +731,9 @@ State 43
 
 State 44
 
-   24 method_decl_list: method_decl_list method_decl •
+   34 method_decl_list: method_decl_list method_decl •
 
-    $default  reduce using rule 24 (method_decl_list)
+    $default  reduce using rule 34 (method_decl_list)
 
 
 State 45
@@ -734,9 +756,9 @@ State 47
     9           | CLASS ID EXTENDS ID O_BR var_decl_list • C_BR
    14 var_decl_list: var_decl_list • var_decl
 
-    PUBLIC  shift, and go to state 17
+    ID      shift, and go to state 17
+    PUBLIC  shift, and go to state 18
     C_BR    shift, and go to state 61
-    ID      shift, and go to state 19
     INT     shift, and go to state 20
     BOOL    shift, and go to state 21
 
@@ -748,9 +770,9 @@ State 47
 State 48
 
    11 class_decl: CLASS ID EXTENDS ID O_BR method_decl_list • C_BR
-   24 method_decl_list: method_decl_list • method_decl
+   34 method_decl_list: method_decl_list • method_decl
 
-    PUBLIC  shift, and go to state 17
+    PUBLIC  shift, and go to state 18
     C_BR    shift, and go to state 63
 
     method_decl  go to state 44
@@ -758,51 +780,51 @@ State 48
 
 State 49
 
-   40 type: type O_SQ • C_SQ
-
-    C_SQ  shift, and go to state 64
-
-
-State 50
-
-   26 method_decl: PUBLIC type ID • O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   27            | PUBLIC type ID • O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   28            | PUBLIC type ID • O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   29            | PUBLIC type ID • O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC type ID • O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   31            | PUBLIC type ID • O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   32            | PUBLIC type ID • O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
-   33            | PUBLIC type ID • O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR
-
-    O_PAREN  shift, and go to state 65
-
-
-State 51
-
-   23 type_bracket_list: O_SQ C_SQ •
-
-    $default  reduce using rule 23 (type_bracket_list)
-
-
-State 52
-
    18 var_decl: ID ID SEMI •
 
     $default  reduce using rule 18 (var_decl)
 
 
+State 50
+
+   33 type_bracket_list: O_SQ C_SQ •
+
+    $default  reduce using rule 33 (type_bracket_list)
+
+
+State 51
+
+   21 var_decl: ID type_bracket_list ID • SEMI
+
+    SEMI  shift, and go to state 64
+
+
+State 52
+
+   32 type_bracket_list: type_bracket_list O_SQ • C_SQ
+
+    C_SQ  shift, and go to state 65
+
+
 State 53
 
-   22 type_bracket_list: type_bracket_list O_SQ • C_SQ
+   36 method_decl: PUBLIC type ID • O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   37            | PUBLIC type ID • O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   38            | PUBLIC type ID • O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   39            | PUBLIC type ID • O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC type ID • O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   41            | PUBLIC type ID • O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   42            | PUBLIC type ID • O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
+   43            | PUBLIC type ID • O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR
 
-    C_SQ  shift, and go to state 66
+    O_PAREN  shift, and go to state 66
 
 
 State 54
 
-   21 var_decl: ID type_bracket_list ID • SEMI
+   50 type: type O_SQ • C_SQ
 
-    SEMI  shift, and go to state 67
+    C_SQ  shift, and go to state 67
 
 
 State 55
@@ -857,9 +879,9 @@ State 61
 State 62
 
     7 class_decl: CLASS ID EXTENDS ID O_BR var_decl_list method_decl_list • C_BR
-   24 method_decl_list: method_decl_list • method_decl
+   34 method_decl_list: method_decl_list • method_decl
 
-    PUBLIC  shift, and go to state 17
+    PUBLIC  shift, and go to state 18
     C_BR    shift, and go to state 71
 
     method_decl  go to state 44
@@ -874,44 +896,44 @@ State 63
 
 State 64
 
-   40 type: type O_SQ C_SQ •
+   21 var_decl: ID type_bracket_list ID SEMI •
 
-    $default  reduce using rule 40 (type)
+    $default  reduce using rule 21 (var_decl)
 
 
 State 65
 
-   26 method_decl: PUBLIC type ID O_PAREN • formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   27            | PUBLIC type ID O_PAREN • C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   28            | PUBLIC type ID O_PAREN • formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   29            | PUBLIC type ID O_PAREN • C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC type ID O_PAREN • formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   31            | PUBLIC type ID O_PAREN • C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   32            | PUBLIC type ID O_PAREN • formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
-   33            | PUBLIC type ID O_PAREN • C_PAREN O_BR RETURN full_exp SEMI C_BR
+   32 type_bracket_list: type_bracket_list O_SQ C_SQ •
 
-    C_PAREN  shift, and go to state 72
-    ID       shift, and go to state 28
-    INT      shift, and go to state 29
-    BOOL     shift, and go to state 30
-
-    formal_list  go to state 73
-    type         go to state 74
-    prime_type   go to state 32
+    $default  reduce using rule 32 (type_bracket_list)
 
 
 State 66
 
-   22 type_bracket_list: type_bracket_list O_SQ C_SQ •
+   36 method_decl: PUBLIC type ID O_PAREN • formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   37            | PUBLIC type ID O_PAREN • C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   38            | PUBLIC type ID O_PAREN • formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   39            | PUBLIC type ID O_PAREN • C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC type ID O_PAREN • formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   41            | PUBLIC type ID O_PAREN • C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   42            | PUBLIC type ID O_PAREN • formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR
+   43            | PUBLIC type ID O_PAREN • C_PAREN O_BR RETURN full_exp SEMI C_BR
 
-    $default  reduce using rule 22 (type_bracket_list)
+    ID       shift, and go to state 31
+    C_PAREN  shift, and go to state 72
+    INT      shift, and go to state 32
+    BOOL     shift, and go to state 33
+
+    formal_list  go to state 73
+    type         go to state 74
+    prime_type   go to state 35
 
 
 State 67
 
-   21 var_decl: ID type_bracket_list ID SEMI •
+   50 type: type O_SQ C_SQ •
 
-    $default  reduce using rule 21 (var_decl)
+    $default  reduce using rule 50 (type)
 
 
 State 68
@@ -944,32 +966,32 @@ State 71
 
 State 72
 
-   27 method_decl: PUBLIC type ID O_PAREN C_PAREN • O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   29            | PUBLIC type ID O_PAREN C_PAREN • O_BR statement_list RETURN full_exp SEMI C_BR
-   31            | PUBLIC type ID O_PAREN C_PAREN • O_BR var_decl_list RETURN full_exp SEMI C_BR
-   33            | PUBLIC type ID O_PAREN C_PAREN • O_BR RETURN full_exp SEMI C_BR
+   37 method_decl: PUBLIC type ID O_PAREN C_PAREN • O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   39            | PUBLIC type ID O_PAREN C_PAREN • O_BR statement_list RETURN full_exp SEMI C_BR
+   41            | PUBLIC type ID O_PAREN C_PAREN • O_BR var_decl_list RETURN full_exp SEMI C_BR
+   43            | PUBLIC type ID O_PAREN C_PAREN • O_BR RETURN full_exp SEMI C_BR
 
     O_BR  shift, and go to state 76
 
 
 State 73
 
-   26 method_decl: PUBLIC type ID O_PAREN formal_list • C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   28            | PUBLIC type ID O_PAREN formal_list • C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC type ID O_PAREN formal_list • C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
-   32            | PUBLIC type ID O_PAREN formal_list • C_PAREN O_BR RETURN full_exp SEMI C_BR
+   36 method_decl: PUBLIC type ID O_PAREN formal_list • C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   38            | PUBLIC type ID O_PAREN formal_list • C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC type ID O_PAREN formal_list • C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR
+   42            | PUBLIC type ID O_PAREN formal_list • C_PAREN O_BR RETURN full_exp SEMI C_BR
 
     C_PAREN  shift, and go to state 77
 
 
 State 74
 
-   34 formal_list: type • ID formal_rest_list
-   35            | type • ID
-   40 type: type • O_SQ C_SQ
+   44 formal_list: type • ID formal_rest_list
+   45            | type • ID
+   50 type: type • O_SQ C_SQ
 
-    O_SQ  shift, and go to state 49
     ID    shift, and go to state 78
+    O_SQ  shift, and go to state 54
 
 
 State 75
@@ -981,2313 +1003,3005 @@ State 75
 
 State 76
 
-   27 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR • var_decl_list statement_list RETURN full_exp SEMI C_BR
-   29            | PUBLIC type ID O_PAREN C_PAREN O_BR • statement_list RETURN full_exp SEMI C_BR
-   31            | PUBLIC type ID O_PAREN C_PAREN O_BR • var_decl_list RETURN full_exp SEMI C_BR
-   33            | PUBLIC type ID O_PAREN C_PAREN O_BR • RETURN full_exp SEMI C_BR
+   37 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR • var_decl_list statement_list RETURN full_exp SEMI C_BR
+   39            | PUBLIC type ID O_PAREN C_PAREN O_BR • statement_list RETURN full_exp SEMI C_BR
+   41            | PUBLIC type ID O_PAREN C_PAREN O_BR • var_decl_list RETURN full_exp SEMI C_BR
+   43            | PUBLIC type ID O_PAREN C_PAREN O_BR • RETURN full_exp SEMI C_BR
 
-    RETURN          shift, and go to state 80
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 86
+    ID              shift, and go to state 80
+    RETURN          shift, and go to state 81
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
     INT             shift, and go to state 20
     BOOL            shift, and go to state 21
 
-    var_decl_list   go to state 87
+    var_decl_list   go to state 88
     var_decl        go to state 23
-    statement_list  go to state 88
-    statement       go to state 89
+    statement_list  go to state 89
+    statement       go to state 90
 
 
 State 77
 
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN • O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
-   28            | PUBLIC type ID O_PAREN formal_list C_PAREN • O_BR statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC type ID O_PAREN formal_list C_PAREN • O_BR var_decl_list RETURN full_exp SEMI C_BR
-   32            | PUBLIC type ID O_PAREN formal_list C_PAREN • O_BR RETURN full_exp SEMI C_BR
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN • O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR
+   38            | PUBLIC type ID O_PAREN formal_list C_PAREN • O_BR statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC type ID O_PAREN formal_list C_PAREN • O_BR var_decl_list RETURN full_exp SEMI C_BR
+   42            | PUBLIC type ID O_PAREN formal_list C_PAREN • O_BR RETURN full_exp SEMI C_BR
 
-    O_BR  shift, and go to state 90
+    O_BR  shift, and go to state 91
 
 
 State 78
 
-   34 formal_list: type ID • formal_rest_list
-   35            | type ID •
+   44 formal_list: type ID • formal_rest_list
+   45            | type ID •
 
-    COMMA  shift, and go to state 91
+    COMMA  shift, and go to state 92
 
-    $default  reduce using rule 35 (formal_list)
+    $default  reduce using rule 45 (formal_list)
 
-    formal_rest_list  go to state 92
-    formal_rest       go to state 93
+    formal_rest_list  go to state 93
+    formal_rest       go to state 94
 
 
 State 79
 
     3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ • ID C_PAREN O_BR statement C_BR C_BR
 
-    ID  shift, and go to state 94
+    ID  shift, and go to state 95
 
 
 State 80
 
-   33 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR RETURN • full_exp SEMI C_BR
-   56 statement: RETURN • full_exp SEMI
+   18 var_decl: ID • ID SEMI
+   21         | ID • type_bracket_list ID SEMI
+   67 statement: ID • EQUAL full_exp SEMI
+   68          | ID • index EQUAL full_exp SEMI
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    ID     shift, and go to state 28
+    EQUAL  shift, and go to state 96
+    O_SQ   shift, and go to state 97
 
-    full_exp    go to state 105
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    type_bracket_list  go to state 30
+    index              go to state 98
 
 
 State 81
 
-   50 statement: PRINT_STATE • O_PAREN full_exp C_PAREN SEMI
-   51          | PRINT_STATE • O_PAREN STRING_LITERAL C_PAREN SEMI
+   43 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR RETURN • full_exp SEMI C_BR
+   69 statement: RETURN • full_exp SEMI
 
-    O_PAREN  shift, and go to state 115
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 109
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 82
 
-   52 statement: PRINT_STATE_LN • O_PAREN full_exp C_PAREN SEMI
-   53          | PRINT_STATE_LN • O_PAREN STRING_LITERAL C_PAREN SEMI
+   63 statement: PRINT_STATE • O_PAREN full_exp C_PAREN SEMI
+   64          | PRINT_STATE • O_PAREN STRING_LITERAL C_PAREN SEMI
 
-    O_PAREN  shift, and go to state 116
+    O_PAREN  shift, and go to state 119
 
 
 State 83
 
-   48 statement: IF • O_PAREN full_exp C_PAREN statement ELSE statement
+   65 statement: PRINT_STATE_LN • O_PAREN full_exp C_PAREN SEMI
+   66          | PRINT_STATE_LN • O_PAREN STRING_LITERAL C_PAREN SEMI
 
-    O_PAREN  shift, and go to state 117
+    O_PAREN  shift, and go to state 120
 
 
 State 84
 
-   49 statement: WHILE • O_PAREN full_exp C_PAREN statement
+   60 statement: IF • O_PAREN full_exp C_PAREN statement ELSE statement
 
-    O_PAREN  shift, and go to state 118
+    O_PAREN  shift, and go to state 121
 
 
 State 85
 
-   46 statement: O_BR • statement_list C_BR
-   47          | O_BR • C_BR
+   62 statement: FOR • O_PAREN var_decl_exp SEMI full_exp SEMI ID EQUAL full_exp C_PAREN statement
 
-    RETURN          shift, and go to state 119
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    C_BR            shift, and go to state 120
-    ID              shift, and go to state 121
-
-    statement_list  go to state 122
-    statement       go to state 89
+    O_PAREN  shift, and go to state 122
 
 
 State 86
 
-   18 var_decl: ID • ID SEMI
-   21         | ID • type_bracket_list ID SEMI
-   54 statement: ID • EQUAL full_exp SEMI
-   55          | ID • index EQUAL full_exp SEMI
+   61 statement: WHILE • O_PAREN full_exp C_PAREN statement
 
-    EQUAL  shift, and go to state 123
-    O_SQ   shift, and go to state 124
-    ID     shift, and go to state 34
-
-    type_bracket_list  go to state 35
-    index              go to state 125
+    O_PAREN  shift, and go to state 123
 
 
 State 87
 
-   14 var_decl_list: var_decl_list • var_decl
-   27 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list • statement_list RETURN full_exp SEMI C_BR
-   31            | PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list • RETURN full_exp SEMI C_BR
+   56 statement: O_BR • C_BR
+   57          | O_BR • statement_list C_BR
+   58          | O_BR • var_decl_exp_list C_BR
+   59          | O_BR • var_decl_exp_list statement_list C_BR
 
-    RETURN          shift, and go to state 126
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 86
-    INT             shift, and go to state 20
-    BOOL            shift, and go to state 21
+    ID              shift, and go to state 124
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+    C_BR            shift, and go to state 126
+    INT             shift, and go to state 127
+    BOOL            shift, and go to state 128
 
-    var_decl        go to state 41
-    statement_list  go to state 127
-    statement       go to state 89
+    var_decl           go to state 129
+    var_decl_exp_list  go to state 130
+    var_decl_exp       go to state 131
+    statement_list     go to state 132
+    statement          go to state 90
 
 
 State 88
 
-   29 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list • RETURN full_exp SEMI C_BR
-   44 statement_list: statement_list • statement
-
-    RETURN          shift, and go to state 128
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 121
-
-    statement  go to state 129
-
-
-State 89
-
-   45 statement_list: statement •
-
-    $default  reduce using rule 45 (statement_list)
-
-
-State 90
-
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR • var_decl_list statement_list RETURN full_exp SEMI C_BR
-   28            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR • statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR • var_decl_list RETURN full_exp SEMI C_BR
-   32            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR • RETURN full_exp SEMI C_BR
-
-    RETURN          shift, and go to state 130
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 86
-    INT             shift, and go to state 20
-    BOOL            shift, and go to state 21
-
-    var_decl_list   go to state 131
-    var_decl        go to state 23
-    statement_list  go to state 132
-    statement       go to state 89
-
-
-State 91
-
-   38 formal_rest: COMMA • type ID
-
-    ID    shift, and go to state 28
-    INT   shift, and go to state 29
-    BOOL  shift, and go to state 30
-
-    type        go to state 133
-    prime_type  go to state 32
-
-
-State 92
-
-   34 formal_list: type ID formal_rest_list •
-   36 formal_rest_list: formal_rest_list • formal_rest
-
-    COMMA  shift, and go to state 91
-
-    $default  reduce using rule 34 (formal_list)
-
-    formal_rest  go to state 134
-
-
-State 93
-
-   37 formal_rest_list: formal_rest •
-
-    $default  reduce using rule 37 (formal_rest_list)
-
-
-State 94
-
-    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID • C_PAREN O_BR statement C_BR C_BR
-
-    C_PAREN  shift, and go to state 135
-
-
-State 95
-
-   95 object: THIS •
-
-    $default  reduce using rule 95 (object)
-
-
-State 96
-
-   96 object: NEW • ID O_PAREN C_PAREN
-   97       | NEW • prime_type index
-
-    ID    shift, and go to state 136
-    INT   shift, and go to state 29
-    BOOL  shift, and go to state 30
-
-    prime_type  go to state 137
-
-
-State 97
-
-   79 un_op: NOT • un_op
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    un_op   go to state 138
-    exp     go to state 113
-    object  go to state 114
-
-
-State 98
-
-   80 un_op: PLUS • un_op
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    un_op   go to state 139
-    exp     go to state 113
-    object  go to state 114
-
-
-State 99
-
-   81 un_op: MINUS • un_op
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    un_op   go to state 140
-    exp     go to state 113
-    object  go to state 114
-
-
-State 100
-
-   87 exp: TRUE •
-
-    $default  reduce using rule 87 (exp)
-
-
-State 101
-
-   88 exp: FALSE •
-
-    $default  reduce using rule 88 (exp)
-
-
-State 102
-
-   94 exp: O_PAREN • full_exp C_PAREN
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 141
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 103
-
-   86 exp: INTEGER_LITERAL •
-
-    $default  reduce using rule 86 (exp)
-
-
-State 104
-
-   82 exp: ID •
-   83    | ID • index
-   84    | ID • DOT LENGTH
-   85    | ID • index DOT LENGTH
-   90    | ID • DOT ID O_PAREN exp_list C_PAREN
-   92    | ID • DOT ID O_PAREN C_PAREN
-
-    DOT   shift, and go to state 142
-    O_SQ  shift, and go to state 143
-
-    $default  reduce using rule 82 (exp)
-
-    index  go to state 144
-
-
-State 105
-
-   33 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR RETURN full_exp • SEMI C_BR
-   56 statement: RETURN full_exp • SEMI
-
-    SEMI  shift, and go to state 145
-
-
-State 106
-
-   59 full_exp: or_term •
-   61 or_term: or_term • OR and_term
-
-    OR  shift, and go to state 146
-
-    $default  reduce using rule 59 (full_exp)
-
-
-State 107
-
-   60 or_term: and_term •
-   63 and_term: and_term • AND eq_term
-
-    AND  shift, and go to state 147
-
-    $default  reduce using rule 60 (or_term)
-
-
-State 108
-
-   62 and_term: eq_term •
-   65 eq_term: eq_term • EQEQ gr_le_term
-   66        | eq_term • N_EQ gr_le_term
-
-    EQEQ  shift, and go to state 148
-    N_EQ  shift, and go to state 149
-
-    $default  reduce using rule 62 (and_term)
-
-
-State 109
-
-   64 eq_term: gr_le_term •
-   68 gr_le_term: gr_le_term • LESS add_term
-   69           | gr_le_term • GREAT add_term
-   70           | gr_le_term • L_EQ add_term
-   71           | gr_le_term • G_EQ add_term
-
-    G_EQ   shift, and go to state 150
-    L_EQ   shift, and go to state 151
-    GREAT  shift, and go to state 152
-    LESS   shift, and go to state 153
-
-    $default  reduce using rule 64 (eq_term)
-
-
-State 110
-
-   67 gr_le_term: add_term •
-   73 add_term: add_term • PLUS mul_term
-   74         | add_term • MINUS mul_term
-
-    PLUS   shift, and go to state 154
-    MINUS  shift, and go to state 155
-
-    $default  reduce using rule 67 (gr_le_term)
-
-
-State 111
-
-   72 add_term: mul_term •
-   76 mul_term: mul_term • DIV un_op
-   77         | mul_term • MUL un_op
-
-    MUL  shift, and go to state 156
-    DIV  shift, and go to state 157
-
-    $default  reduce using rule 72 (add_term)
-
-
-State 112
-
-   75 mul_term: un_op •
-
-    $default  reduce using rule 75 (mul_term)
-
-
-State 113
-
-   78 un_op: exp •
-
-    $default  reduce using rule 78 (un_op)
-
-
-State 114
-
-   89 exp: object •
-   91    | object • DOT ID O_PAREN exp_list C_PAREN
-   93    | object • DOT ID O_PAREN C_PAREN
-
-    DOT  shift, and go to state 158
-
-    $default  reduce using rule 89 (exp)
-
-
-State 115
-
-   50 statement: PRINT_STATE O_PAREN • full_exp C_PAREN SEMI
-   51          | PRINT_STATE O_PAREN • STRING_LITERAL C_PAREN SEMI
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    STRING_LITERAL   shift, and go to state 159
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 160
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 116
-
-   52 statement: PRINT_STATE_LN O_PAREN • full_exp C_PAREN SEMI
-   53          | PRINT_STATE_LN O_PAREN • STRING_LITERAL C_PAREN SEMI
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    STRING_LITERAL   shift, and go to state 161
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 162
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 117
-
-   48 statement: IF O_PAREN • full_exp C_PAREN statement ELSE statement
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 163
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 118
-
-   49 statement: WHILE O_PAREN • full_exp C_PAREN statement
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 164
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 119
-
-   56 statement: RETURN • full_exp SEMI
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 165
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 120
-
-   47 statement: O_BR C_BR •
-
-    $default  reduce using rule 47 (statement)
-
-
-State 121
-
-   54 statement: ID • EQUAL full_exp SEMI
-   55          | ID • index EQUAL full_exp SEMI
-
-    EQUAL  shift, and go to state 123
-    O_SQ   shift, and go to state 143
-
-    index  go to state 125
-
-
-State 122
-
-   44 statement_list: statement_list • statement
-   46 statement: O_BR statement_list • C_BR
-
-    RETURN          shift, and go to state 119
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    C_BR            shift, and go to state 166
-    ID              shift, and go to state 121
-
-    statement  go to state 129
-
-
-State 123
-
-   54 statement: ID EQUAL • full_exp SEMI
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 167
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 124
-
-   23 type_bracket_list: O_SQ • C_SQ
-   57 index: O_SQ • full_exp C_SQ
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    C_SQ             shift, and go to state 51
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 168
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 125
-
-   55 statement: ID index • EQUAL full_exp SEMI
-   58 index: index • O_SQ full_exp C_SQ
-
-    EQUAL  shift, and go to state 169
-    O_SQ   shift, and go to state 170
-
-
-State 126
-
-   31 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN • full_exp SEMI C_BR
-   56 statement: RETURN • full_exp SEMI
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 171
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 127
-
-   27 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list • RETURN full_exp SEMI C_BR
-   44 statement_list: statement_list • statement
-
-    RETURN          shift, and go to state 172
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 121
-
-    statement  go to state 129
-
-
-State 128
-
-   29 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN • full_exp SEMI C_BR
-   56 statement: RETURN • full_exp SEMI
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 173
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 129
-
-   44 statement_list: statement_list statement •
-
-    $default  reduce using rule 44 (statement_list)
-
-
-State 130
-
-   32 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN • full_exp SEMI C_BR
-   56 statement: RETURN • full_exp SEMI
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 174
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 131
-
    14 var_decl_list: var_decl_list • var_decl
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list • statement_list RETURN full_exp SEMI C_BR
-   30            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list • RETURN full_exp SEMI C_BR
+   37 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list • statement_list RETURN full_exp SEMI C_BR
+   41            | PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list • RETURN full_exp SEMI C_BR
 
-    RETURN          shift, and go to state 175
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 86
+    ID              shift, and go to state 80
+    RETURN          shift, and go to state 133
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
     INT             shift, and go to state 20
     BOOL            shift, and go to state 21
 
     var_decl        go to state 41
-    statement_list  go to state 176
-    statement       go to state 89
+    statement_list  go to state 134
+    statement       go to state 90
+
+
+State 89
+
+   39 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list • RETURN full_exp SEMI C_BR
+   54 statement_list: statement_list • statement
+
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 136
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 137
+
+
+State 90
+
+   55 statement_list: statement •
+
+    $default  reduce using rule 55 (statement_list)
+
+
+State 91
+
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR • var_decl_list statement_list RETURN full_exp SEMI C_BR
+   38            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR • statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR • var_decl_list RETURN full_exp SEMI C_BR
+   42            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR • RETURN full_exp SEMI C_BR
+
+    ID              shift, and go to state 80
+    RETURN          shift, and go to state 138
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+    INT             shift, and go to state 20
+    BOOL            shift, and go to state 21
+
+    var_decl_list   go to state 139
+    var_decl        go to state 23
+    statement_list  go to state 140
+    statement       go to state 90
+
+
+State 92
+
+   48 formal_rest: COMMA • type ID
+
+    ID    shift, and go to state 31
+    INT   shift, and go to state 32
+    BOOL  shift, and go to state 33
+
+    type        go to state 141
+    prime_type  go to state 35
+
+
+State 93
+
+   44 formal_list: type ID formal_rest_list •
+   46 formal_rest_list: formal_rest_list • formal_rest
+
+    COMMA  shift, and go to state 92
+
+    $default  reduce using rule 44 (formal_list)
+
+    formal_rest  go to state 142
+
+
+State 94
+
+   47 formal_rest_list: formal_rest •
+
+    $default  reduce using rule 47 (formal_rest_list)
+
+
+State 95
+
+    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID • C_PAREN O_BR statement C_BR C_BR
+
+    C_PAREN  shift, and go to state 143
+
+
+State 96
+
+   67 statement: ID EQUAL • full_exp SEMI
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 144
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 97
+
+   33 type_bracket_list: O_SQ • C_SQ
+   70 index: O_SQ • full_exp C_SQ
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+    C_SQ             shift, and go to state 50
+
+    full_exp    go to state 145
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 98
+
+   68 statement: ID index • EQUAL full_exp SEMI
+   71 index: index • O_SQ full_exp C_SQ
+
+    EQUAL  shift, and go to state 146
+    O_SQ   shift, and go to state 147
+
+
+State 99
+
+   99 exp: INTEGER_LITERAL •
+
+    $default  reduce using rule 99 (exp)
+
+
+State 100
+
+   95 exp: ID •
+   96    | ID • index
+   97    | ID • DOT LENGTH
+   98    | ID • index DOT LENGTH
+  103    | ID • DOT ID O_PAREN exp_list C_PAREN
+  105    | ID • DOT ID O_PAREN C_PAREN
+
+    DOT   shift, and go to state 148
+    O_SQ  shift, and go to state 149
+
+    $default  reduce using rule 95 (exp)
+
+    index  go to state 150
+
+
+State 101
+
+  108 object: THIS •
+
+    $default  reduce using rule 108 (object)
+
+
+State 102
+
+  109 object: NEW • ID O_PAREN C_PAREN
+  110       | NEW • prime_type index
+
+    ID    shift, and go to state 151
+    INT   shift, and go to state 32
+    BOOL  shift, and go to state 33
+
+    prime_type  go to state 152
+
+
+State 103
+
+   92 un_op: NOT • un_op
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    un_op   go to state 153
+    exp     go to state 117
+    object  go to state 118
+
+
+State 104
+
+   93 un_op: PLUS • un_op
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    un_op   go to state 154
+    exp     go to state 117
+    object  go to state 118
+
+
+State 105
+
+   94 un_op: MINUS • un_op
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    un_op   go to state 155
+    exp     go to state 117
+    object  go to state 118
+
+
+State 106
+
+  100 exp: TRUE •
+
+    $default  reduce using rule 100 (exp)
+
+
+State 107
+
+  101 exp: FALSE •
+
+    $default  reduce using rule 101 (exp)
+
+
+State 108
+
+  107 exp: O_PAREN • full_exp C_PAREN
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 156
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 109
+
+   43 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR RETURN full_exp • SEMI C_BR
+   69 statement: RETURN full_exp • SEMI
+
+    SEMI  shift, and go to state 157
+
+
+State 110
+
+   72 full_exp: or_term •
+   74 or_term: or_term • OR and_term
+
+    OR  shift, and go to state 158
+
+    $default  reduce using rule 72 (full_exp)
+
+
+State 111
+
+   73 or_term: and_term •
+   76 and_term: and_term • AND eq_term
+
+    AND  shift, and go to state 159
+
+    $default  reduce using rule 73 (or_term)
+
+
+State 112
+
+   75 and_term: eq_term •
+   78 eq_term: eq_term • EQEQ gr_le_term
+   79        | eq_term • N_EQ gr_le_term
+
+    EQEQ  shift, and go to state 160
+    N_EQ  shift, and go to state 161
+
+    $default  reduce using rule 75 (and_term)
+
+
+State 113
+
+   77 eq_term: gr_le_term •
+   81 gr_le_term: gr_le_term • LESS add_term
+   82           | gr_le_term • GREAT add_term
+   83           | gr_le_term • L_EQ add_term
+   84           | gr_le_term • G_EQ add_term
+
+    G_EQ   shift, and go to state 162
+    L_EQ   shift, and go to state 163
+    GREAT  shift, and go to state 164
+    LESS   shift, and go to state 165
+
+    $default  reduce using rule 77 (eq_term)
+
+
+State 114
+
+   80 gr_le_term: add_term •
+   86 add_term: add_term • PLUS mul_term
+   87         | add_term • MINUS mul_term
+
+    PLUS   shift, and go to state 166
+    MINUS  shift, and go to state 167
+
+    $default  reduce using rule 80 (gr_le_term)
+
+
+State 115
+
+   85 add_term: mul_term •
+   89 mul_term: mul_term • DIV un_op
+   90         | mul_term • MUL un_op
+
+    MUL  shift, and go to state 168
+    DIV  shift, and go to state 169
+
+    $default  reduce using rule 85 (add_term)
+
+
+State 116
+
+   88 mul_term: un_op •
+
+    $default  reduce using rule 88 (mul_term)
+
+
+State 117
+
+   91 un_op: exp •
+
+    $default  reduce using rule 91 (un_op)
+
+
+State 118
+
+  102 exp: object •
+  104    | object • DOT ID O_PAREN exp_list C_PAREN
+  106    | object • DOT ID O_PAREN C_PAREN
+
+    DOT  shift, and go to state 170
+
+    $default  reduce using rule 102 (exp)
+
+
+State 119
+
+   63 statement: PRINT_STATE O_PAREN • full_exp C_PAREN SEMI
+   64          | PRINT_STATE O_PAREN • STRING_LITERAL C_PAREN SEMI
+
+    INTEGER_LITERAL  shift, and go to state 99
+    STRING_LITERAL   shift, and go to state 171
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 172
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 120
+
+   65 statement: PRINT_STATE_LN O_PAREN • full_exp C_PAREN SEMI
+   66          | PRINT_STATE_LN O_PAREN • STRING_LITERAL C_PAREN SEMI
+
+    INTEGER_LITERAL  shift, and go to state 99
+    STRING_LITERAL   shift, and go to state 173
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 174
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 121
+
+   60 statement: IF O_PAREN • full_exp C_PAREN statement ELSE statement
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 175
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 122
+
+   62 statement: FOR O_PAREN • var_decl_exp SEMI full_exp SEMI ID EQUAL full_exp C_PAREN statement
+
+    ID    shift, and go to state 176
+    INT   shift, and go to state 177
+    BOOL  shift, and go to state 178
+
+    var_decl_exp  go to state 179
+
+
+State 123
+
+   61 statement: WHILE O_PAREN • full_exp C_PAREN statement
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 180
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 124
+
+   18 var_decl: ID • ID SEMI
+   21         | ID • type_bracket_list ID SEMI
+   28 var_decl_exp: ID • ID EQUAL full_exp
+   31             | ID • type_bracket_list ID EQUAL NEW prime_type index
+   67 statement: ID • EQUAL full_exp SEMI
+   68          | ID • index EQUAL full_exp SEMI
+
+    ID     shift, and go to state 181
+    EQUAL  shift, and go to state 96
+    O_SQ   shift, and go to state 97
+
+    type_bracket_list  go to state 182
+    index              go to state 98
+
+
+State 125
+
+   69 statement: RETURN • full_exp SEMI
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 183
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 126
+
+   56 statement: O_BR C_BR •
+
+    $default  reduce using rule 56 (statement)
+
+
+State 127
+
+   16 var_decl: INT • ID SEMI
+   19         | INT • type_bracket_list ID SEMI
+   26 var_decl_exp: INT • ID EQUAL full_exp
+   29             | INT • type_bracket_list ID EQUAL NEW prime_type index
+
+    ID    shift, and go to state 184
+    O_SQ  shift, and go to state 29
+
+    type_bracket_list  go to state 185
+
+
+State 128
+
+   17 var_decl: BOOL • ID SEMI
+   20         | BOOL • type_bracket_list ID SEMI
+   27 var_decl_exp: BOOL • ID EQUAL full_exp
+   30             | BOOL • type_bracket_list ID EQUAL NEW prime_type index
+
+    ID    shift, and go to state 186
+    O_SQ  shift, and go to state 29
+
+    type_bracket_list  go to state 187
+
+
+State 129
+
+   25 var_decl_exp_list: var_decl •
+
+    $default  reduce using rule 25 (var_decl_exp_list)
+
+
+State 130
+
+   22 var_decl_exp_list: var_decl_exp_list • var_decl_exp SEMI
+   23                  | var_decl_exp_list • var_decl
+   58 statement: O_BR var_decl_exp_list • C_BR
+   59          | O_BR var_decl_exp_list • statement_list C_BR
+
+    ID              shift, and go to state 124
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+    C_BR            shift, and go to state 188
+    INT             shift, and go to state 127
+    BOOL            shift, and go to state 128
+
+    var_decl        go to state 189
+    var_decl_exp    go to state 190
+    statement_list  go to state 191
+    statement       go to state 90
+
+
+State 131
+
+   24 var_decl_exp_list: var_decl_exp • SEMI
+
+    SEMI  shift, and go to state 192
 
 
 State 132
 
-   28 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list • RETURN full_exp SEMI C_BR
-   44 statement_list: statement_list • statement
+   54 statement_list: statement_list • statement
+   57 statement: O_BR statement_list • C_BR
 
-    RETURN          shift, and go to state 177
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 121
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+    C_BR            shift, and go to state 193
 
-    statement  go to state 129
+    statement  go to state 137
 
 
 State 133
 
-   38 formal_rest: COMMA type • ID
-   40 type: type • O_SQ C_SQ
+   41 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN • full_exp SEMI C_BR
+   69 statement: RETURN • full_exp SEMI
 
-    O_SQ  shift, and go to state 49
-    ID    shift, and go to state 178
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 194
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 134
 
-   36 formal_rest_list: formal_rest_list formal_rest •
+   37 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list • RETURN full_exp SEMI C_BR
+   54 statement_list: statement_list • statement
 
-    $default  reduce using rule 36 (formal_rest_list)
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 195
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 137
 
 
 State 135
 
-    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN • O_BR statement C_BR C_BR
+   67 statement: ID • EQUAL full_exp SEMI
+   68          | ID • index EQUAL full_exp SEMI
 
-    O_BR  shift, and go to state 179
+    EQUAL  shift, and go to state 96
+    O_SQ   shift, and go to state 149
+
+    index  go to state 98
 
 
 State 136
 
-   43 prime_type: ID •
-   96 object: NEW ID • O_PAREN C_PAREN
+   39 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN • full_exp SEMI C_BR
+   69 statement: RETURN • full_exp SEMI
 
-    O_PAREN  shift, and go to state 180
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
 
-    $default  reduce using rule 43 (prime_type)
+    full_exp    go to state 196
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 137
 
-   97 object: NEW prime_type • index
+   54 statement_list: statement_list statement •
 
-    O_SQ  shift, and go to state 143
-
-    index  go to state 181
+    $default  reduce using rule 54 (statement_list)
 
 
 State 138
 
-   79 un_op: NOT un_op •
+   42 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN • full_exp SEMI C_BR
+   69 statement: RETURN • full_exp SEMI
 
-    $default  reduce using rule 79 (un_op)
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 197
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 139
 
-   80 un_op: PLUS un_op •
+   14 var_decl_list: var_decl_list • var_decl
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list • statement_list RETURN full_exp SEMI C_BR
+   40            | PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list • RETURN full_exp SEMI C_BR
 
-    $default  reduce using rule 80 (un_op)
+    ID              shift, and go to state 80
+    RETURN          shift, and go to state 198
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+    INT             shift, and go to state 20
+    BOOL            shift, and go to state 21
+
+    var_decl        go to state 41
+    statement_list  go to state 199
+    statement       go to state 90
 
 
 State 140
 
-   81 un_op: MINUS un_op •
+   38 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list • RETURN full_exp SEMI C_BR
+   54 statement_list: statement_list • statement
 
-    $default  reduce using rule 81 (un_op)
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 200
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 137
 
 
 State 141
 
-   94 exp: O_PAREN full_exp • C_PAREN
+   48 formal_rest: COMMA type • ID
+   50 type: type • O_SQ C_SQ
 
-    C_PAREN  shift, and go to state 182
+    ID    shift, and go to state 201
+    O_SQ  shift, and go to state 54
 
 
 State 142
 
-   84 exp: ID DOT • LENGTH
-   90    | ID DOT • ID O_PAREN exp_list C_PAREN
-   92    | ID DOT • ID O_PAREN C_PAREN
+   46 formal_rest_list: formal_rest_list formal_rest •
 
-    LENGTH  shift, and go to state 183
-    ID      shift, and go to state 184
+    $default  reduce using rule 46 (formal_rest_list)
 
 
 State 143
 
-   57 index: O_SQ • full_exp C_SQ
+    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN • O_BR statement C_BR C_BR
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 168
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    O_BR  shift, and go to state 202
 
 
 State 144
 
-   58 index: index • O_SQ full_exp C_SQ
-   83 exp: ID index •
-   85    | ID index • DOT LENGTH
+   67 statement: ID EQUAL full_exp • SEMI
 
-    DOT   shift, and go to state 185
-    O_SQ  shift, and go to state 170
-
-    $default  reduce using rule 83 (exp)
+    SEMI  shift, and go to state 203
 
 
 State 145
 
-   33 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI • C_BR
-   56 statement: RETURN full_exp SEMI •
+   70 index: O_SQ full_exp • C_SQ
 
-    C_BR  shift, and go to state 186
-
-    $default  reduce using rule 56 (statement)
+    C_SQ  shift, and go to state 204
 
 
 State 146
 
-   61 or_term: or_term OR • and_term
+   68 statement: ID index EQUAL • full_exp SEMI
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
 
-    and_term    go to state 187
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    full_exp    go to state 205
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 147
 
-   63 and_term: and_term AND • eq_term
+   71 index: index O_SQ • full_exp C_SQ
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
 
-    eq_term     go to state 188
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    full_exp    go to state 206
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 148
 
-   65 eq_term: eq_term EQEQ • gr_le_term
+   97 exp: ID DOT • LENGTH
+  103    | ID DOT • ID O_PAREN exp_list C_PAREN
+  105    | ID DOT • ID O_PAREN C_PAREN
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    gr_le_term  go to state 189
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    ID      shift, and go to state 207
+    LENGTH  shift, and go to state 208
 
 
 State 149
 
-   66 eq_term: eq_term N_EQ • gr_le_term
+   70 index: O_SQ • full_exp C_SQ
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
 
-    gr_le_term  go to state 190
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    full_exp    go to state 145
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 150
 
-   71 gr_le_term: gr_le_term G_EQ • add_term
+   71 index: index • O_SQ full_exp C_SQ
+   96 exp: ID index •
+   98    | ID index • DOT LENGTH
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    DOT   shift, and go to state 209
+    O_SQ  shift, and go to state 147
 
-    add_term  go to state 191
-    mul_term  go to state 111
-    un_op     go to state 112
-    exp       go to state 113
-    object    go to state 114
+    $default  reduce using rule 96 (exp)
 
 
 State 151
 
-   70 gr_le_term: gr_le_term L_EQ • add_term
+   53 prime_type: ID •
+  109 object: NEW ID • O_PAREN C_PAREN
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    O_PAREN  shift, and go to state 210
 
-    add_term  go to state 192
-    mul_term  go to state 111
-    un_op     go to state 112
-    exp       go to state 113
-    object    go to state 114
+    $default  reduce using rule 53 (prime_type)
 
 
 State 152
 
-   69 gr_le_term: gr_le_term GREAT • add_term
+  110 object: NEW prime_type • index
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    O_SQ  shift, and go to state 149
 
-    add_term  go to state 193
-    mul_term  go to state 111
-    un_op     go to state 112
-    exp       go to state 113
-    object    go to state 114
+    index  go to state 211
 
 
 State 153
 
-   68 gr_le_term: gr_le_term LESS • add_term
+   92 un_op: NOT un_op •
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    add_term  go to state 194
-    mul_term  go to state 111
-    un_op     go to state 112
-    exp       go to state 113
-    object    go to state 114
+    $default  reduce using rule 92 (un_op)
 
 
 State 154
 
-   73 add_term: add_term PLUS • mul_term
+   93 un_op: PLUS un_op •
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    mul_term  go to state 195
-    un_op     go to state 112
-    exp       go to state 113
-    object    go to state 114
+    $default  reduce using rule 93 (un_op)
 
 
 State 155
 
-   74 add_term: add_term MINUS • mul_term
+   94 un_op: MINUS un_op •
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    mul_term  go to state 196
-    un_op     go to state 112
-    exp       go to state 113
-    object    go to state 114
+    $default  reduce using rule 94 (un_op)
 
 
 State 156
 
-   77 mul_term: mul_term MUL • un_op
+  107 exp: O_PAREN full_exp • C_PAREN
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    un_op   go to state 197
-    exp     go to state 113
-    object  go to state 114
+    C_PAREN  shift, and go to state 212
 
 
 State 157
 
-   76 mul_term: mul_term DIV • un_op
+   43 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI • C_BR
+   69 statement: RETURN full_exp SEMI •
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    C_BR  shift, and go to state 213
 
-    un_op   go to state 198
-    exp     go to state 113
-    object  go to state 114
+    $default  reduce using rule 69 (statement)
 
 
 State 158
 
-   91 exp: object DOT • ID O_PAREN exp_list C_PAREN
-   93    | object DOT • ID O_PAREN C_PAREN
+   74 or_term: or_term OR • and_term
 
-    ID  shift, and go to state 199
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    and_term    go to state 214
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 159
 
-   51 statement: PRINT_STATE O_PAREN STRING_LITERAL • C_PAREN SEMI
+   76 and_term: and_term AND • eq_term
 
-    C_PAREN  shift, and go to state 200
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    eq_term     go to state 215
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 160
 
-   50 statement: PRINT_STATE O_PAREN full_exp • C_PAREN SEMI
+   78 eq_term: eq_term EQEQ • gr_le_term
 
-    C_PAREN  shift, and go to state 201
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    gr_le_term  go to state 216
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 161
 
-   53 statement: PRINT_STATE_LN O_PAREN STRING_LITERAL • C_PAREN SEMI
+   79 eq_term: eq_term N_EQ • gr_le_term
 
-    C_PAREN  shift, and go to state 202
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    gr_le_term  go to state 217
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 162
 
-   52 statement: PRINT_STATE_LN O_PAREN full_exp • C_PAREN SEMI
+   84 gr_le_term: gr_le_term G_EQ • add_term
 
-    C_PAREN  shift, and go to state 203
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    add_term  go to state 218
+    mul_term  go to state 115
+    un_op     go to state 116
+    exp       go to state 117
+    object    go to state 118
 
 
 State 163
 
-   48 statement: IF O_PAREN full_exp • C_PAREN statement ELSE statement
+   83 gr_le_term: gr_le_term L_EQ • add_term
 
-    C_PAREN  shift, and go to state 204
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    add_term  go to state 219
+    mul_term  go to state 115
+    un_op     go to state 116
+    exp       go to state 117
+    object    go to state 118
 
 
 State 164
 
-   49 statement: WHILE O_PAREN full_exp • C_PAREN statement
+   82 gr_le_term: gr_le_term GREAT • add_term
 
-    C_PAREN  shift, and go to state 205
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    add_term  go to state 220
+    mul_term  go to state 115
+    un_op     go to state 116
+    exp       go to state 117
+    object    go to state 118
 
 
 State 165
 
-   56 statement: RETURN full_exp • SEMI
+   81 gr_le_term: gr_le_term LESS • add_term
 
-    SEMI  shift, and go to state 206
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    add_term  go to state 221
+    mul_term  go to state 115
+    un_op     go to state 116
+    exp       go to state 117
+    object    go to state 118
 
 
 State 166
 
-   46 statement: O_BR statement_list C_BR •
+   86 add_term: add_term PLUS • mul_term
 
-    $default  reduce using rule 46 (statement)
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    mul_term  go to state 222
+    un_op     go to state 116
+    exp       go to state 117
+    object    go to state 118
 
 
 State 167
 
-   54 statement: ID EQUAL full_exp • SEMI
+   87 add_term: add_term MINUS • mul_term
 
-    SEMI  shift, and go to state 207
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    mul_term  go to state 223
+    un_op     go to state 116
+    exp       go to state 117
+    object    go to state 118
 
 
 State 168
 
-   57 index: O_SQ full_exp • C_SQ
+   90 mul_term: mul_term MUL • un_op
 
-    C_SQ  shift, and go to state 208
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    un_op   go to state 224
+    exp     go to state 117
+    object  go to state 118
 
 
 State 169
 
-   55 statement: ID index EQUAL • full_exp SEMI
+   89 mul_term: mul_term DIV • un_op
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
 
-    full_exp    go to state 209
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    un_op   go to state 225
+    exp     go to state 117
+    object  go to state 118
 
 
 State 170
 
-   58 index: index O_SQ • full_exp C_SQ
+  104 exp: object DOT • ID O_PAREN exp_list C_PAREN
+  106    | object DOT • ID O_PAREN C_PAREN
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 210
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    ID  shift, and go to state 226
 
 
 State 171
 
-   31 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp • SEMI C_BR
-   56 statement: RETURN full_exp • SEMI
+   64 statement: PRINT_STATE O_PAREN STRING_LITERAL • C_PAREN SEMI
 
-    SEMI  shift, and go to state 211
+    C_PAREN  shift, and go to state 227
 
 
 State 172
 
-   27 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN • full_exp SEMI C_BR
-   56 statement: RETURN • full_exp SEMI
+   63 statement: PRINT_STATE O_PAREN full_exp • C_PAREN SEMI
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 212
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    C_PAREN  shift, and go to state 228
 
 
 State 173
 
-   29 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp • SEMI C_BR
-   56 statement: RETURN full_exp • SEMI
+   66 statement: PRINT_STATE_LN O_PAREN STRING_LITERAL • C_PAREN SEMI
 
-    SEMI  shift, and go to state 213
+    C_PAREN  shift, and go to state 229
 
 
 State 174
 
-   32 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp • SEMI C_BR
-   56 statement: RETURN full_exp • SEMI
+   65 statement: PRINT_STATE_LN O_PAREN full_exp • C_PAREN SEMI
 
-    SEMI  shift, and go to state 214
+    C_PAREN  shift, and go to state 230
 
 
 State 175
 
-   30 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN • full_exp SEMI C_BR
-   56 statement: RETURN • full_exp SEMI
+   60 statement: IF O_PAREN full_exp • C_PAREN statement ELSE statement
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 215
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    C_PAREN  shift, and go to state 231
 
 
 State 176
 
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list • RETURN full_exp SEMI C_BR
-   44 statement_list: statement_list • statement
+   28 var_decl_exp: ID • ID EQUAL full_exp
+   31             | ID • type_bracket_list ID EQUAL NEW prime_type index
 
-    RETURN          shift, and go to state 216
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 121
+    ID    shift, and go to state 232
+    O_SQ  shift, and go to state 29
 
-    statement  go to state 129
+    type_bracket_list  go to state 233
 
 
 State 177
 
-   28 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN • full_exp SEMI C_BR
-   56 statement: RETURN • full_exp SEMI
+   26 var_decl_exp: INT • ID EQUAL full_exp
+   29             | INT • type_bracket_list ID EQUAL NEW prime_type index
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    ID    shift, and go to state 234
+    O_SQ  shift, and go to state 29
 
-    full_exp    go to state 217
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
+    type_bracket_list  go to state 235
 
 
 State 178
 
-   38 formal_rest: COMMA type ID •
+   27 var_decl_exp: BOOL • ID EQUAL full_exp
+   30             | BOOL • type_bracket_list ID EQUAL NEW prime_type index
 
-    $default  reduce using rule 38 (formal_rest)
+    ID    shift, and go to state 236
+    O_SQ  shift, and go to state 29
+
+    type_bracket_list  go to state 237
 
 
 State 179
 
-    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR • statement C_BR C_BR
+   62 statement: FOR O_PAREN var_decl_exp • SEMI full_exp SEMI ID EQUAL full_exp C_PAREN statement
 
-    RETURN          shift, and go to state 119
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 121
-
-    statement  go to state 218
+    SEMI  shift, and go to state 238
 
 
 State 180
 
-   96 object: NEW ID O_PAREN • C_PAREN
+   61 statement: WHILE O_PAREN full_exp • C_PAREN statement
 
-    C_PAREN  shift, and go to state 219
+    C_PAREN  shift, and go to state 239
 
 
 State 181
 
-   58 index: index • O_SQ full_exp C_SQ
-   97 object: NEW prime_type index •
+   18 var_decl: ID ID • SEMI
+   28 var_decl_exp: ID ID • EQUAL full_exp
 
-    O_SQ  shift, and go to state 170
-
-    $default  reduce using rule 97 (object)
+    SEMI   shift, and go to state 49
+    EQUAL  shift, and go to state 240
 
 
 State 182
 
-   94 exp: O_PAREN full_exp C_PAREN •
+   21 var_decl: ID type_bracket_list • ID SEMI
+   31 var_decl_exp: ID type_bracket_list • ID EQUAL NEW prime_type index
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
 
-    $default  reduce using rule 94 (exp)
+    ID    shift, and go to state 241
+    O_SQ  shift, and go to state 52
 
 
 State 183
 
-   84 exp: ID DOT LENGTH •
+   69 statement: RETURN full_exp • SEMI
 
-    $default  reduce using rule 84 (exp)
+    SEMI  shift, and go to state 242
 
 
 State 184
 
-   90 exp: ID DOT ID • O_PAREN exp_list C_PAREN
-   92    | ID DOT ID • O_PAREN C_PAREN
+   16 var_decl: INT ID • SEMI
+   26 var_decl_exp: INT ID • EQUAL full_exp
 
-    O_PAREN  shift, and go to state 220
+    SEMI   shift, and go to state 55
+    EQUAL  shift, and go to state 243
 
 
 State 185
 
-   85 exp: ID index DOT • LENGTH
+   19 var_decl: INT type_bracket_list • ID SEMI
+   29 var_decl_exp: INT type_bracket_list • ID EQUAL NEW prime_type index
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
 
-    LENGTH  shift, and go to state 221
+    ID    shift, and go to state 244
+    O_SQ  shift, and go to state 52
 
 
 State 186
 
-   33 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR •
+   17 var_decl: BOOL ID • SEMI
+   27 var_decl_exp: BOOL ID • EQUAL full_exp
 
-    $default  reduce using rule 33 (method_decl)
+    SEMI   shift, and go to state 57
+    EQUAL  shift, and go to state 245
 
 
 State 187
 
-   61 or_term: or_term OR and_term •
-   63 and_term: and_term • AND eq_term
+   20 var_decl: BOOL type_bracket_list • ID SEMI
+   30 var_decl_exp: BOOL type_bracket_list • ID EQUAL NEW prime_type index
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
 
-    AND  shift, and go to state 147
-
-    $default  reduce using rule 61 (or_term)
+    ID    shift, and go to state 246
+    O_SQ  shift, and go to state 52
 
 
 State 188
 
-   63 and_term: and_term AND eq_term •
-   65 eq_term: eq_term • EQEQ gr_le_term
-   66        | eq_term • N_EQ gr_le_term
+   58 statement: O_BR var_decl_exp_list C_BR •
 
-    EQEQ  shift, and go to state 148
-    N_EQ  shift, and go to state 149
-
-    $default  reduce using rule 63 (and_term)
+    $default  reduce using rule 58 (statement)
 
 
 State 189
 
-   65 eq_term: eq_term EQEQ gr_le_term •
-   68 gr_le_term: gr_le_term • LESS add_term
-   69           | gr_le_term • GREAT add_term
-   70           | gr_le_term • L_EQ add_term
-   71           | gr_le_term • G_EQ add_term
+   23 var_decl_exp_list: var_decl_exp_list var_decl •
 
-    G_EQ   shift, and go to state 150
-    L_EQ   shift, and go to state 151
-    GREAT  shift, and go to state 152
-    LESS   shift, and go to state 153
-
-    $default  reduce using rule 65 (eq_term)
+    $default  reduce using rule 23 (var_decl_exp_list)
 
 
 State 190
 
-   66 eq_term: eq_term N_EQ gr_le_term •
-   68 gr_le_term: gr_le_term • LESS add_term
-   69           | gr_le_term • GREAT add_term
-   70           | gr_le_term • L_EQ add_term
-   71           | gr_le_term • G_EQ add_term
-
-    G_EQ   shift, and go to state 150
-    L_EQ   shift, and go to state 151
-    GREAT  shift, and go to state 152
-    LESS   shift, and go to state 153
-
-    $default  reduce using rule 66 (eq_term)
-
-
-State 191
-
-   71 gr_le_term: gr_le_term G_EQ add_term •
-   73 add_term: add_term • PLUS mul_term
-   74         | add_term • MINUS mul_term
-
-    PLUS   shift, and go to state 154
-    MINUS  shift, and go to state 155
-
-    $default  reduce using rule 71 (gr_le_term)
-
-
-State 192
-
-   70 gr_le_term: gr_le_term L_EQ add_term •
-   73 add_term: add_term • PLUS mul_term
-   74         | add_term • MINUS mul_term
-
-    PLUS   shift, and go to state 154
-    MINUS  shift, and go to state 155
-
-    $default  reduce using rule 70 (gr_le_term)
-
-
-State 193
-
-   69 gr_le_term: gr_le_term GREAT add_term •
-   73 add_term: add_term • PLUS mul_term
-   74         | add_term • MINUS mul_term
-
-    PLUS   shift, and go to state 154
-    MINUS  shift, and go to state 155
-
-    $default  reduce using rule 69 (gr_le_term)
-
-
-State 194
-
-   68 gr_le_term: gr_le_term LESS add_term •
-   73 add_term: add_term • PLUS mul_term
-   74         | add_term • MINUS mul_term
-
-    PLUS   shift, and go to state 154
-    MINUS  shift, and go to state 155
-
-    $default  reduce using rule 68 (gr_le_term)
-
-
-State 195
-
-   73 add_term: add_term PLUS mul_term •
-   76 mul_term: mul_term • DIV un_op
-   77         | mul_term • MUL un_op
-
-    MUL  shift, and go to state 156
-    DIV  shift, and go to state 157
-
-    $default  reduce using rule 73 (add_term)
-
-
-State 196
-
-   74 add_term: add_term MINUS mul_term •
-   76 mul_term: mul_term • DIV un_op
-   77         | mul_term • MUL un_op
-
-    MUL  shift, and go to state 156
-    DIV  shift, and go to state 157
-
-    $default  reduce using rule 74 (add_term)
-
-
-State 197
-
-   77 mul_term: mul_term MUL un_op •
-
-    $default  reduce using rule 77 (mul_term)
-
-
-State 198
-
-   76 mul_term: mul_term DIV un_op •
-
-    $default  reduce using rule 76 (mul_term)
-
-
-State 199
-
-   91 exp: object DOT ID • O_PAREN exp_list C_PAREN
-   93    | object DOT ID • O_PAREN C_PAREN
-
-    O_PAREN  shift, and go to state 222
-
-
-State 200
-
-   51 statement: PRINT_STATE O_PAREN STRING_LITERAL C_PAREN • SEMI
-
-    SEMI  shift, and go to state 223
-
-
-State 201
-
-   50 statement: PRINT_STATE O_PAREN full_exp C_PAREN • SEMI
-
-    SEMI  shift, and go to state 224
-
-
-State 202
-
-   53 statement: PRINT_STATE_LN O_PAREN STRING_LITERAL C_PAREN • SEMI
-
-    SEMI  shift, and go to state 225
-
-
-State 203
-
-   52 statement: PRINT_STATE_LN O_PAREN full_exp C_PAREN • SEMI
-
-    SEMI  shift, and go to state 226
-
-
-State 204
-
-   48 statement: IF O_PAREN full_exp C_PAREN • statement ELSE statement
-
-    RETURN          shift, and go to state 119
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 121
-
-    statement  go to state 227
-
-
-State 205
-
-   49 statement: WHILE O_PAREN full_exp C_PAREN • statement
-
-    RETURN          shift, and go to state 119
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 121
-
-    statement  go to state 228
-
-
-State 206
-
-   56 statement: RETURN full_exp SEMI •
-
-    $default  reduce using rule 56 (statement)
-
-
-State 207
-
-   54 statement: ID EQUAL full_exp SEMI •
-
-    $default  reduce using rule 54 (statement)
-
-
-State 208
-
-   57 index: O_SQ full_exp C_SQ •
-
-    $default  reduce using rule 57 (index)
-
-
-State 209
-
-   55 statement: ID index EQUAL full_exp • SEMI
-
-    SEMI  shift, and go to state 229
-
-
-State 210
-
-   58 index: index O_SQ full_exp • C_SQ
-
-    C_SQ  shift, and go to state 230
-
-
-State 211
-
-   31 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI • C_BR
-   56 statement: RETURN full_exp SEMI •
-
-    C_BR  shift, and go to state 231
-
-    $default  reduce using rule 56 (statement)
-
-
-State 212
-
-   27 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp • SEMI C_BR
-   56 statement: RETURN full_exp • SEMI
-
-    SEMI  shift, and go to state 232
-
-
-State 213
-
-   29 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI • C_BR
-   56 statement: RETURN full_exp SEMI •
-
-    C_BR  shift, and go to state 233
-
-    $default  reduce using rule 56 (statement)
-
-
-State 214
-
-   32 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI • C_BR
-   56 statement: RETURN full_exp SEMI •
-
-    C_BR  shift, and go to state 234
-
-    $default  reduce using rule 56 (statement)
-
-
-State 215
-
-   30 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp • SEMI C_BR
-   56 statement: RETURN full_exp • SEMI
-
-    SEMI  shift, and go to state 235
-
-
-State 216
-
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN • full_exp SEMI C_BR
-   56 statement: RETURN • full_exp SEMI
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 236
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 217
-
-   28 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp • SEMI C_BR
-   56 statement: RETURN full_exp • SEMI
-
-    SEMI  shift, and go to state 237
-
-
-State 218
-
-    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement • C_BR C_BR
-
-    C_BR  shift, and go to state 238
-
-
-State 219
-
-   96 object: NEW ID O_PAREN C_PAREN •
-
-    $default  reduce using rule 96 (object)
-
-
-State 220
-
-   90 exp: ID DOT ID O_PAREN • exp_list C_PAREN
-   92    | ID DOT ID O_PAREN • C_PAREN
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    C_PAREN          shift, and go to state 239
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 240
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-    exp_list    go to state 241
-
-
-State 221
-
-   85 exp: ID index DOT LENGTH •
-
-    $default  reduce using rule 85 (exp)
-
-
-State 222
-
-   91 exp: object DOT ID O_PAREN • exp_list C_PAREN
-   93    | object DOT ID O_PAREN • C_PAREN
-
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    C_PAREN          shift, and go to state 242
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
-
-    full_exp    go to state 240
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-    exp_list    go to state 243
-
-
-State 223
-
-   51 statement: PRINT_STATE O_PAREN STRING_LITERAL C_PAREN SEMI •
-
-    $default  reduce using rule 51 (statement)
-
-
-State 224
-
-   50 statement: PRINT_STATE O_PAREN full_exp C_PAREN SEMI •
-
-    $default  reduce using rule 50 (statement)
-
-
-State 225
-
-   53 statement: PRINT_STATE_LN O_PAREN STRING_LITERAL C_PAREN SEMI •
-
-    $default  reduce using rule 53 (statement)
-
-
-State 226
-
-   52 statement: PRINT_STATE_LN O_PAREN full_exp C_PAREN SEMI •
-
-    $default  reduce using rule 52 (statement)
-
-
-State 227
-
-   48 statement: IF O_PAREN full_exp C_PAREN statement • ELSE statement
-
-    ELSE  shift, and go to state 244
-
-
-State 228
-
-   49 statement: WHILE O_PAREN full_exp C_PAREN statement •
-
-    $default  reduce using rule 49 (statement)
-
-
-State 229
-
-   55 statement: ID index EQUAL full_exp SEMI •
-
-    $default  reduce using rule 55 (statement)
-
-
-State 230
-
-   58 index: index O_SQ full_exp C_SQ •
-
-    $default  reduce using rule 58 (index)
-
-
-State 231
-
-   31 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR •
-
-    $default  reduce using rule 31 (method_decl)
-
-
-State 232
-
-   27 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI • C_BR
-   56 statement: RETURN full_exp SEMI •
-
-    C_BR  shift, and go to state 245
-
-    $default  reduce using rule 56 (statement)
-
-
-State 233
-
-   29 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR •
-
-    $default  reduce using rule 29 (method_decl)
-
-
-State 234
-
-   32 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR •
-
-    $default  reduce using rule 32 (method_decl)
-
-
-State 235
-
-   30 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI • C_BR
-   56 statement: RETURN full_exp SEMI •
-
-    C_BR  shift, and go to state 246
-
-    $default  reduce using rule 56 (statement)
-
-
-State 236
-
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp • SEMI C_BR
-   56 statement: RETURN full_exp • SEMI
+   22 var_decl_exp_list: var_decl_exp_list var_decl_exp • SEMI
 
     SEMI  shift, and go to state 247
 
 
+State 191
+
+   54 statement_list: statement_list • statement
+   59 statement: O_BR var_decl_exp_list statement_list • C_BR
+
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+    C_BR            shift, and go to state 248
+
+    statement  go to state 137
+
+
+State 192
+
+   24 var_decl_exp_list: var_decl_exp SEMI •
+
+    $default  reduce using rule 24 (var_decl_exp_list)
+
+
+State 193
+
+   57 statement: O_BR statement_list C_BR •
+
+    $default  reduce using rule 57 (statement)
+
+
+State 194
+
+   41 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp • SEMI C_BR
+   69 statement: RETURN full_exp • SEMI
+
+    SEMI  shift, and go to state 249
+
+
+State 195
+
+   37 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN • full_exp SEMI C_BR
+   69 statement: RETURN • full_exp SEMI
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 250
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 196
+
+   39 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp • SEMI C_BR
+   69 statement: RETURN full_exp • SEMI
+
+    SEMI  shift, and go to state 251
+
+
+State 197
+
+   42 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp • SEMI C_BR
+   69 statement: RETURN full_exp • SEMI
+
+    SEMI  shift, and go to state 252
+
+
+State 198
+
+   40 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN • full_exp SEMI C_BR
+   69 statement: RETURN • full_exp SEMI
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 253
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 199
+
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list • RETURN full_exp SEMI C_BR
+   54 statement_list: statement_list • statement
+
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 254
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 137
+
+
+State 200
+
+   38 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN • full_exp SEMI C_BR
+   69 statement: RETURN • full_exp SEMI
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 255
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 201
+
+   48 formal_rest: COMMA type ID •
+
+    $default  reduce using rule 48 (formal_rest)
+
+
+State 202
+
+    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR • statement C_BR C_BR
+
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 256
+
+
+State 203
+
+   67 statement: ID EQUAL full_exp SEMI •
+
+    $default  reduce using rule 67 (statement)
+
+
+State 204
+
+   70 index: O_SQ full_exp C_SQ •
+
+    $default  reduce using rule 70 (index)
+
+
+State 205
+
+   68 statement: ID index EQUAL full_exp • SEMI
+
+    SEMI  shift, and go to state 257
+
+
+State 206
+
+   71 index: index O_SQ full_exp • C_SQ
+
+    C_SQ  shift, and go to state 258
+
+
+State 207
+
+  103 exp: ID DOT ID • O_PAREN exp_list C_PAREN
+  105    | ID DOT ID • O_PAREN C_PAREN
+
+    O_PAREN  shift, and go to state 259
+
+
+State 208
+
+   97 exp: ID DOT LENGTH •
+
+    $default  reduce using rule 97 (exp)
+
+
+State 209
+
+   98 exp: ID index DOT • LENGTH
+
+    LENGTH  shift, and go to state 260
+
+
+State 210
+
+  109 object: NEW ID O_PAREN • C_PAREN
+
+    C_PAREN  shift, and go to state 261
+
+
+State 211
+
+   71 index: index • O_SQ full_exp C_SQ
+  110 object: NEW prime_type index •
+
+    O_SQ  shift, and go to state 147
+
+    $default  reduce using rule 110 (object)
+
+
+State 212
+
+  107 exp: O_PAREN full_exp C_PAREN •
+
+    $default  reduce using rule 107 (exp)
+
+
+State 213
+
+   43 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR RETURN full_exp SEMI C_BR •
+
+    $default  reduce using rule 43 (method_decl)
+
+
+State 214
+
+   74 or_term: or_term OR and_term •
+   76 and_term: and_term • AND eq_term
+
+    AND  shift, and go to state 159
+
+    $default  reduce using rule 74 (or_term)
+
+
+State 215
+
+   76 and_term: and_term AND eq_term •
+   78 eq_term: eq_term • EQEQ gr_le_term
+   79        | eq_term • N_EQ gr_le_term
+
+    EQEQ  shift, and go to state 160
+    N_EQ  shift, and go to state 161
+
+    $default  reduce using rule 76 (and_term)
+
+
+State 216
+
+   78 eq_term: eq_term EQEQ gr_le_term •
+   81 gr_le_term: gr_le_term • LESS add_term
+   82           | gr_le_term • GREAT add_term
+   83           | gr_le_term • L_EQ add_term
+   84           | gr_le_term • G_EQ add_term
+
+    G_EQ   shift, and go to state 162
+    L_EQ   shift, and go to state 163
+    GREAT  shift, and go to state 164
+    LESS   shift, and go to state 165
+
+    $default  reduce using rule 78 (eq_term)
+
+
+State 217
+
+   79 eq_term: eq_term N_EQ gr_le_term •
+   81 gr_le_term: gr_le_term • LESS add_term
+   82           | gr_le_term • GREAT add_term
+   83           | gr_le_term • L_EQ add_term
+   84           | gr_le_term • G_EQ add_term
+
+    G_EQ   shift, and go to state 162
+    L_EQ   shift, and go to state 163
+    GREAT  shift, and go to state 164
+    LESS   shift, and go to state 165
+
+    $default  reduce using rule 79 (eq_term)
+
+
+State 218
+
+   84 gr_le_term: gr_le_term G_EQ add_term •
+   86 add_term: add_term • PLUS mul_term
+   87         | add_term • MINUS mul_term
+
+    PLUS   shift, and go to state 166
+    MINUS  shift, and go to state 167
+
+    $default  reduce using rule 84 (gr_le_term)
+
+
+State 219
+
+   83 gr_le_term: gr_le_term L_EQ add_term •
+   86 add_term: add_term • PLUS mul_term
+   87         | add_term • MINUS mul_term
+
+    PLUS   shift, and go to state 166
+    MINUS  shift, and go to state 167
+
+    $default  reduce using rule 83 (gr_le_term)
+
+
+State 220
+
+   82 gr_le_term: gr_le_term GREAT add_term •
+   86 add_term: add_term • PLUS mul_term
+   87         | add_term • MINUS mul_term
+
+    PLUS   shift, and go to state 166
+    MINUS  shift, and go to state 167
+
+    $default  reduce using rule 82 (gr_le_term)
+
+
+State 221
+
+   81 gr_le_term: gr_le_term LESS add_term •
+   86 add_term: add_term • PLUS mul_term
+   87         | add_term • MINUS mul_term
+
+    PLUS   shift, and go to state 166
+    MINUS  shift, and go to state 167
+
+    $default  reduce using rule 81 (gr_le_term)
+
+
+State 222
+
+   86 add_term: add_term PLUS mul_term •
+   89 mul_term: mul_term • DIV un_op
+   90         | mul_term • MUL un_op
+
+    MUL  shift, and go to state 168
+    DIV  shift, and go to state 169
+
+    $default  reduce using rule 86 (add_term)
+
+
+State 223
+
+   87 add_term: add_term MINUS mul_term •
+   89 mul_term: mul_term • DIV un_op
+   90         | mul_term • MUL un_op
+
+    MUL  shift, and go to state 168
+    DIV  shift, and go to state 169
+
+    $default  reduce using rule 87 (add_term)
+
+
+State 224
+
+   90 mul_term: mul_term MUL un_op •
+
+    $default  reduce using rule 90 (mul_term)
+
+
+State 225
+
+   89 mul_term: mul_term DIV un_op •
+
+    $default  reduce using rule 89 (mul_term)
+
+
+State 226
+
+  104 exp: object DOT ID • O_PAREN exp_list C_PAREN
+  106    | object DOT ID • O_PAREN C_PAREN
+
+    O_PAREN  shift, and go to state 262
+
+
+State 227
+
+   64 statement: PRINT_STATE O_PAREN STRING_LITERAL C_PAREN • SEMI
+
+    SEMI  shift, and go to state 263
+
+
+State 228
+
+   63 statement: PRINT_STATE O_PAREN full_exp C_PAREN • SEMI
+
+    SEMI  shift, and go to state 264
+
+
+State 229
+
+   66 statement: PRINT_STATE_LN O_PAREN STRING_LITERAL C_PAREN • SEMI
+
+    SEMI  shift, and go to state 265
+
+
+State 230
+
+   65 statement: PRINT_STATE_LN O_PAREN full_exp C_PAREN • SEMI
+
+    SEMI  shift, and go to state 266
+
+
+State 231
+
+   60 statement: IF O_PAREN full_exp C_PAREN • statement ELSE statement
+
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 267
+
+
+State 232
+
+   28 var_decl_exp: ID ID • EQUAL full_exp
+
+    EQUAL  shift, and go to state 240
+
+
+State 233
+
+   31 var_decl_exp: ID type_bracket_list • ID EQUAL NEW prime_type index
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
+
+    ID    shift, and go to state 268
+    O_SQ  shift, and go to state 52
+
+
+State 234
+
+   26 var_decl_exp: INT ID • EQUAL full_exp
+
+    EQUAL  shift, and go to state 243
+
+
+State 235
+
+   29 var_decl_exp: INT type_bracket_list • ID EQUAL NEW prime_type index
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
+
+    ID    shift, and go to state 269
+    O_SQ  shift, and go to state 52
+
+
+State 236
+
+   27 var_decl_exp: BOOL ID • EQUAL full_exp
+
+    EQUAL  shift, and go to state 245
+
+
 State 237
 
-   28 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI • C_BR
-   56 statement: RETURN full_exp SEMI •
+   30 var_decl_exp: BOOL type_bracket_list • ID EQUAL NEW prime_type index
+   32 type_bracket_list: type_bracket_list • O_SQ C_SQ
 
-    C_BR  shift, and go to state 248
-
-    $default  reduce using rule 56 (statement)
+    ID    shift, and go to state 270
+    O_SQ  shift, and go to state 52
 
 
 State 238
 
-    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement C_BR • C_BR
+   62 statement: FOR O_PAREN var_decl_exp SEMI • full_exp SEMI ID EQUAL full_exp C_PAREN statement
 
-    C_BR  shift, and go to state 249
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 271
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 239
 
-   92 exp: ID DOT ID O_PAREN C_PAREN •
+   61 statement: WHILE O_PAREN full_exp C_PAREN • statement
 
-    $default  reduce using rule 92 (exp)
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 272
 
 
 State 240
 
-  100 exp_list: full_exp • exp_rest_list
-  101         | full_exp •
+   28 var_decl_exp: ID ID EQUAL • full_exp
 
-    COMMA  shift, and go to state 250
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
 
-    $default  reduce using rule 101 (exp_list)
-
-    exp_rest_list  go to state 251
-    exp_rest       go to state 252
+    full_exp    go to state 273
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 241
 
-   90 exp: ID DOT ID O_PAREN exp_list • C_PAREN
+   21 var_decl: ID type_bracket_list ID • SEMI
+   31 var_decl_exp: ID type_bracket_list ID • EQUAL NEW prime_type index
 
-    C_PAREN  shift, and go to state 253
+    SEMI   shift, and go to state 64
+    EQUAL  shift, and go to state 274
 
 
 State 242
 
-   93 exp: object DOT ID O_PAREN C_PAREN •
+   69 statement: RETURN full_exp SEMI •
 
-    $default  reduce using rule 93 (exp)
+    $default  reduce using rule 69 (statement)
 
 
 State 243
 
-   91 exp: object DOT ID O_PAREN exp_list • C_PAREN
+   26 var_decl_exp: INT ID EQUAL • full_exp
 
-    C_PAREN  shift, and go to state 254
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 275
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 244
 
-   48 statement: IF O_PAREN full_exp C_PAREN statement ELSE • statement
+   19 var_decl: INT type_bracket_list ID • SEMI
+   29 var_decl_exp: INT type_bracket_list ID • EQUAL NEW prime_type index
 
-    RETURN          shift, and go to state 119
-    PRINT_STATE     shift, and go to state 81
-    PRINT_STATE_LN  shift, and go to state 82
-    IF              shift, and go to state 83
-    WHILE           shift, and go to state 84
-    O_BR            shift, and go to state 85
-    ID              shift, and go to state 121
-
-    statement  go to state 255
+    SEMI   shift, and go to state 68
+    EQUAL  shift, and go to state 276
 
 
 State 245
 
-   27 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR •
+   27 var_decl_exp: BOOL ID EQUAL • full_exp
 
-    $default  reduce using rule 27 (method_decl)
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 277
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
 State 246
 
-   30 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR •
+   20 var_decl: BOOL type_bracket_list ID • SEMI
+   30 var_decl_exp: BOOL type_bracket_list ID • EQUAL NEW prime_type index
 
-    $default  reduce using rule 30 (method_decl)
+    SEMI   shift, and go to state 69
+    EQUAL  shift, and go to state 278
 
 
 State 247
 
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI • C_BR
-   56 statement: RETURN full_exp SEMI •
+   22 var_decl_exp_list: var_decl_exp_list var_decl_exp SEMI •
 
-    C_BR  shift, and go to state 256
-
-    $default  reduce using rule 56 (statement)
+    $default  reduce using rule 22 (var_decl_exp_list)
 
 
 State 248
 
-   28 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR •
+   59 statement: O_BR var_decl_exp_list statement_list C_BR •
 
-    $default  reduce using rule 28 (method_decl)
+    $default  reduce using rule 59 (statement)
 
 
 State 249
+
+   41 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI • C_BR
+   69 statement: RETURN full_exp SEMI •
+
+    C_BR  shift, and go to state 279
+
+    $default  reduce using rule 69 (statement)
+
+
+State 250
+
+   37 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp • SEMI C_BR
+   69 statement: RETURN full_exp • SEMI
+
+    SEMI  shift, and go to state 280
+
+
+State 251
+
+   39 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI • C_BR
+   69 statement: RETURN full_exp SEMI •
+
+    C_BR  shift, and go to state 281
+
+    $default  reduce using rule 69 (statement)
+
+
+State 252
+
+   42 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI • C_BR
+   69 statement: RETURN full_exp SEMI •
+
+    C_BR  shift, and go to state 282
+
+    $default  reduce using rule 69 (statement)
+
+
+State 253
+
+   40 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp • SEMI C_BR
+   69 statement: RETURN full_exp • SEMI
+
+    SEMI  shift, and go to state 283
+
+
+State 254
+
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN • full_exp SEMI C_BR
+   69 statement: RETURN • full_exp SEMI
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 284
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 255
+
+   38 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp • SEMI C_BR
+   69 statement: RETURN full_exp • SEMI
+
+    SEMI  shift, and go to state 285
+
+
+State 256
+
+    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement • C_BR C_BR
+
+    C_BR  shift, and go to state 286
+
+
+State 257
+
+   68 statement: ID index EQUAL full_exp SEMI •
+
+    $default  reduce using rule 68 (statement)
+
+
+State 258
+
+   71 index: index O_SQ full_exp C_SQ •
+
+    $default  reduce using rule 71 (index)
+
+
+State 259
+
+  103 exp: ID DOT ID O_PAREN • exp_list C_PAREN
+  105    | ID DOT ID O_PAREN • C_PAREN
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+    C_PAREN          shift, and go to state 287
+
+    full_exp    go to state 288
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+    exp_list    go to state 289
+
+
+State 260
+
+   98 exp: ID index DOT LENGTH •
+
+    $default  reduce using rule 98 (exp)
+
+
+State 261
+
+  109 object: NEW ID O_PAREN C_PAREN •
+
+    $default  reduce using rule 109 (object)
+
+
+State 262
+
+  104 exp: object DOT ID O_PAREN • exp_list C_PAREN
+  106    | object DOT ID O_PAREN • C_PAREN
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+    C_PAREN          shift, and go to state 290
+
+    full_exp    go to state 288
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+    exp_list    go to state 291
+
+
+State 263
+
+   64 statement: PRINT_STATE O_PAREN STRING_LITERAL C_PAREN SEMI •
+
+    $default  reduce using rule 64 (statement)
+
+
+State 264
+
+   63 statement: PRINT_STATE O_PAREN full_exp C_PAREN SEMI •
+
+    $default  reduce using rule 63 (statement)
+
+
+State 265
+
+   66 statement: PRINT_STATE_LN O_PAREN STRING_LITERAL C_PAREN SEMI •
+
+    $default  reduce using rule 66 (statement)
+
+
+State 266
+
+   65 statement: PRINT_STATE_LN O_PAREN full_exp C_PAREN SEMI •
+
+    $default  reduce using rule 65 (statement)
+
+
+State 267
+
+   60 statement: IF O_PAREN full_exp C_PAREN statement • ELSE statement
+
+    ELSE  shift, and go to state 292
+
+
+State 268
+
+   31 var_decl_exp: ID type_bracket_list ID • EQUAL NEW prime_type index
+
+    EQUAL  shift, and go to state 274
+
+
+State 269
+
+   29 var_decl_exp: INT type_bracket_list ID • EQUAL NEW prime_type index
+
+    EQUAL  shift, and go to state 276
+
+
+State 270
+
+   30 var_decl_exp: BOOL type_bracket_list ID • EQUAL NEW prime_type index
+
+    EQUAL  shift, and go to state 278
+
+
+State 271
+
+   62 statement: FOR O_PAREN var_decl_exp SEMI full_exp • SEMI ID EQUAL full_exp C_PAREN statement
+
+    SEMI  shift, and go to state 293
+
+
+State 272
+
+   61 statement: WHILE O_PAREN full_exp C_PAREN statement •
+
+    $default  reduce using rule 61 (statement)
+
+
+State 273
+
+   28 var_decl_exp: ID ID EQUAL full_exp •
+
+    $default  reduce using rule 28 (var_decl_exp)
+
+
+State 274
+
+   31 var_decl_exp: ID type_bracket_list ID EQUAL • NEW prime_type index
+
+    NEW  shift, and go to state 294
+
+
+State 275
+
+   26 var_decl_exp: INT ID EQUAL full_exp •
+
+    $default  reduce using rule 26 (var_decl_exp)
+
+
+State 276
+
+   29 var_decl_exp: INT type_bracket_list ID EQUAL • NEW prime_type index
+
+    NEW  shift, and go to state 295
+
+
+State 277
+
+   27 var_decl_exp: BOOL ID EQUAL full_exp •
+
+    $default  reduce using rule 27 (var_decl_exp)
+
+
+State 278
+
+   30 var_decl_exp: BOOL type_bracket_list ID EQUAL • NEW prime_type index
+
+    NEW  shift, and go to state 296
+
+
+State 279
+
+   41 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR •
+
+    $default  reduce using rule 41 (method_decl)
+
+
+State 280
+
+   37 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI • C_BR
+   69 statement: RETURN full_exp SEMI •
+
+    C_BR  shift, and go to state 297
+
+    $default  reduce using rule 69 (statement)
+
+
+State 281
+
+   39 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR •
+
+    $default  reduce using rule 39 (method_decl)
+
+
+State 282
+
+   42 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR RETURN full_exp SEMI C_BR •
+
+    $default  reduce using rule 42 (method_decl)
+
+
+State 283
+
+   40 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI • C_BR
+   69 statement: RETURN full_exp SEMI •
+
+    C_BR  shift, and go to state 298
+
+    $default  reduce using rule 69 (statement)
+
+
+State 284
+
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp • SEMI C_BR
+   69 statement: RETURN full_exp • SEMI
+
+    SEMI  shift, and go to state 299
+
+
+State 285
+
+   38 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI • C_BR
+   69 statement: RETURN full_exp SEMI •
+
+    C_BR  shift, and go to state 300
+
+    $default  reduce using rule 69 (statement)
+
+
+State 286
+
+    3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement C_BR • C_BR
+
+    C_BR  shift, and go to state 301
+
+
+State 287
+
+  105 exp: ID DOT ID O_PAREN C_PAREN •
+
+    $default  reduce using rule 105 (exp)
+
+
+State 288
+
+  113 exp_list: full_exp • exp_rest_list
+  114         | full_exp •
+
+    COMMA  shift, and go to state 302
+
+    $default  reduce using rule 114 (exp_list)
+
+    exp_rest_list  go to state 303
+    exp_rest       go to state 304
+
+
+State 289
+
+  103 exp: ID DOT ID O_PAREN exp_list • C_PAREN
+
+    C_PAREN  shift, and go to state 305
+
+
+State 290
+
+  106 exp: object DOT ID O_PAREN C_PAREN •
+
+    $default  reduce using rule 106 (exp)
+
+
+State 291
+
+  104 exp: object DOT ID O_PAREN exp_list • C_PAREN
+
+    C_PAREN  shift, and go to state 306
+
+
+State 292
+
+   60 statement: IF O_PAREN full_exp C_PAREN statement ELSE • statement
+
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 307
+
+
+State 293
+
+   62 statement: FOR O_PAREN var_decl_exp SEMI full_exp SEMI • ID EQUAL full_exp C_PAREN statement
+
+    ID  shift, and go to state 308
+
+
+State 294
+
+   31 var_decl_exp: ID type_bracket_list ID EQUAL NEW • prime_type index
+
+    ID    shift, and go to state 31
+    INT   shift, and go to state 32
+    BOOL  shift, and go to state 33
+
+    prime_type  go to state 309
+
+
+State 295
+
+   29 var_decl_exp: INT type_bracket_list ID EQUAL NEW • prime_type index
+
+    ID    shift, and go to state 31
+    INT   shift, and go to state 32
+    BOOL  shift, and go to state 33
+
+    prime_type  go to state 310
+
+
+State 296
+
+   30 var_decl_exp: BOOL type_bracket_list ID EQUAL NEW • prime_type index
+
+    ID    shift, and go to state 31
+    INT   shift, and go to state 32
+    BOOL  shift, and go to state 33
+
+    prime_type  go to state 311
+
+
+State 297
+
+   37 method_decl: PUBLIC type ID O_PAREN C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR •
+
+    $default  reduce using rule 37 (method_decl)
+
+
+State 298
+
+   40 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list RETURN full_exp SEMI C_BR •
+
+    $default  reduce using rule 40 (method_decl)
+
+
+State 299
+
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI • C_BR
+   69 statement: RETURN full_exp SEMI •
+
+    C_BR  shift, and go to state 312
+
+    $default  reduce using rule 69 (statement)
+
+
+State 300
+
+   38 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR statement_list RETURN full_exp SEMI C_BR •
+
+    $default  reduce using rule 38 (method_decl)
+
+
+State 301
 
     3 main_class: CLASS ID O_BR PUBLIC STATIC VOID MAIN O_PAREN STRING O_SQ C_SQ ID C_PAREN O_BR statement C_BR C_BR •
 
     $default  reduce using rule 3 (main_class)
 
 
-State 250
+State 302
 
-  102 exp_rest: COMMA • full_exp
+  115 exp_rest: COMMA • full_exp
 
-    THIS             shift, and go to state 95
-    NEW              shift, and go to state 96
-    NOT              shift, and go to state 97
-    PLUS             shift, and go to state 98
-    MINUS            shift, and go to state 99
-    TRUE             shift, and go to state 100
-    FALSE            shift, and go to state 101
-    O_PAREN          shift, and go to state 102
-    INTEGER_LITERAL  shift, and go to state 103
-    ID               shift, and go to state 104
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
 
-    full_exp    go to state 257
-    or_term     go to state 106
-    and_term    go to state 107
-    eq_term     go to state 108
-    gr_le_term  go to state 109
-    add_term    go to state 110
-    mul_term    go to state 111
-    un_op       go to state 112
-    exp         go to state 113
-    object      go to state 114
-
-
-State 251
-
-   98 exp_rest_list: exp_rest_list • exp_rest
-  100 exp_list: full_exp exp_rest_list •
-
-    COMMA  shift, and go to state 250
-
-    $default  reduce using rule 100 (exp_list)
-
-    exp_rest  go to state 258
+    full_exp    go to state 313
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
 
 
-State 252
+State 303
 
-   99 exp_rest_list: exp_rest •
+  111 exp_rest_list: exp_rest_list • exp_rest
+  113 exp_list: full_exp exp_rest_list •
 
-    $default  reduce using rule 99 (exp_rest_list)
+    COMMA  shift, and go to state 302
 
+    $default  reduce using rule 113 (exp_list)
 
-State 253
-
-   90 exp: ID DOT ID O_PAREN exp_list C_PAREN •
-
-    $default  reduce using rule 90 (exp)
+    exp_rest  go to state 314
 
 
-State 254
+State 304
 
-   91 exp: object DOT ID O_PAREN exp_list C_PAREN •
+  112 exp_rest_list: exp_rest •
 
-    $default  reduce using rule 91 (exp)
-
-
-State 255
-
-   48 statement: IF O_PAREN full_exp C_PAREN statement ELSE statement •
-
-    $default  reduce using rule 48 (statement)
+    $default  reduce using rule 112 (exp_rest_list)
 
 
-State 256
+State 305
 
-   26 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR •
+  103 exp: ID DOT ID O_PAREN exp_list C_PAREN •
 
-    $default  reduce using rule 26 (method_decl)
-
-
-State 257
-
-  102 exp_rest: COMMA full_exp •
-
-    $default  reduce using rule 102 (exp_rest)
+    $default  reduce using rule 103 (exp)
 
 
-State 258
+State 306
 
-   98 exp_rest_list: exp_rest_list exp_rest •
+  104 exp: object DOT ID O_PAREN exp_list C_PAREN •
 
-    $default  reduce using rule 98 (exp_rest_list)
+    $default  reduce using rule 104 (exp)
+
+
+State 307
+
+   60 statement: IF O_PAREN full_exp C_PAREN statement ELSE statement •
+
+    $default  reduce using rule 60 (statement)
+
+
+State 308
+
+   62 statement: FOR O_PAREN var_decl_exp SEMI full_exp SEMI ID • EQUAL full_exp C_PAREN statement
+
+    EQUAL  shift, and go to state 315
+
+
+State 309
+
+   31 var_decl_exp: ID type_bracket_list ID EQUAL NEW prime_type • index
+
+    O_SQ  shift, and go to state 149
+
+    index  go to state 316
+
+
+State 310
+
+   29 var_decl_exp: INT type_bracket_list ID EQUAL NEW prime_type • index
+
+    O_SQ  shift, and go to state 149
+
+    index  go to state 317
+
+
+State 311
+
+   30 var_decl_exp: BOOL type_bracket_list ID EQUAL NEW prime_type • index
+
+    O_SQ  shift, and go to state 149
+
+    index  go to state 318
+
+
+State 312
+
+   36 method_decl: PUBLIC type ID O_PAREN formal_list C_PAREN O_BR var_decl_list statement_list RETURN full_exp SEMI C_BR •
+
+    $default  reduce using rule 36 (method_decl)
+
+
+State 313
+
+  115 exp_rest: COMMA full_exp •
+
+    $default  reduce using rule 115 (exp_rest)
+
+
+State 314
+
+  111 exp_rest_list: exp_rest_list exp_rest •
+
+    $default  reduce using rule 111 (exp_rest_list)
+
+
+State 315
+
+   62 statement: FOR O_PAREN var_decl_exp SEMI full_exp SEMI ID EQUAL • full_exp C_PAREN statement
+
+    INTEGER_LITERAL  shift, and go to state 99
+    ID               shift, and go to state 100
+    THIS             shift, and go to state 101
+    NEW              shift, and go to state 102
+    NOT              shift, and go to state 103
+    PLUS             shift, and go to state 104
+    MINUS            shift, and go to state 105
+    TRUE             shift, and go to state 106
+    FALSE            shift, and go to state 107
+    O_PAREN          shift, and go to state 108
+
+    full_exp    go to state 319
+    or_term     go to state 110
+    and_term    go to state 111
+    eq_term     go to state 112
+    gr_le_term  go to state 113
+    add_term    go to state 114
+    mul_term    go to state 115
+    un_op       go to state 116
+    exp         go to state 117
+    object      go to state 118
+
+
+State 316
+
+   31 var_decl_exp: ID type_bracket_list ID EQUAL NEW prime_type index •
+   71 index: index • O_SQ full_exp C_SQ
+
+    O_SQ  shift, and go to state 147
+
+    $default  reduce using rule 31 (var_decl_exp)
+
+
+State 317
+
+   29 var_decl_exp: INT type_bracket_list ID EQUAL NEW prime_type index •
+   71 index: index • O_SQ full_exp C_SQ
+
+    O_SQ  shift, and go to state 147
+
+    $default  reduce using rule 29 (var_decl_exp)
+
+
+State 318
+
+   30 var_decl_exp: BOOL type_bracket_list ID EQUAL NEW prime_type index •
+   71 index: index • O_SQ full_exp C_SQ
+
+    O_SQ  shift, and go to state 147
+
+    $default  reduce using rule 30 (var_decl_exp)
+
+
+State 319
+
+   62 statement: FOR O_PAREN var_decl_exp SEMI full_exp SEMI ID EQUAL full_exp • C_PAREN statement
+
+    C_PAREN  shift, and go to state 320
+
+
+State 320
+
+   62 statement: FOR O_PAREN var_decl_exp SEMI full_exp SEMI ID EQUAL full_exp C_PAREN • statement
+
+    ID              shift, and go to state 135
+    RETURN          shift, and go to state 125
+    PRINT_STATE     shift, and go to state 82
+    PRINT_STATE_LN  shift, and go to state 83
+    IF              shift, and go to state 84
+    FOR             shift, and go to state 85
+    WHILE           shift, and go to state 86
+    O_BR            shift, and go to state 87
+
+    statement  go to state 321
+
+
+State 321
+
+   62 statement: FOR O_PAREN var_decl_exp SEMI full_exp SEMI ID EQUAL full_exp C_PAREN statement •
+
+    $default  reduce using rule 62 (statement)
