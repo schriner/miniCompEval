@@ -80,7 +80,10 @@ Error Output:
 ### CMake:
 In the root directory
 ```
-cmake -B build
+cmake -DCMAKE_C_COMPILER=<path/to/clang> \
+    -DCMAKE_CXX_COMPILER=<path/to/clang++> \
+    -DLLVM_DIR=<path/to/llvm17> \
+    -B build
 cmake --build build
 ```
 
