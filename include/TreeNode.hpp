@@ -124,11 +124,11 @@ class MainClass : public TreeNode {
 		Ident * i1;
 		Ident * i2;
 		Statement * s;
-		vector<string * > * instr = nullptr;
 		MainClass (Ident * i1, Ident * i2, Statement * s)
 			: i1(i1), i2(i2), s(s) {}
 		void traverse();
 #ifdef ASSEM
+		vector<string * > * instr = nullptr;
 		void assemArmv7();
 #else
 		void evaluate();
@@ -138,11 +138,12 @@ class MainClass : public TreeNode {
 class ClassDeclList : public TreeNode {
 	public:
 		vector<ClassDecl * > * cdVector = nullptr;
-		vector<string * > * instr = nullptr;
 		ClassDeclList(ClassDecl * c) { 
 			cdVector = new vector<ClassDecl * >;
 			cdVector->push_back(c);
+#ifdef ASSEM
 			instr = new vector<string * >;
+#endif
 		}
 		// Add an element to the 
 		void append(ClassDecl * c) {
@@ -150,6 +151,7 @@ class ClassDeclList : public TreeNode {
 		}
 		void traverse();
 #ifdef ASSEM
+		vector<string * > * instr = nullptr;
 		void assemArmv7();
 #else
 		void evaluate();

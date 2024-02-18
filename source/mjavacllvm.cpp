@@ -13,21 +13,19 @@
 
 
 #define INPUT_FORMAT "Expected: mjavacllvm [ -o <output_file> | --stdout ] <inputfile>.java"
-#define PARSING_ERROR(x) { fprintf(stderr, "mjavac: %s\n%s\n\n", (x), INPUT_FORMAT); abort(); }
+#define PARSING_ERROR(x) { fprintf(stderr, "%s: %s\n%s\n\n", exe, (x), INPUT_FORMAT); abort(); }
 
 int yyparse(void);
 
 using namespace std;
 Program * programRoot = nullptr;
 bool programTypeError = false;
-ofstream bcStream;
 string bcFilename;
 
 char * yyfilename = nullptr;
 char * exe;
 
-//void GenerateIR(Program * root);
-void GenerateIR();
+void GenerateIR(Program * root);
 
 /* Main */
 int main( int argc, char** argv ) {
@@ -46,10 +44,11 @@ int main( int argc, char** argv ) {
 		yyin = fopen(argv[3], "r");
 		yyfilename = argv[3];
 
-	} else if (argc == 3 && string(argv[1]).find(".java") != string::npos) {
+	} else if (argc == 3 && string(argv[2]).find(".java") != string::npos) {
 		if (!string("--stdout").compare(argv[1])) {
-			yyin = fopen(argv[1], "r");
+			yyin = fopen(argv[2], "r");
 			yyfilename = argv[2];
+
 		} else {
 			PARSING_ERROR("invalid flag");
 		}
@@ -74,8 +73,7 @@ int main( int argc, char** argv ) {
 
 	if (!yyin) { PARSING_ERROR(".java filepath not found"); }
 	yyparse();
-	//GenerateIR(programRoot);
-	GenerateIR();
-	if (argc != 3) bcStream.close();
 
+	GenerateIR(programRoot);
+	
 }
