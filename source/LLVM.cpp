@@ -117,38 +117,27 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		//buildExpression();
 	//	cerr << "PrintExp: unimplemented" << endl;
 	} else if (PrintString * p_str = dynamic_cast<PrintString * >(s)) {
-		llvm::Value * str = llvm::ConstantDataArray::getString(
+		llvm::Constant * StrConstant = llvm::ConstantDataArray::getString(
 				Context, p_str->s->str->c_str()
 		);
-		llvm::CallInst *CallPrint = llvm::CallInst::Create(_printf, str, "printf", BB);
+		auto *GV = new llvm::GlobalVariable(
+				*BB->getParent()->getParent(), StrConstant->getType(), true, llvm::GlobalValue::PrivateLinkage,
+				StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
+		GV->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+		GV->setAlignment(llvm::Align(1));
+		llvm::CallInst *CallPrint = llvm::CallInst::Create(_printf, GV, "printf", BB);
 		return CallPrint;
 	//} else if (PrintLineExp * pln_exp = dynamic_cast<PrintLineExp * >(s)) {
 		//buildExpression();
 	//	cerr << "PrintLineExp: unimplemented" << endl;
 	} else if (PrintLineString * pln_str = dynamic_cast<PrintLineString * >(s)) {
-	/*	llvm::Value * str = llvm::ConstantArray::get(
-				llvm::ArrayType::get(llvm::Type::getInt8Ty(Context), pln_str->s->str->size() + 1), 
-				(*pln_str->s->str + "\n").c_str()
-		);*/
-		/*
-		llvm::Value * str = llvm::ConstantDataArray::getString(
-				Context, (*pln_str->s->str + "\n").c_str()
-		);
-
-		llvm::Constant *Zero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0);
-		llvm::Constant *idx[] = {Zero, Zero};
-		llvm::CallInst *CallPrint = llvm::CallInst::Create(_printf,
-			llvm::getGetElementPtr::Create(
-					llvm::Type::getInt8Ty(Context), str, idx, true
-			), "printf", BB);*/
 		llvm::Constant *StrConstant = llvm::ConstantDataArray::getString(Context, *pln_str->s->str + "\n");
 		auto *GV = new llvm::GlobalVariable(
 				*BB->getParent()->getParent(), StrConstant->getType(), true, llvm::GlobalValue::PrivateLinkage,
 				StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
 		GV->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 		GV->setAlignment(llvm::Align(1));
-		llvm::CallInst *CallPrint = llvm::CallInst::Create(_printf,
-			GV, "printf", BB);
+		llvm::CallInst *CallPrint = llvm::CallInst::Create(_printf, GV, "printf", BB);
 		return CallPrint;
 	//} else if (Assign * assign = dynamic_cast<Assign * >(s)) {
 	//	cerr << "Assign: unimplemented" << endl;
