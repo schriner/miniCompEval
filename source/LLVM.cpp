@@ -118,7 +118,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 	} else if (PrintExp * p_exp = dynamic_cast<PrintExp * >(s)) {
 		//buildExpression();
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
-			_printf, {_exp_format, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 2)}, "printf", BB
+			_printf, {_exp_format, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), dynamic_cast<LitInt *>(p_exp->e)->i->i)}, "printf", BB
 		);
 		return CallPrint;
 
@@ -139,7 +139,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 	} else if (PrintLineExp * pln_exp = dynamic_cast<PrintLineExp * >(s)) {
 		//buildExpression();
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
-			_printf, {_exp_format_n, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 42)}, "printf", BB
+			_printf, {_exp_format_n, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), dynamic_cast<LitInt *>(pln_exp->e)->i->i)}, "printf", BB
 		);
 		return CallPrint;
 

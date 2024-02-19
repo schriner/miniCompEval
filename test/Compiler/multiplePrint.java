@@ -7,8 +7,8 @@ class multiplePrint {
             System.out.println("The answer");
             System.out.println("to the meaning");
             System.out.println("of life");
-            System.out.println("is:");
-            System.out.println("42");
+            System.out.println("is: ");
+            System.out.print(42);
 			}
     }
 }
