@@ -34,10 +34,12 @@
 
 using namespace std;
 
+// TODO: turn this into a state struct ?
 extern string bcFilename;
 llvm::Function *_printf;
 llvm::GlobalVariable *_exp_format;
 llvm::GlobalVariable *_exp_format_n;
+map<string, llvm::Function *> func_table;
 
 llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 	llvm::Instruction *i;
@@ -140,8 +142,16 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 	} else if (False* e = dynamic_cast<False * >(exp)) {
 		return llvm::ConstantInt::getFalse(Context);
 
-	//} else if (ExpObject* e = dynamic_cast< * >(exp)) {
-	//} else if (ObjectMethodCall* e = dynamic_cast< * >(exp)) {
+	} else if (ExpObject* e = dynamic_cast<ExpObject * >(exp)) {
+		cerr << "Error processing buildExpression: " << endl;
+		cerr << "ExpObject unimplemented " << endl;
+		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 1);
+
+	} else if (ObjectMethodCall* e = dynamic_cast<ObjectMethodCall * >(exp)) {
+		//return llvm::CallInst::Create(func_table[*e->o->id+*e->i->id], "", BB);
+		// TODO classname
+		return llvm::CallInst::Create(func_table[*e->i->id], "", BB);
+
 	} else if (ParenExp* e = dynamic_cast<ParenExp * >(exp)) {
 		return buildExpression(e->e, Context, BB);
 
@@ -205,24 +215,29 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		return &succBB->back();
 
 	} else if (WhileStatement * while_s = dynamic_cast<WhileStatement * >(s)) {
-		llvm::Value * cond = buildExpression(if_s->e, Context, BB);
+		// FIXME Cond Block
+		// While Block
+		// After Block
+		llvm::Value * cond = buildExpression(while_s->e, Context, BB);
 		llvm::BasicBlock * whileBB = 
 			llvm::BasicBlock::Create(Context, "w", BB->getParent());
 		llvm::BasicBlock * succBB = 
 			llvm::BasicBlock::Create(Context, "s", BB->getParent());
+		
 		buildStatement(while_s->s, Context, whileBB);
 		llvm::BranchInst::Create(whileBB, succBB, cond, BB);
-		cond = buildExpression(if_s->e, Context, BB);
+
+		cond = buildExpression(while_s->e, Context, BB);
 		llvm::BranchInst::Create(whileBB, succBB, cond, whileBB);
 		return &succBB->back();
 
-	} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
-		cerr << "ForStatement: unimplemented" << endl;
+	//} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
+	//	cerr << "ForStatement: unimplemented" << endl;
 
 	} else if (PrintExp * p_exp = dynamic_cast<PrintExp * >(s)) {
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
 			_printf, {_exp_format, buildExpression(p_exp->e, Context, BB)},
-			"printf", BB
+			"", BB
 		);
 		return CallPrint;
 
@@ -236,14 +251,14 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		GV->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 		GV->setAlignment(llvm::Align(1));
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
-			_printf, GV, "printf", BB
+			_printf, GV, "", BB
 		);
 		return CallPrint;
 
 	} else if (PrintLineExp * pln_exp = dynamic_cast<PrintLineExp * >(s)) {
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
 			_printf,{_exp_format_n, buildExpression(pln_exp->e, Context, BB)},
-			"printf", BB
+			"", BB
 		);
 		return CallPrint;
 
@@ -255,12 +270,12 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		GV->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 		GV->setAlignment(llvm::Align(1));
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
-			_printf, GV, "printf", BB
+			_printf, GV, "", BB
 		);
 		return CallPrint;
 		
-	//} else if (Assign * assign = dynamic_cast<Assign * >(s)) {
-	//	cerr << "Assign: unimplemented" << endl;
+	} else if (Assign * assign = dynamic_cast<Assign * >(s)) {
+		cerr << "Assign: unimplemented" << endl;
 	//} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
 	//	cerr << "IndexAssign: unimplemented" << endl;
 	//} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
@@ -276,14 +291,38 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 }
 
 void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) {
-	llvm::FunctionType *FT =
-		llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
-	llvm::Function *F =
-     llvm::Function::Create(FT, llvm::Function::ExternalLinkage, *c->i->id, M);
+	//llvm::FunctionType * ClassType =
+	//	llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
+	//llvm::Function *Class =
+  //   llvm::Function::Create(FT, llvm::Function::ExternalLinkage, *c->i->id, M);
 
 	// VarDeclList * v = nullptr;
 	// MethodDeclList * m = nullptr;
-	// buildMethod(c->m)	
+	for (auto func : *c->m->mdVector) {
+		// TODO(ss) return and arg type
+		// VarDeclList * v = nullptr;
+		llvm::FunctionType *FT =
+			llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
+		llvm::Function *F =
+			llvm::Function::Create(
+					FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
+		);
+		//func_table[*c->i->id+*func->i->id] = F;
+		func_table[*func->i->id] = F;
+		
+		llvm::BasicBlock *BB = 
+			llvm::BasicBlock::Create(Context, "EntryBlock", F);
+		
+		if (func->s) {
+			for (auto state : *func->s->sVector ) {
+				buildStatement(state, Context, BB);
+			}
+		}
+
+		llvm::ReturnInst::Create(Context, 
+			buildExpression(func->e, Context, BB), 
+			&F->back());
+	}
 
 }
 
@@ -297,13 +336,6 @@ void buildMain(MainClass * main, llvm::LLVMContext &Context, llvm::Module *M) {
 	llvm::Function *F = 
 		llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "main", M);
 
-	// Create the main function: first create the type 'int ()'
-	llvm::FunctionType *FT_printf =
-		llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), { llvm::PointerType::get(llvm::Type::getInt8Ty(Context), 0)}, true);
-
-	_printf = llvm::Function::Create(
-		FT_printf, llvm::Function::ExternalLinkage, "printf", M
-	);
 	// Add a basic block to the function... again, it automatically inserts
 	// because of the last argument.
 	llvm::BasicBlock *BB = 
@@ -338,12 +370,20 @@ void GenerateIR(Program * root) {
 	_exp_format_n->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 	_exp_format_n->setAlignment(llvm::Align(1));
 
-	buildMain(root->m, Context, M);
+	// Create the main function: first create the type 'int ()'
+	llvm::FunctionType *FT_printf =
+		llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), { llvm::PointerType::get(llvm::Type::getInt8Ty(Context), 0)}, true);
+
+	_printf = llvm::Function::Create(
+		FT_printf, llvm::Function::ExternalLinkage, "printf", M
+	);
+
 	if (root->c) {
 		for (auto classdecl : *root->c->cdVector) {
 			buildClassDecl(classdecl, Context, M);
 		}
 	}
+	buildMain(root->m, Context, M);
 
 	// Output the bitcode file to stdout
 	// TODO(ss): print target triple for computer arch to file
