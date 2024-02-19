@@ -188,6 +188,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 			}
 		}
 		return i;
+
 	} else if (IfStatement * if_s = dynamic_cast<IfStatement * >(s)) {
 		llvm::Value * cond = buildExpression(if_s->e, Context, BB);
 		llvm::BasicBlock * ifBB = 
@@ -197,15 +198,27 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		buildStatement(if_s->s_if, Context, ifBB);
 		buildStatement(if_s->s_el, Context, elBB);
 		llvm::BranchInst::Create(ifBB, elBB, cond, BB);
-		llvm::BasicBlock * postBB = 
-			llvm::BasicBlock::Create(Context, "post", BB->getParent());
-		llvm::BranchInst::Create(postBB, ifBB);
-		llvm::BranchInst::Create(postBB, elBB);
-		return &postBB->back();
-	//} else if (WhileStatement * while_s = dynamic_cast<WhileStatement * >(s)) {
-	//	cerr << "WhileStatement: unimplemented" << endl;
-	//} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
-	//	cerr << "ForStatement: unimplemented" << endl;
+		llvm::BasicBlock * succBB = 
+			llvm::BasicBlock::Create(Context, "s", BB->getParent());
+		llvm::BranchInst::Create(succBB, ifBB);
+		llvm::BranchInst::Create(succBB, elBB);
+		return &succBB->back();
+
+	} else if (WhileStatement * while_s = dynamic_cast<WhileStatement * >(s)) {
+		llvm::Value * cond = buildExpression(if_s->e, Context, BB);
+		llvm::BasicBlock * whileBB = 
+			llvm::BasicBlock::Create(Context, "w", BB->getParent());
+		llvm::BasicBlock * succBB = 
+			llvm::BasicBlock::Create(Context, "s", BB->getParent());
+		buildStatement(while_s->s, Context, whileBB);
+		llvm::BranchInst::Create(whileBB, succBB, cond, BB);
+		cond = buildExpression(if_s->e, Context, BB);
+		llvm::BranchInst::Create(whileBB, succBB, cond, whileBB);
+		return &succBB->back();
+
+	} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
+		cerr << "ForStatement: unimplemented" << endl;
+
 	} else if (PrintExp * p_exp = dynamic_cast<PrintExp * >(s)) {
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
 			_printf, {_exp_format, buildExpression(p_exp->e, Context, BB)},

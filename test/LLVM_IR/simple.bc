@@ -26,13 +26,13 @@ if:                                               ; preds = %EntryBlock
   %8 = add i32 5, 3
   %9 = mul i32 %8, 17
   %printf4 = call i32 (ptr, ...) @printf(ptr @1, i32 %9)
-  br label %post
+  br label %s
 
 el:                                               ; preds = %EntryBlock
   %printf5 = call i32 (ptr, ...) @printf(ptr @3)
-  br label %post
+  br label %s
 
-post:                                             ; preds = %el, %if
+s:                                                ; preds = %el, %if
   ret i32 0
 }
 
