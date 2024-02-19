@@ -36,6 +36,8 @@ using namespace std;
 
 extern string bcFilename;
 llvm::Function *_printf;
+llvm::GlobalVariable *_exp_format;
+llvm::GlobalVariable *_exp_format_n;
 
 llvm::Instruction * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 	
@@ -113,9 +115,13 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 	//	cerr << "WhileStatement: unimplemented" << endl;
 	//} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
 	//	cerr << "ForStatement: unimplemented" << endl;
-	//} else if (PrintExp * p_exp = dynamic_cast<PrintExp * >(s)) {
+	} else if (PrintExp * p_exp = dynamic_cast<PrintExp * >(s)) {
 		//buildExpression();
-	//	cerr << "PrintExp: unimplemented" << endl;
+		llvm::CallInst *CallPrint = llvm::CallInst::Create(
+			_printf, {_exp_format, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 2)}, "printf", BB
+		);
+		return CallPrint;
+
 	} else if (PrintString * p_str = dynamic_cast<PrintString * >(s)) {
 		llvm::Constant * StrConstant = llvm::ConstantDataArray::getString(
 				Context, p_str->s->str->c_str()
@@ -125,11 +131,18 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 				StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
 		GV->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 		GV->setAlignment(llvm::Align(1));
-		llvm::CallInst *CallPrint = llvm::CallInst::Create(_printf, GV, "printf", BB);
+		llvm::CallInst *CallPrint = llvm::CallInst::Create(
+			_printf, GV, "printf", BB
+		);
 		return CallPrint;
-	//} else if (PrintLineExp * pln_exp = dynamic_cast<PrintLineExp * >(s)) {
+
+	} else if (PrintLineExp * pln_exp = dynamic_cast<PrintLineExp * >(s)) {
 		//buildExpression();
-	//	cerr << "PrintLineExp: unimplemented" << endl;
+		llvm::CallInst *CallPrint = llvm::CallInst::Create(
+			_printf, {_exp_format_n, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 42)}, "printf", BB
+		);
+		return CallPrint;
+
 	} else if (PrintLineString * pln_str = dynamic_cast<PrintLineString * >(s)) {
 		llvm::Constant *StrConstant = llvm::ConstantDataArray::getString(Context, *pln_str->s->str + "\n");
 		auto *GV = new llvm::GlobalVariable(
@@ -137,8 +150,11 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 				StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
 		GV->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 		GV->setAlignment(llvm::Align(1));
-		llvm::CallInst *CallPrint = llvm::CallInst::Create(_printf, GV, "printf", BB);
+		llvm::CallInst *CallPrint = llvm::CallInst::Create(
+			_printf, GV, "printf", BB
+		);
 		return CallPrint;
+		
 	//} else if (Assign * assign = dynamic_cast<Assign * >(s)) {
 	//	cerr << "Assign: unimplemented" << endl;
 	//} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
@@ -207,6 +223,21 @@ void GenerateIR(Program * root) {
 
 	// Create some module to put our function into it.
 	llvm::Module *M = new llvm::Module(*root->m->i1->id, Context);
+
+	llvm::Constant * StrConstant = 
+		llvm::ConstantDataArray::getString(Context, "%d");
+	_exp_format = new llvm::GlobalVariable(
+		*M, StrConstant->getType(), true, llvm::GlobalValue::PrivateLinkage,
+		StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
+	_exp_format->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+	_exp_format->setAlignment(llvm::Align(1));
+
+	StrConstant = llvm::ConstantDataArray::getString(Context, "%d\n");
+	_exp_format_n = new llvm::GlobalVariable(
+		*M, StrConstant->getType(), true, llvm::GlobalValue::PrivateLinkage,
+		StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
+	_exp_format_n->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+	_exp_format_n->setAlignment(llvm::Align(1));
 
 	buildMain(root->m, Context, M);
 	if (root->c) {
