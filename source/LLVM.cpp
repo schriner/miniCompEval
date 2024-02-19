@@ -39,6 +39,7 @@ extern string bcFilename;
 llvm::Function *_printf;
 llvm::GlobalVariable *_exp_format;
 llvm::GlobalVariable *_exp_format_n;
+
 map<string, llvm::Function *> func_table;
 
 llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
@@ -297,16 +298,24 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
   //   llvm::Function::Create(FT, llvm::Function::ExternalLinkage, *c->i->id, M);
 
 	// VarDeclList * v = nullptr;
-	// MethodDeclList * m = nullptr;
+
 	for (auto func : *c->m->mdVector) {
-		// TODO(ss) return and arg type
+		// TODO(ss) FIXME return and arg type
+
 		// VarDeclList * v = nullptr;
+		if (VarDeclList * v = func->v) {\
+			for (auto var : *v->vdVector ) {
+				cerr << *var->i->id << endl;
+			}
+		}
+
 		llvm::FunctionType *FT =
 			llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
 		llvm::Function *F =
 			llvm::Function::Create(
 					FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
 		);
+
 		//func_table[*c->i->id+*func->i->id] = F;
 		func_table[*func->i->id] = F;
 		
