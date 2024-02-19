@@ -184,10 +184,6 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 }
 
 llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
-	
-	// TODO: System.out.println
-	// TODO: System.out.print
-	// TODO: llvm::Value string constant
 
 	if (BlockStatements * block_s = dynamic_cast<BlockStatements * >(s)) {
 		// TODO: VarDeclExpList * vdel = nullptr;
