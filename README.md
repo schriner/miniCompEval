@@ -21,6 +21,8 @@ Functionality is tested for the files contained within:
 * Supported:
 * TODO:
 
+Generated IR is compileable with `clang`
+
 ## mjavac:  Code Generator for ARM 32 bit assembly 
 From the build directory: 
 
@@ -77,6 +79,7 @@ Error Output:
 * clang++
 * flex
 * bison
+* LLVM 17
 
 ### CMake:
 In the root directory
