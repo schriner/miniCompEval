@@ -7,7 +7,8 @@ build*
 parse
 CMakeCache.txt
 test/*/*.s
-test/*/*.bc
+test/Interpreter/*.bc
+test/Compiler*/*.bc
 test/*/*.class
 .project
 .cproject

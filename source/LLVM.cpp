@@ -40,67 +40,119 @@ llvm::GlobalVariable *_exp_format;
 llvm::GlobalVariable *_exp_format_n;
 
 llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
-	
+	llvm::Instruction *i;
+
 	if (Or* e = dynamic_cast<Or * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		i = llvm::BinaryOperator::Create(llvm::Instruction::Or, lhs, rhs, "");
+
 	} else if (And* e = dynamic_cast<And * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		i = llvm::BinaryOperator::Create(
+			llvm::Instruction::And, lhs, rhs, ""
+		);
+
 	} else if (Equal* e = dynamic_cast<Equal * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+
 	} else if (NotEqual* e = dynamic_cast<NotEqual * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_NE, lhs, rhs, "");
+
 	} else if (Lesser* e = dynamic_cast<Lesser * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+
 	} else if (Greater* e = dynamic_cast<Greater * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+
 	} else if (LessEqual* e = dynamic_cast<LessEqual * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+
 	} else if (GreatEqual* e = dynamic_cast<GreatEqual * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+
 	} else if (Add* e = dynamic_cast<Add * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
 		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		llvm::Instruction *Add = llvm::BinaryOperator::Create(llvm::Instruction::Add, lhs, rhs, "");
-		Add->insertInto(BB, BB->end());
-		return Add;
+		i = llvm::BinaryOperator::Create(llvm::Instruction::Add, lhs, rhs, "");
+
 	} else if (Subtract* e = dynamic_cast<Subtract * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
 		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		llvm::Instruction *Sub = llvm::BinaryOperator::Create(
+		i = llvm::BinaryOperator::Create(
 			llvm::Instruction::Sub, lhs, rhs, ""
 		);
-		Sub->insertInto(BB, BB->end());
-		return Sub;
-	//} else if (Divide* e = dynamic_cast<Divide * >(exp)) {
-		//llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
-		//llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		//llvm::Instruction *Div = llvm::BinaryOperator::Create(
-			//llvm::Instruction::Div, lhs, rhs, ""
-		//);
-		//Div->insertInto(BB, BB->end());
-		//return Div;
+
+	} else if (Divide* e = dynamic_cast<Divide * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		i = llvm::BinaryOperator::Create(
+			llvm::Instruction::SDiv, lhs, rhs, ""
+		);
+
 	} else if (Multiply* e = dynamic_cast<Multiply * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
 		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		llvm::Instruction *Mul = llvm::BinaryOperator::Create(
+		i = llvm::BinaryOperator::Create(
 			llvm::Instruction::Mul, lhs, rhs, ""
 		);
-		Mul->insertInto(BB, BB->end());
-		return Mul;
+
 	} else if (Not* e = dynamic_cast<Not * >(exp)) {
+		llvm::Value *exp = buildExpression(e->e, Context, BB);
+		//i = llvm::UnaryOperator::Create(
+		//	llvm::Instruction::Not, exp, ""
+		//);
+
 	} else if (Pos* e = dynamic_cast<Pos * >(exp)) {
+		return buildExpression(e->e, Context, BB);
+
 	} else if (Neg* e = dynamic_cast<Neg * >(exp)) {
+		llvm::Value *rhs = buildExpression(e->e, Context, BB);
+		i = llvm::BinaryOperator::Create(
+			llvm::Instruction::Mul,
+			llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), -1), 
+			rhs, ""
+		);
+
 	//} else if (ExpObject* e = dynamic_cast< * >(exp)) {
 	//} else if (ArrayAccess* e = dynamic_cast< * >(exp)) {
 	//} else if (Length* e = dynamic_cast< * >(exp)) {
 	//} else if (ArrayAccessLength* e = dynamic_cast< * >(exp)) {
 	} else if (LitInt* e = dynamic_cast<LitInt * >(exp)) {
 		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), e->i);
+
 	} else if (True* e = dynamic_cast<True * >(exp)) {
 		return llvm::ConstantInt::getTrue(Context);
+
 	} else if (False* e = dynamic_cast<False * >(exp)) {
 		return llvm::ConstantInt::getFalse(Context);
+
 	//} else if (ExpObject* e = dynamic_cast< * >(exp)) {
 	//} else if (ObjectMethodCall* e = dynamic_cast< * >(exp)) {
 	} else if (ParenExp* e = dynamic_cast<ParenExp * >(exp)) {
 		return buildExpression(e->e, Context, BB);
+
 	} else {
 		cerr << "Error processing buildExpression: " << endl;
 		cerr << "Expresion e cast error " << endl;
 		abort();
 	}
+	
+	i->insertInto(BB, BB->end());
+	return i;
 
 	// Get pointers to the constant integers...
 	llvm::Value *Two = 
