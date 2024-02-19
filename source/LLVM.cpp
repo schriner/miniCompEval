@@ -111,8 +111,9 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 			llvm::Instruction::Mul, lhs, rhs, ""
 		);
 
-	} else if (Not* e = dynamic_cast<Not * >(exp)) {
-		llvm::Value *exp = buildExpression(e->e, Context, BB);
+	// TODO: Not
+	//} else if (Not* e = dynamic_cast<Not * >(exp)) {
+		//llvm::Value *exp = buildExpression(e->e, Context, BB);
 		// invert operand or constant
 
 		//i = llvm::UnaryOperator::Create(
@@ -130,10 +131,18 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 			rhs, ""
 		);
 
+	// TODO: Variable Declaration
 	//} else if (ExpObject* e = dynamic_cast< * >(exp)) {
+
+	// TODO: Array
 	//} else if (ArrayAccess* e = dynamic_cast< * >(exp)) {
+
+	// TODO: Array
 	//} else if (Length* e = dynamic_cast< * >(exp)) {
+
+	// TODO: Array
 	//} else if (ArrayAccessLength* e = dynamic_cast< * >(exp)) {
+
 	} else if (LitInt* e = dynamic_cast<LitInt * >(exp)) {
 		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), e->i);
 
@@ -146,6 +155,7 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 	} else if (ExpObject* e = dynamic_cast<ExpObject * >(exp)) {
 		cerr << "Error processing buildExpression: " << endl;
 		cerr << "ExpObject unimplemented " << endl;
+		// load object
 		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 1);
 
 	} else if (ObjectMethodCall* e = dynamic_cast<ObjectMethodCall * >(exp)) {
@@ -165,29 +175,12 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 	i->insertInto(BB, BB->end());
 	return i;
 
-	// Get pointers to the constant integers...
-	llvm::Value *Two = 
-		llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 2);
-	llvm::Value *Three = 
-		llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 3);
-
-	// Create the add instruction... does not insert...
-	llvm::Instruction *Add = 
-		llvm::BinaryOperator::Create(llvm::Instruction::Add, Two, Three,
-			"addresult");
-
-	// explicitly insert it into the basic block...
-	Add->insertInto(BB, BB->end());
-	
-	return Add;
-
 }
 
 llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 
 	if (BlockStatements * block_s = dynamic_cast<BlockStatements * >(s)) {
 		// TODO: VarDeclExpList * vdel = nullptr;
-		// TODO: StatementList * s = nullptr;
 		llvm::Instruction * i = nullptr;
 		if (s) {
 			for (auto state : *block_s->s->sVector ) {
@@ -228,6 +221,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		llvm::BranchInst::Create(whileBB, succBB, cond, whileBB);
 		return &succBB->back();
 
+	// TODO: For
 	//} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
 	//	cerr << "ForStatement: unimplemented" << endl;
 
@@ -272,11 +266,18 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		return CallPrint;
 		
 	} else if (Assign * assign = dynamic_cast<Assign * >(s)) {
+		buildExpression(assign->e, Context, BB);
+		// store value
 		cerr << "Assign: unimplemented" << endl;
+		
+	// TODO: Array
 	//} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
 	//	cerr << "IndexAssign: unimplemented" << endl;
+		
+	// TODO: Return
 	//} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
 	//	cerr << "ReturnStatement: unimplemented" << endl;
+		
 	} else {
 		cerr << "Error processing buildStatement: " << endl;
 		cerr << "Statement s cast error " << endl;
@@ -284,7 +285,6 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 	}
 	
 	return nullptr;
-
 }
 
 void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) {
@@ -312,7 +312,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
 		);
 
-		//func_table[*c->i->id+*func->i->id] = F;
+		// FIXME: add classname func_table[*c->i->id+*func->i->id] = F;
 		func_table[*func->i->id] = F;
 		
 		llvm::BasicBlock *BB = 
