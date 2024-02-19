@@ -71,7 +71,7 @@ B_COMMENT "/*"([^*]|\*+[^*/])*\*+"/"
 #endif
 	return STRING_LITERAL; 
 }
-{INT} { PRINTDEBUG(yytext); yylval.in_l = new IntLiteral( atoi(yytext) ); return INTEGER_LITERAL; }
+{INT} { PRINTDEBUG(yytext); yylval.in_l = atoi(yytext); return INTEGER_LITERAL; }
 [ \r\t\n] { /* Discard Extra Whitespce */ }
 ; { PRINTDEBUG(yytext); return SEMI; }
 , { PRINTDEBUG(yytext); return COMMA; }

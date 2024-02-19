@@ -552,9 +552,9 @@ void ArrayAccessLength::traverse() {
 // LitInt //
 void LitInt::traverse() {
 	if (expErr) { return; }
-	i->traverse();
 	PRINTDEBUGTREE("LitInt");
 	updateExpResult(i_res);
+	//fprintf(stderr, "At Leaf: %d\n", i);
 }
 
 // True //
@@ -649,11 +649,6 @@ void Ident::traverse() {
 // StringLiteral //
 void StringLiteral::traverse() {
 	//fprintf(stderr, "At StringLiteral Leaf: %s\n", str->c_str());
-}
-
-// IntLiteral //
-void IntLiteral::traverse() {
-	//fprintf(stderr, "At Leaf: %d\n", i);
 }
 
 /*

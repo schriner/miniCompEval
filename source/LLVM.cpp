@@ -39,7 +39,7 @@ llvm::Function *_printf;
 llvm::GlobalVariable *_exp_format;
 llvm::GlobalVariable *_exp_format_n;
 
-llvm::Instruction * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
+llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 	
 	if (Or* e = dynamic_cast<Or * >(exp)) {
 	} else if (And* e = dynamic_cast<And * >(exp)) {
@@ -50,9 +50,35 @@ llvm::Instruction * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm:
 	} else if (LessEqual* e = dynamic_cast<LessEqual * >(exp)) {
 	} else if (GreatEqual* e = dynamic_cast<GreatEqual * >(exp)) {
 	} else if (Add* e = dynamic_cast<Add * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		llvm::Instruction *Add = llvm::BinaryOperator::Create(llvm::Instruction::Add, lhs, rhs, "");
+		Add->insertInto(BB, BB->end());
+		return Add;
 	} else if (Subtract* e = dynamic_cast<Subtract * >(exp)) {
-	} else if (Divide* e = dynamic_cast<Divide * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		llvm::Instruction *Sub = llvm::BinaryOperator::Create(
+			llvm::Instruction::Sub, lhs, rhs, ""
+		);
+		Sub->insertInto(BB, BB->end());
+		return Sub;
+	//} else if (Divide* e = dynamic_cast<Divide * >(exp)) {
+		//llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		//llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		//llvm::Instruction *Div = llvm::BinaryOperator::Create(
+			//llvm::Instruction::Div, lhs, rhs, ""
+		//);
+		//Div->insertInto(BB, BB->end());
+		//return Div;
 	} else if (Multiply* e = dynamic_cast<Multiply * >(exp)) {
+		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
+		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
+		llvm::Instruction *Mul = llvm::BinaryOperator::Create(
+			llvm::Instruction::Mul, lhs, rhs, ""
+		);
+		Mul->insertInto(BB, BB->end());
+		return Mul;
 	} else if (Not* e = dynamic_cast<Not * >(exp)) {
 	} else if (Pos* e = dynamic_cast<Pos * >(exp)) {
 	} else if (Neg* e = dynamic_cast<Neg * >(exp)) {
@@ -61,11 +87,15 @@ llvm::Instruction * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm:
 	//} else if (Length* e = dynamic_cast< * >(exp)) {
 	//} else if (ArrayAccessLength* e = dynamic_cast< * >(exp)) {
 	} else if (LitInt* e = dynamic_cast<LitInt * >(exp)) {
+		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), e->i);
 	} else if (True* e = dynamic_cast<True * >(exp)) {
+		return llvm::ConstantInt::getTrue(Context);
 	} else if (False* e = dynamic_cast<False * >(exp)) {
+		return llvm::ConstantInt::getFalse(Context);
 	//} else if (ExpObject* e = dynamic_cast< * >(exp)) {
 	//} else if (ObjectMethodCall* e = dynamic_cast< * >(exp)) {
 	} else if (ParenExp* e = dynamic_cast<ParenExp * >(exp)) {
+		return buildExpression(e->e, Context, BB);
 	} else {
 		cerr << "Error processing buildExpression: " << endl;
 		cerr << "Expresion e cast error " << endl;
@@ -118,7 +148,9 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 	} else if (PrintExp * p_exp = dynamic_cast<PrintExp * >(s)) {
 		//buildExpression();
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
-			_printf, {_exp_format, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), dynamic_cast<LitInt *>(p_exp->e)->i->i)}, "printf", BB
+			_printf, {_exp_format, //llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 
+			buildExpression(p_exp->e, Context, BB) //dynamic_cast<LitInt *>(p_exp->e)->i)
+			}, "printf", BB
 		);
 		return CallPrint;
 
@@ -139,7 +171,10 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 	} else if (PrintLineExp * pln_exp = dynamic_cast<PrintLineExp * >(s)) {
 		//buildExpression();
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
-			_printf, {_exp_format_n, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), dynamic_cast<LitInt *>(pln_exp->e)->i->i)}, "printf", BB
+			_printf, {_exp_format_n, //llvm::ConstantInt::get(
+			//llvm::Type::getInt32Ty(Context), 
+			buildExpression(pln_exp->e, Context, BB) //dynamic_cast<LitInt *>(pln_exp->e)->i)
+			}, "printf", BB
 		);
 		return CallPrint;
 
@@ -172,26 +207,21 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 }
 
 void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) {
-	// Create the main function: first create the type 'int ()'
 	llvm::FunctionType *FT =
-		llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), /*not vararg*/false);
-
-	// By passing a module as the last parameter to the Function constructor,
-	// it automatically gets appended to the Module.
+		llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
 	llvm::Function *F =
      llvm::Function::Create(FT, llvm::Function::ExternalLinkage, *c->i->id, M);
 
-
 	// VarDeclList * v = nullptr;
-
 	// MethodDeclList * m = nullptr;
 	// buildMethod(c->m)	
+
 }
 
 void buildMain(MainClass * main, llvm::LLVMContext &Context, llvm::Module *M) {
 	// Create the main function: first create the type 'int ()'
 	llvm::FunctionType *FT =
-		llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), /*not vararg*/false);
+		llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
 
 	// By passing a module as the last parameter to the Function constructor,
 	// it automatically gets appended to the Module.
@@ -202,9 +232,9 @@ void buildMain(MainClass * main, llvm::LLVMContext &Context, llvm::Module *M) {
 	llvm::FunctionType *FT_printf =
 		llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), { llvm::PointerType::get(llvm::Type::getInt8Ty(Context), 0)}, true);
 
-	// By passing a module as the last parameter to the Function constructor,
-	// it automatically gets appended to the Module.
-	_printf = llvm::Function::Create(FT_printf, llvm::Function::ExternalLinkage, "printf", M);
+	_printf = llvm::Function::Create(
+		FT_printf, llvm::Function::ExternalLinkage, "printf", M
+	);
 	// Add a basic block to the function... again, it automatically inserts
 	// because of the last argument.
 	llvm::BasicBlock *BB = 
@@ -247,6 +277,7 @@ void GenerateIR(Program * root) {
 	}
 
 	// Output the bitcode file to stdout
+	// TODO(ss): print target triple for computer arch to file
 	std::error_code ec;
 	llvm::ToolOutputFile bc(bcFilename.c_str(), ec, llvm::sys::fs::OF_None);
 	//WriteBitcodeToFile(*M, bc.os());

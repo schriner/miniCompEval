@@ -446,7 +446,7 @@ VAL ArrayAccessLength::evaluate() {
 }
 
 VAL LitInt::evaluate() {
-	return {i->i};
+	return {i};
 }
 
 VAL True::evaluate() {

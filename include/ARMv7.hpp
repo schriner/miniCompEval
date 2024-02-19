@@ -72,29 +72,25 @@ bool isIntLiteral(Exp * e) {
 void getIntLiteral (Exp * e, string * s) {
 	if (dynamic_cast<LitInt *>( e )) { // op1 is a literal
 		LitInt * expr = (LitInt *) e;
-		*s = *s + "#" + to_string(expr->i->i);
+		*s = *s + "#" + to_string(expr->i);
 		return;
 	}
 
 	int negCnt = 0;
 	while (dynamic_cast<ParenExp *>( e ) || dynamic_cast<Neg *> ( e )
 			|| dynamic_cast<LitInt *>( e ) || dynamic_cast<Pos *> ( e )) {
-		if (dynamic_cast<ParenExp *>( e )) { // ignore parentheses
-			ParenExp * expr = (ParenExp * ) e;
+		if (ParenExp * expr = dynamic_cast<ParenExp *>( e )) { // ignore parentheses
 			e = expr->e;
-		} else if (dynamic_cast< Pos * >( e )) {
-			Pos * expr = (Pos * ) e;
+		} else if (Pos * expr = dynamic_cast< Pos * >( e )) {
 			e = expr->e;
-		} else if (dynamic_cast< Neg * > ( e )) { // count the negative
+		} else if (Neg * expr = dynamic_cast< Neg * > ( e )) { // count the negative
 			negCnt++;
-			Neg * expr = (Neg * ) e;
 			e = expr->e;
-		} else if (dynamic_cast<LitInt *>( e )) {
-			LitInt * expr = (LitInt *) e;
+		} else if (LitInt * expr = dynamic_cast<LitInt *>( e )) {
 			if (negCnt % 2) {
-				*s = *s + "#-" + to_string(expr->i->i);
+				*s = *s + "#-" + to_string(expr->i);
 			} else {
-				*s = *s + "#" + to_string(expr->i->i);
+				*s = *s + "#" + to_string(expr->i);
 			}
 
 			// stop when you hit the literal

@@ -966,8 +966,8 @@ class ArrayAccessLength : public Exp {
 };
 class LitInt : public Exp {
 	public:
-		IntLiteral * i = nullptr;
-		LitInt(IntLiteral * i) : i(i) {}
+		int i;
+		LitInt(int i) : i(i) {}
 		void traverse();
 #ifdef ASSEM
 		virtual void assemArmv7(string * exp_str, string * branchLabel);
@@ -1122,13 +1122,6 @@ class StringLiteral : public TreeNode {
 #ifdef ASSEM
 		void assemArmv7();
 #endif
-};
-
-class IntLiteral : public TreeNode {
-	public:
-		int i = 0;
-		IntLiteral(int i) : i(i) {}
-		void traverse();
 };
 
 class BoolLiteral : public TreeNode {

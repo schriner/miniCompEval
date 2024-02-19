@@ -516,21 +516,17 @@ void Pos::assemArmv7(string * exp_str, string * branchLabel) {
 }
 
 void Neg::assemArmv7(string * exp_str, string * branchLabel) {
-  if (dynamic_cast<LitInt *>( e )) {
-    LitInt * expr = (LitInt *) e;
-    *exp_str = *exp_str + "\tmov r1, #-"+ to_string(expr->i->i) + "\n";
-  } else if (dynamic_cast<Neg *>( e )) {
-    Neg * expr = (Neg *) e;
+  if (LitInt * expr = dynamic_cast<LitInt *>( e )) {
+    *exp_str = *exp_str + "\tmov r1, #-"+ to_string(expr->i) + "\n";
+  } else if (Neg * expr = dynamic_cast<Neg *>( e )) {
     expr->e->assemArmv7(exp_str, nullptr);
   } else if (dynamic_cast< ParenExp * >( e )
               || dynamic_cast< Pos * >( e ) ) { // eliminate paren
 
     Exp * nExp = nullptr;
-    if (dynamic_cast< ParenExp * >( e )) {
-      ParenExp * p = (ParenExp *) e;
+    if (ParenExp * p = dynamic_cast< ParenExp * >( e )) {
       nExp = p->e;
-    } else if (dynamic_cast< Pos * >( e )) {
-      Pos * p = (Pos *) e;
+    } else if (Pos * p = dynamic_cast< Pos * >( e )) {
       nExp = p->e;
     } else {
       cout << "OPPS! This is bad." << endl;
@@ -538,22 +534,18 @@ void Neg::assemArmv7(string * exp_str, string * branchLabel) {
 
     while (dynamic_cast<ParenExp *>( nExp )
         || dynamic_cast<Pos *>( nExp )) {
-      if (dynamic_cast< ParenExp * >( nExp )) {
-        ParenExp * p = (ParenExp *) nExp;
+      if (ParenExp * p = dynamic_cast< ParenExp * >( nExp )) {
         nExp = p->e;
-      } else if (dynamic_cast< Pos * >( nExp )) {
-        Pos * p = (Pos *) nExp;
+      } else if (Pos * p = dynamic_cast< Pos * >( nExp )) {
         nExp = p->e;
       } else {
         cout << "OPPS! This is bad." << endl;
       }
     }
     // There was an int in the mess
-    if (dynamic_cast<LitInt *>(nExp)) {
-      LitInt * expr = (LitInt *) e;
-      *exp_str = *exp_str + "\tmov r1, #-"+ to_string(expr->i->i) + "\n";
-    } else if (dynamic_cast<Neg *>(nExp)) { // it was another neg
-      Neg * expr = (Neg *) nExp;
+    if (LitInt * expr = dynamic_cast<LitInt *>(nExp)) {
+      *exp_str = *exp_str + "\tmov r1, #-"+ to_string(expr->i) + "\n";
+    } else if (Neg * expr = dynamic_cast<Neg *>(nExp)) { // it was another neg
       expr->e->assemArmv7(exp_str, nullptr);
     } else { // something else
       nExp->assemArmv7(exp_str, nullptr);
@@ -571,7 +563,7 @@ void ParenExp::assemArmv7(string * exp_str, string * branchLabel) {
 }
 
 void LitInt::assemArmv7(string * exp_str, string * branchLabel) {
-  *exp_str = *exp_str + "\tmov r1, #"+ to_string(i->i) + "\n";
+  *exp_str = *exp_str + "\tmov r1, #"+ to_string(i) + "\n";
 }
 
 void True::assemArmv7(string * exp_str, string * branchLabel) {

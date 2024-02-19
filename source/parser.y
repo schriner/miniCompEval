@@ -42,7 +42,7 @@ using namespace std;
 	ExpList * el;
 	vector<Exp * > * erl;
 	Exp * er;
-	IntLiteral * in_l;
+	int in_l;
 	//BoolLiteral * b_l;
 	StringLiteral * st_l;
 	Ident * id;
