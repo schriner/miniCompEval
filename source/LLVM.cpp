@@ -274,9 +274,10 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 	//} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
 	//	cerr << "IndexAssign: unimplemented" << endl;
 		
-	// TODO: Return
-	//} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
-	//	cerr << "ReturnStatement: unimplemented" << endl;
+	} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
+		llvm::ReturnInst::Create(Context, 
+			buildExpression(ret_s->e, Context, BB), 
+			&BB->getParent()->back());
 		
 	} else {
 		cerr << "Error processing buildStatement: " << endl;
@@ -390,13 +391,11 @@ void GenerateIR(Program * root) {
 	}
 	buildMain(root->m, Context, M);
 
-	// Output the bitcode file to stdout
 	// TODO(ss): print target triple for computer arch to file
 	std::error_code ec;
 	llvm::ToolOutputFile bc(bcFilename.c_str(), ec, llvm::sys::fs::OF_None);
 	//WriteBitcodeToFile(*M, bc.os());
 	//WriteBitcodeToFile(*M, outs());
-	
 
 	if (bcFilename.empty()) {
   	M->print(llvm::outs(), nullptr, false, true); // method 1
