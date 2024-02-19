@@ -1,0 +1,48 @@
+; ModuleID = 'simpleMethodCall'
+source_filename = "simpleMethodCall"
+
+@0 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@2 = private unnamed_addr constant [17 x i8] c"Function Called\0A\00", align 1
+@3 = private unnamed_addr constant [9 x i8] c"Huzzah!\0A\00", align 1
+@4 = private unnamed_addr constant [19 x i8] c"Calling a method:\0A\00", align 1
+@5 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+
+declare i32 @printf(ptr %0, ...)
+
+define i32 @dummyFunctionfunction() {
+EntryBlock:
+  %0 = call i32 (ptr, ...) @printf(ptr @1, i32 49)
+  %1 = call i32 (ptr, ...) @printf(ptr @2)
+  %2 = call i32 (ptr, ...) @printf(ptr @3)
+  %3 = mul i32 9, 9
+  %4 = mul i32 1, %3
+  %5 = mul i32 %4, 2
+  %6 = mul i32 %5, 67
+  %7 = mul i32 10, 2
+  %8 = add i32 %6, %7
+  %9 = sub i32 %8, 39
+  %10 = mul i32 10, 8
+  %11 = add i32 %9, %10
+  ret i32 %11
+}
+
+define i32 @main() {
+EntryBlock:
+  %0 = icmp slt i32 2, 3
+  %1 = and i1 true, %0
+  br i1 %1, label %if, label %el
+
+if:                                               ; preds = %EntryBlock
+  %2 = call i32 (ptr, ...) @printf(ptr @4)
+  %3 = call i32 @dummyFunctionfunction()
+  %4 = call i32 (ptr, ...) @printf(ptr @1, i32 %3)
+  br label %s
+
+el:                                               ; preds = %EntryBlock
+  %5 = call i32 (ptr, ...) @printf(ptr @5)
+  br label %s
+
+s:                                                ; preds = %el, %if
+  ret i32 0
+}

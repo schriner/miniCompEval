@@ -1,0 +1,18 @@
+; ModuleID = 'multiplePrintNumber'
+source_filename = "multiplePrintNumber"
+
+@0 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@2 = private unnamed_addr constant [16 x i8] c"Single Number: \00", align 1
+@3 = private unnamed_addr constant [17 x i8] c"\0ASingle Number:\0A\00", align 1
+
+define i32 @main() {
+EntryBlock:
+  %printf = call i32 (ptr, ...) @printf(ptr @2)
+  %printf1 = call i32 (ptr, ...) @printf(ptr @0, i32 42)
+  %printf2 = call i32 (ptr, ...) @printf(ptr @3)
+  %printf3 = call i32 (ptr, ...) @printf(ptr @1, i32 42)
+  ret i32 %printf3
+}
+
+declare i32 @printf(ptr %0, ...)

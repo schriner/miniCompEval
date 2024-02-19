@@ -58,7 +58,7 @@ class Ident;
 class IntLiteral;
 class StringLiteral;
 
-using namespace Interpreter;
+using Interpreter::VAL;
 
 // Parent Abstract Class of Everything
 class TreeNode {
@@ -124,11 +124,11 @@ class MainClass : public TreeNode {
 		Ident * i1;
 		Ident * i2;
 		Statement * s;
-		vector<string * > * instr = nullptr;
 		MainClass (Ident * i1, Ident * i2, Statement * s)
 			: i1(i1), i2(i2), s(s) {}
 		void traverse();
 #ifdef ASSEM
+		vector<string * > * instr = nullptr;
 		void assemArmv7();
 #else
 		void evaluate();
@@ -138,11 +138,12 @@ class MainClass : public TreeNode {
 class ClassDeclList : public TreeNode {
 	public:
 		vector<ClassDecl * > * cdVector = nullptr;
-		vector<string * > * instr = nullptr;
 		ClassDeclList(ClassDecl * c) { 
 			cdVector = new vector<ClassDecl * >;
 			cdVector->push_back(c);
+#ifdef ASSEM
 			instr = new vector<string * >;
+#endif
 		}
 		// Add an element to the 
 		void append(ClassDecl * c) {
@@ -150,6 +151,7 @@ class ClassDeclList : public TreeNode {
 		}
 		void traverse();
 #ifdef ASSEM
+		vector<string * > * instr = nullptr;
 		void assemArmv7();
 #else
 		void evaluate();
@@ -214,7 +216,6 @@ class VarDecl : public TreeNode {
 		string * label = nullptr;
 		VarDecl(Type * t, Ident * i) : t(t), i(i) {} 
 		void traverse();
-		// TODO(ss): void evaluate();
 #ifdef ASSEM
 		void assemArmv7(map<string, string*> *, map<string, string*> *);
 #else
@@ -227,10 +228,10 @@ class VarDeclExp : public VarDecl {
 		Assign * a = nullptr;
 		VarDeclExp(Type * t, Ident * i, Assign * a) : VarDecl(t,i), a(a) {} 
 		void traverse() { cerr << "traverse unimplmented in VarDeclExp" << endl; }
-		// TODO(ss): void evaluate();
 #ifdef ASSEM
 		void assemArmv7(map<string, string*> *, map<string, string*> *) {
-			cerr << "assemArmv7 unimplmented in VarDeclExp" << endl; }
+			cerr << "assemArmv7 unimplmented in VarDeclExp" << endl; 
+		}
 #else
 		void evaluate();
 #endif
@@ -250,7 +251,9 @@ class VarDeclExpList : public TreeNode {
 			cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList";
 		}
 #ifdef ASSEM
-		void assemArmv7(string * stmt_str, map<string, string*> *) {cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList"; }
+		void assemArmv7(string * stmt_str, map<string, string*> *) {
+			cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList";
+		}
 #else
 		void evaluate();
 #endif
@@ -279,14 +282,18 @@ class MethodDecl : public TreeNode {
 		VarDeclList * v = nullptr; 
 		StatementList * s = nullptr;
 		Exp * e = nullptr;
+#ifdef ASSEM
 		map<string, string*> * nameTable = nullptr; // id -> symRegLabel
 		map<string, string*> * typeTable = nullptr; // id -> symRegLabel
+#endif
 
 		MethodDecl(Type * t, Ident * i, FormalList * f, 
 				VarDeclList * v, StatementList * s, Exp * e)
 			: t(t), i(i), f(f), v(v), s(s), e(e) {
+#ifdef ASSEM
 			nameTable = new map<string, string*>;
 			typeTable = new map<string, string*>;
+#endif
 		} 
 		void traverse();
 #ifdef ASSEM
@@ -959,8 +966,8 @@ class ArrayAccessLength : public Exp {
 };
 class LitInt : public Exp {
 	public:
-		IntLiteral * i = nullptr;
-		LitInt(IntLiteral * i) : i(i) {}
+		int i;
+		LitInt(int i) : i(i) {}
 		void traverse();
 #ifdef ASSEM
 		virtual void assemArmv7(string * exp_str, string * branchLabel);
@@ -1115,13 +1122,6 @@ class StringLiteral : public TreeNode {
 #ifdef ASSEM
 		void assemArmv7();
 #endif
-};
-
-class IntLiteral : public TreeNode {
-	public:
-		int i = 0;
-		IntLiteral(int i) : i(i) {}
-		void traverse();
 };
 
 class BoolLiteral : public TreeNode {

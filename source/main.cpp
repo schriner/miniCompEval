@@ -13,7 +13,7 @@
 #include "TreeNode.hpp"
 
 #define INPUT_FORMAT "Expected: mjavac [ -p | -o <output_file> | --stdout ] <inputfile>.java"
-#define PARSING_ERROR(x) { fprintf(stderr, "mjavac: %s\n%s\n\n", (x), INPUT_FORMAT); abort(); }
+#define PARSING_ERROR(x) { fprintf(stderr, "%s: %s\n%s\n\n", exe, (x), INPUT_FORMAT); abort(); }
 
 int yyparse(void);
 

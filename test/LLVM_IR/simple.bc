@@ -1,0 +1,39 @@
+; ModuleID = 'simple'
+source_filename = "simple"
+
+@0 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@2 = private unnamed_addr constant [54 x i8] c"This line should be printed. A bunch of expressions:\0A\00", align 1
+@3 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+
+define i32 @main() {
+EntryBlock:
+  %0 = icmp slt i32 2, 3
+  %1 = and i1 true, %0
+  br i1 %1, label %if, label %el
+
+if:                                               ; preds = %EntryBlock
+  %2 = call i32 (ptr, ...) @printf(ptr @2)
+  %3 = call i32 (ptr, ...) @printf(ptr @1, i32 5)
+  %4 = add i32 3, 4
+  %5 = add i32 %4, 5
+  %6 = add i32 %5, 35
+  %7 = call i32 (ptr, ...) @printf(ptr @1, i32 %6)
+  %8 = sub i32 32, 70
+  %9 = sub i32 %8, 2
+  %10 = add i32 %9, 9
+  %11 = call i32 (ptr, ...) @printf(ptr @1, i32 %10)
+  %12 = add i32 5, 3
+  %13 = mul i32 %12, 17
+  %14 = call i32 (ptr, ...) @printf(ptr @1, i32 %13)
+  br label %s
+
+el:                                               ; preds = %EntryBlock
+  %15 = call i32 (ptr, ...) @printf(ptr @3)
+  br label %s
+
+s:                                                ; preds = %el, %if
+  ret i32 0
+}
+
+declare i32 @printf(ptr %0, ...)

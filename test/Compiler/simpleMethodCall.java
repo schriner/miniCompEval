@@ -14,6 +14,7 @@ class simpleMethodCall {
 
 class dummyFunction {
 	public int function() {
+		System.out.println(49);
 		System.out.println("Function Called");
 		System.out.println("Huzzah!");
 		return 1*(9*9)*2*67+10*2-39+(10)*8;

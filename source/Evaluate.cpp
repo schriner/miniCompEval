@@ -4,7 +4,7 @@
 /*
  * miniCompEval
  * Sonya Schriner
- * File: EvalNode.cpp
+ * File: Evaluate.cpp
  *
  */
 
@@ -446,7 +446,7 @@ VAL ArrayAccessLength::evaluate() {
 }
 
 VAL LitInt::evaluate() {
-	return {i->i};
+	return {i};
 }
 
 VAL True::evaluate() {
