@@ -50,9 +50,7 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 	} else if (And* e = dynamic_cast<And * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
 		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		i = llvm::BinaryOperator::Create(
-			llvm::Instruction::And, lhs, rhs, ""
-		);
+		i = llvm::BinaryOperator::Create(llvm::Instruction::And, lhs, rhs, "");
 
 	} else if (Equal* e = dynamic_cast<Equal * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
@@ -67,22 +65,22 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 	} else if (Lesser* e = dynamic_cast<Lesser * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
 		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_SLT, lhs, rhs, "");
 
 	} else if (Greater* e = dynamic_cast<Greater * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
 		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_SGT, lhs, rhs, "");
 
 	} else if (LessEqual* e = dynamic_cast<LessEqual * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
 		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_SLE, lhs, rhs, "");
 
 	} else if (GreatEqual* e = dynamic_cast<GreatEqual * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
 		llvm::Value *rhs = buildExpression(e->e2, Context, BB);
-		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_EQ, lhs, rhs, "");
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_SGE, lhs, rhs, "");
 
 	} else if (Add* e = dynamic_cast<Add * >(exp)) {
 		llvm::Value *lhs = buildExpression(e->e1, Context, BB); 
@@ -112,6 +110,8 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 
 	} else if (Not* e = dynamic_cast<Not * >(exp)) {
 		llvm::Value *exp = buildExpression(e->e, Context, BB);
+		// invert operand or constant
+
 		//i = llvm::UnaryOperator::Create(
 		//	llvm::Instruction::Not, exp, ""
 		//);
@@ -188,21 +188,28 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 			}
 		}
 		return i;
-	//} else if (IfStatement * if_s = dynamic_cast<IfStatement * >(s)) {
-	//	buildExpression(if_s->e, Context, BB);
-	//	buildStatement(if_s->s_if, Context, BB);
-	//	buildStatement(if_s->s_el, Context, BB);
-	//	cerr << "IfStatement: unimplemented" << endl;
+	} else if (IfStatement * if_s = dynamic_cast<IfStatement * >(s)) {
+		llvm::Value * cond = buildExpression(if_s->e, Context, BB);
+		llvm::BasicBlock * ifBB = 
+			llvm::BasicBlock::Create(Context, "if", BB->getParent());
+		llvm::BasicBlock * elBB = 
+			llvm::BasicBlock::Create(Context, "el", BB->getParent());
+		buildStatement(if_s->s_if, Context, ifBB);
+		buildStatement(if_s->s_el, Context, elBB);
+		llvm::BranchInst::Create(ifBB, elBB, cond, BB);
+		llvm::BasicBlock * postBB = 
+			llvm::BasicBlock::Create(Context, "post", BB->getParent());
+		llvm::BranchInst::Create(postBB, ifBB);
+		llvm::BranchInst::Create(postBB, elBB);
+		return &postBB->back();
 	//} else if (WhileStatement * while_s = dynamic_cast<WhileStatement * >(s)) {
 	//	cerr << "WhileStatement: unimplemented" << endl;
 	//} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
 	//	cerr << "ForStatement: unimplemented" << endl;
 	} else if (PrintExp * p_exp = dynamic_cast<PrintExp * >(s)) {
-		//buildExpression();
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
-			_printf, {_exp_format, //llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 
-			buildExpression(p_exp->e, Context, BB) //dynamic_cast<LitInt *>(p_exp->e)->i)
-			}, "printf", BB
+			_printf, {_exp_format, buildExpression(p_exp->e, Context, BB)},
+			"printf", BB
 		);
 		return CallPrint;
 
@@ -221,12 +228,9 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		return CallPrint;
 
 	} else if (PrintLineExp * pln_exp = dynamic_cast<PrintLineExp * >(s)) {
-		//buildExpression();
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
-			_printf, {_exp_format_n, //llvm::ConstantInt::get(
-			//llvm::Type::getInt32Ty(Context), 
-			buildExpression(pln_exp->e, Context, BB) //dynamic_cast<LitInt *>(pln_exp->e)->i)
-			}, "printf", BB
+			_printf,{_exp_format_n, buildExpression(pln_exp->e, Context, BB)},
+			"printf", BB
 		);
 		return CallPrint;
 
@@ -295,7 +299,7 @@ void buildMain(MainClass * main, llvm::LLVMContext &Context, llvm::Module *M) {
 	llvm::Instruction * last = buildStatement(main->s, Context, BB);
 
 	// Create the return instruction and add it to the basic block
-	llvm::ReturnInst::Create(Context, last)->insertInto(BB, BB->end());
+	llvm::ReturnInst::Create(Context, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), &F->back());
 
 }
 
