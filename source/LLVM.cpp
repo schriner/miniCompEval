@@ -119,14 +119,11 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 			llvm::Instruction::Mul, lhs, rhs, ""
 		);
 
-	// TODO: Not
-	//} else if (Not* e = dynamic_cast<Not * >(exp)) {
-		//llvm::Value *exp = buildExpression(e->e, Context, BB);
-		// invert operand or constant
-
-		//i = llvm::UnaryOperator::Create(
-		//	llvm::Instruction::Not, exp, ""
-		//);
+	} else if (Not* e = dynamic_cast<Not * >(exp)) {
+		// This op should only be for bool values Typecheck
+		llvm::Value *exp = buildExpression(e->e, Context, BB);
+		return new llvm::ICmpInst(*BB, llvm::CmpInst::ICMP_SLE, 
+				exp, llvm::ConstantInt::getTrue(Context), "");
 
 	} else if (Pos* e = dynamic_cast<Pos * >(exp)) {
 		return buildExpression(e->e, Context, BB);
@@ -196,7 +193,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		llvm::Instruction * i = nullptr;
 		// TODO: VarDeclExpList * vdel = nullptr;
 		
-		if (s) {
+		if (block_s->s) {
 			for (auto state : *block_s->s->sVector ) {
 				i = buildStatement(state, Context, BB);
 			}
@@ -207,15 +204,28 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		llvm::Value * cond = buildExpression(if_s->e, Context, BB);
 		llvm::BasicBlock * ifBB = 
 			llvm::BasicBlock::Create(Context, "if", BB->getParent());
+		buildStatement(if_s->s_if, Context, ifBB);
+		ifBB = &ifBB->getParent()->back();
+		
 		llvm::BasicBlock * elBB = 
 			llvm::BasicBlock::Create(Context, "el", BB->getParent());
-		buildStatement(if_s->s_if, Context, ifBB);
-		buildStatement(if_s->s_el, Context, elBB);
+
+		if (buildStatement(if_s->s_el, Context, elBB) == nullptr) {
+			delete elBB;
+			llvm::BasicBlock * succBB = 
+				llvm::BasicBlock::Create(Context, "s", BB->getParent());
+			llvm::BranchInst::Create(ifBB, succBB, cond, BB);
+			llvm::BranchInst::Create(succBB, ifBB);
+			return &succBB->back();
+		}
+
 		llvm::BranchInst::Create(ifBB, elBB, cond, BB);
+		elBB = &elBB->getParent()->back();
+
 		llvm::BasicBlock * succBB = 
 			llvm::BasicBlock::Create(Context, "s", BB->getParent());
-		llvm::BranchInst::Create(succBB, ifBB);
 		llvm::BranchInst::Create(succBB, elBB);
+		llvm::BranchInst::Create(succBB, ifBB);
 		return &succBB->back();
 
 	} else if (WhileStatement * while_s = dynamic_cast<WhileStatement * >(s)) {
@@ -226,7 +236,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		llvm::BasicBlock * whileBB = 
 			llvm::BasicBlock::Create(Context, "w", BB->getParent());
 		llvm::BasicBlock * succBB = 
-			llvm::BasicBlock::Create(Context, "s", BB->getParent());
+			llvm::BasicBlock::Create(Context, "s_w", BB->getParent());
 		
 		buildStatement(while_s->s, Context, whileBB);
 		llvm::BranchInst::Create(whileBB, succBB, cond, BB);
@@ -315,6 +325,8 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
   //   llvm::Function::Create(FT, llvm::Function::ExternalLinkage, *c->i->id, M);
 
 	// VarDeclList * v = nullptr;
+	// TODO create constructor
+	//map<string, llvm::Value *> class_var_decl;
 
 	for (auto func : *c->m->mdVector) {
 		// TODO(ss) FIXME return and arg type
@@ -349,7 +361,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 
 		if (func->s) {
 			for (auto state : *func->s->sVector ) {
-				buildStatement(state, Context, BB);
+				buildStatement(state, Context, &F->back());
 			}
 		}
 
@@ -437,7 +449,7 @@ void GenerateIR(Program * root) {
 	}
 
 	// Delete the module and all of its contents.
-	delete M;
+	//delete M;
 
 }
 
