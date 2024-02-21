@@ -39,6 +39,10 @@ dummyFunction:
 dummyFunctionfunction:
 	push {lr}
 
+	mov r1, #49
+	ldr r0, =pln
+	bl printf
+
 	ldr r0, =str2
 	bl printf
 

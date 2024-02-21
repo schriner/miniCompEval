@@ -3,6 +3,7 @@
  * miniCompEval
  * Sonya Schriner
  * File: LLVM.cpp
+ * Naive IR generation with no control flow analysis.
  *
  */
 
@@ -40,7 +41,14 @@ llvm::Function *_printf;
 llvm::GlobalVariable *_exp_format;
 llvm::GlobalVariable *_exp_format_n;
 
+typedef struct FUNC_SYM {
+	llvm::Function * func;
+	map<string, llvm::Value *> * sym; 
+} _FUNC_SYM;
+
+//map<string, FUNC_SYM> func_table;
 map<string, llvm::Function *> func_table;
+map<string, llvm::Value *> * var_scope;
 
 llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 	llvm::Instruction *i;
@@ -112,12 +120,9 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 		);
 
 	} else if (Not* e = dynamic_cast<Not * >(exp)) {
+		// This op should only be for bool values Typecheck
 		llvm::Value *exp = buildExpression(e->e, Context, BB);
-		// invert operand or constant
-
-		//i = llvm::UnaryOperator::Create(
-		//	llvm::Instruction::Not, exp, ""
-		//);
+		return llvm::BinaryOperator::CreateNot(exp, "", BB);
 
 	} else if (Pos* e = dynamic_cast<Pos * >(exp)) {
 		return buildExpression(e->e, Context, BB);
@@ -130,10 +135,15 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 			rhs, ""
 		);
 
-	//} else if (ExpObject* e = dynamic_cast< * >(exp)) {
+	// TODO: Array
 	//} else if (ArrayAccess* e = dynamic_cast< * >(exp)) {
+
+	// TODO: Array
 	//} else if (Length* e = dynamic_cast< * >(exp)) {
+
+	// TODO: Array
 	//} else if (ArrayAccessLength* e = dynamic_cast< * >(exp)) {
+
 	} else if (LitInt* e = dynamic_cast<LitInt * >(exp)) {
 		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), e->i);
 
@@ -144,13 +154,33 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 		return llvm::ConstantInt::getFalse(Context);
 
 	} else if (ExpObject* e = dynamic_cast<ExpObject * >(exp)) {
-		cerr << "Error processing buildExpression: " << endl;
-		cerr << "ExpObject unimplemented " << endl;
-		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 1);
+		if (IdObj * id_obj = dynamic_cast<IdObj * >(e->o)) {
+			return new llvm::LoadInst(
+				llvm::Type::getInt32Ty(Context),
+				(*var_scope)[*id_obj->i->id], "", BB);
+
+		} else {
+			// load object
+			cerr << "Error processing buildExpression: " << endl;
+			cerr << "ExpObject unimplemented " << endl;
+			return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 1);
+
+		}
 
 	} else if (ObjectMethodCall* e = dynamic_cast<ObjectMethodCall * >(exp)) {
 		//return llvm::CallInst::Create(func_table[*e->o->id+*e->i->id], "", BB);
 		// TODO classname
+		if (e->e) {
+			vector<llvm::Value *> args;
+			if (e->e->erlVector) {
+				for (auto erl : *e->e->erlVector) {
+					args.push_back(buildExpression(erl, Context, BB));
+				}
+			} else {
+				args = {buildExpression(e->e->e, Context, BB)};
+			}
+			return llvm::CallInst::Create(func_table[*e->i->id], args, "", BB);
+		}
 		return llvm::CallInst::Create(func_table[*e->i->id], "", BB);
 
 	} else if (ParenExp* e = dynamic_cast<ParenExp * >(exp)) {
@@ -165,37 +195,17 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 	i->insertInto(BB, BB->end());
 	return i;
 
-	// Get pointers to the constant integers...
-	llvm::Value *Two = 
-		llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 2);
-	llvm::Value *Three = 
-		llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 3);
-
-	// Create the add instruction... does not insert...
-	llvm::Instruction *Add = 
-		llvm::BinaryOperator::Create(llvm::Instruction::Add, Two, Three,
-			"addresult");
-
-	// explicitly insert it into the basic block...
-	Add->insertInto(BB, BB->end());
-	
-	return Add;
-
 }
 
 llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
-	
-	// TODO: System.out.println
-	// TODO: System.out.print
-	// TODO: llvm::Value string constant
 
 	if (BlockStatements * block_s = dynamic_cast<BlockStatements * >(s)) {
-		// TODO: VarDeclExpList * vdel = nullptr;
-		// TODO: StatementList * s = nullptr;
 		llvm::Instruction * i = nullptr;
-		if (s) {
+		// TODO: VarDeclExpList * vdel = nullptr;
+		
+		if (block_s->s) {
 			for (auto state : *block_s->s->sVector ) {
-				i = buildStatement(state, Context, BB);
+				i = buildStatement(state, Context, &BB->getParent()->back());
 			}
 		}
 		return i;
@@ -204,15 +214,31 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		llvm::Value * cond = buildExpression(if_s->e, Context, BB);
 		llvm::BasicBlock * ifBB = 
 			llvm::BasicBlock::Create(Context, "if", BB->getParent());
+
+		buildStatement(if_s->s_if, Context, ifBB);
+		auto iftmp = &ifBB->getParent()->back();
+		
 		llvm::BasicBlock * elBB = 
 			llvm::BasicBlock::Create(Context, "el", BB->getParent());
-		buildStatement(if_s->s_if, Context, ifBB);
-		buildStatement(if_s->s_el, Context, elBB);
-		llvm::BranchInst::Create(ifBB, elBB, cond, BB);
+
+		auto el = llvm::BranchInst::Create(ifBB, elBB, cond, BB);
+		ifBB = iftmp;
+		if (buildStatement(if_s->s_el, Context, elBB) == nullptr) {
+			el->removeFromParent();
+			delete elBB;
+			llvm::BasicBlock * succBB = 
+				llvm::BasicBlock::Create(Context, "s", BB->getParent());
+			llvm::BranchInst::Create(ifBB, succBB, cond, BB);
+			llvm::BranchInst::Create(succBB, ifBB);
+			return &succBB->back();
+		}
+
+		elBB = &elBB->getParent()->back();
+
 		llvm::BasicBlock * succBB = 
 			llvm::BasicBlock::Create(Context, "s", BB->getParent());
-		llvm::BranchInst::Create(succBB, ifBB);
 		llvm::BranchInst::Create(succBB, elBB);
+		llvm::BranchInst::Create(succBB, ifBB);
 		return &succBB->back();
 
 	} else if (WhileStatement * while_s = dynamic_cast<WhileStatement * >(s)) {
@@ -222,16 +248,18 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		llvm::Value * cond = buildExpression(while_s->e, Context, BB);
 		llvm::BasicBlock * whileBB = 
 			llvm::BasicBlock::Create(Context, "w", BB->getParent());
-		llvm::BasicBlock * succBB = 
-			llvm::BasicBlock::Create(Context, "s", BB->getParent());
 		
 		buildStatement(while_s->s, Context, whileBB);
+
+		llvm::BasicBlock * succBB = 
+			llvm::BasicBlock::Create(Context, "s_w", BB->getParent());
 		llvm::BranchInst::Create(whileBB, succBB, cond, BB);
 
-		cond = buildExpression(while_s->e, Context, BB);
+		cond = buildExpression(while_s->e, Context, whileBB);
 		llvm::BranchInst::Create(whileBB, succBB, cond, whileBB);
 		return &succBB->back();
 
+	// TODO: For
 	//} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
 	//	cerr << "ForStatement: unimplemented" << endl;
 
@@ -243,9 +271,9 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		return CallPrint;
 
 	} else if (PrintString * p_str = dynamic_cast<PrintString * >(s)) {
-		llvm::Constant * StrConstant = llvm::ConstantDataArray::getString(
-				Context, p_str->s->str->c_str()
-		);
+		llvm::Constant * StrConstant = 
+			llvm::ConstantDataArray::getString(
+				Context, p_str->s->str->c_str());
 		auto *GV = new llvm::GlobalVariable(
 				*BB->getParent()->getParent(), StrConstant->getType(), true, llvm::GlobalValue::PrivateLinkage,
 				StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
@@ -264,10 +292,12 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		return CallPrint;
 
 	} else if (PrintLineString * pln_str = dynamic_cast<PrintLineString * >(s)) {
-		llvm::Constant *StrConstant = llvm::ConstantDataArray::getString(Context, *pln_str->s->str + "\n");
+		llvm::Constant *StrConstant = llvm::ConstantDataArray::getString(
+			Context, *pln_str->s->str + "\n");
 		auto *GV = new llvm::GlobalVariable(
-				*BB->getParent()->getParent(), StrConstant->getType(), true, llvm::GlobalValue::PrivateLinkage,
-				StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
+			*BB->getParent()->getParent(), StrConstant->getType(),
+			true, llvm::GlobalValue::PrivateLinkage,
+			StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
 		GV->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 		GV->setAlignment(llvm::Align(1));
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
@@ -276,11 +306,22 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		return CallPrint;
 		
 	} else if (Assign * assign = dynamic_cast<Assign * >(s)) {
-		cerr << "Assign: unimplemented" << endl;
+		auto store = new llvm::StoreInst(
+			buildExpression(assign->e, Context, BB),
+			(*var_scope)[*assign->i->id], BB
+		);
+		store->insertInto(BB, BB->end());
+		return store;
+		
+	// TODO: Array
 	//} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
 	//	cerr << "IndexAssign: unimplemented" << endl;
-	//} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
-	//	cerr << "ReturnStatement: unimplemented" << endl;
+		
+	} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
+		llvm::ReturnInst::Create(Context, 
+			buildExpression(ret_s->e, Context, BB), 
+			&BB->getParent()->back());
+		
 	} else {
 		cerr << "Error processing buildStatement: " << endl;
 		cerr << "Statement s cast error " << endl;
@@ -288,7 +329,6 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 	}
 	
 	return nullptr;
-
 }
 
 void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) {
@@ -298,39 +338,113 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
   //   llvm::Function::Create(FT, llvm::Function::ExternalLinkage, *c->i->id, M);
 
 	// VarDeclList * v = nullptr;
+	// TODO create constructor
+	// map<string, llvm::Value *> class_var_decl;
 
 	for (auto func : *c->m->mdVector) {
 		// TODO(ss) FIXME return and arg type
 
-		// VarDeclList * v = nullptr;
-		if (VarDeclList * v = func->v) {\
-			for (auto var : *v->vdVector ) {
-				cerr << *var->i->id << endl;
+		llvm::FunctionType *FT = nullptr;
+
+		if (func->f) {
+			if (func->f->frVector) {
+				//for (auto var : *func->f->frVector) {
+				//}
+				FT = llvm::FunctionType::get(
+					llvm::Type::getInt32Ty(Context),
+					vector<llvm::Type * >(func->f->frVector->size(), 
+					llvm::Type::getInt32Ty(Context)), 
+					false
+				);
+
+			} else {
+				if (dynamic_cast<IntType * >(func->f->t)) { 
+					FT = llvm::FunctionType::get(
+						llvm::Type::getInt32Ty(Context),
+						{ llvm::Type::getInt32Ty(Context) }, 
+						false
+					);
+
+				} else {
+					cerr << "Error with Formalrest: " << endl;
+					cerr << *func->f->i->id << " is not of an IntType" << endl;
+				}
 			}
+
+		} else {
+			FT = llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
+
 		}
 
-		llvm::FunctionType *FT =
-			llvm::FunctionType::get(llvm::Type::getInt32Ty(Context), false);
-		llvm::Function *F =
-			llvm::Function::Create(
-					FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
+		llvm::Function *F = llvm::Function::Create(
+			FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
 		);
 
-		//func_table[*c->i->id+*func->i->id] = F;
+		// FIXME: add classname func_table[*c->i->id+*func->i->id] = F;
 		func_table[*func->i->id] = F;
+		var_scope = new map<string, llvm::Value *>();
 		
 		llvm::BasicBlock *BB = 
 			llvm::BasicBlock::Create(Context, "EntryBlock", F);
 		
-		if (func->s) {
-			for (auto state : *func->s->sVector ) {
-				buildStatement(state, Context, BB);
+		if (func->f) {
+			if (func->f->frVector) {
+				unsigned i = 0;
+				for (auto var : *func->f->frVector) {
+					(*var_scope)[*var->i->id] = new llvm::AllocaInst(
+						llvm::Type::getInt32Ty(Context), 0, 
+						//F->getArg(i++), 
+						//llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), 
+						//llvm::Align(4), 
+						"", BB);
+					auto store = new llvm::StoreInst(
+						F->getArg(i++),
+						(*var_scope)[*var->i->id], BB
+					);
+					store->insertInto(BB, BB->end());
+				}
+			} else {
+				if (dynamic_cast<IntType * >(func->f->t)) { 
+					(*var_scope)[*func->f->i->id] = new llvm::AllocaInst(
+						llvm::Type::getInt32Ty(Context), 0, 
+						//F->getArg(0), llvm::Align(4), 
+						"", BB);
+					auto store = new llvm::StoreInst(
+						F->getArg(0),
+						(*var_scope)[*func->f->i->id], BB
+					);
+					store->insertInto(BB, BB->end());
+				}
 			}
 		}
 
-		llvm::ReturnInst::Create(Context, 
-			buildExpression(func->e, Context, BB), 
-			&F->back());
+		if (func->v) {
+			for (auto var : *func->v->vdVector ) {
+				if (dynamic_cast<IntType * >(var->t)) { 
+					(*var_scope)[*var->i->id] = new llvm::AllocaInst(
+						llvm::Type::getInt32Ty(Context), 0, 
+						llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), 
+						llvm::Align(4), "", BB);
+
+				} else {
+					cerr << "Error with VarDecl: " << endl;
+					cerr << *var->i->id << " is not of an IntType" << endl;
+
+				}
+			}
+		}
+
+		if (func->s) {
+			for (auto state : *func->s->sVector ) {
+				buildStatement(state, Context, &F->back());
+			}
+		}
+
+		llvm::ReturnInst::Create(
+			Context, buildExpression(func->e, Context, &F->back()), &F->back()
+		);
+
+		delete var_scope;
 	}
 
 }
@@ -353,7 +467,9 @@ void buildMain(MainClass * main, llvm::LLVMContext &Context, llvm::Module *M) {
 	llvm::Instruction * last = buildStatement(main->s, Context, BB);
 
 	// Create the return instruction and add it to the basic block
-	llvm::ReturnInst::Create(Context, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), &F->back());
+	llvm::ReturnInst::Create(
+		Context, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), &F->back()
+	);
 
 }
 
@@ -394,13 +510,11 @@ void GenerateIR(Program * root) {
 	}
 	buildMain(root->m, Context, M);
 
-	// Output the bitcode file to stdout
 	// TODO(ss): print target triple for computer arch to file
 	std::error_code ec;
 	llvm::ToolOutputFile bc(bcFilename.c_str(), ec, llvm::sys::fs::OF_None);
 	//WriteBitcodeToFile(*M, bc.os());
 	//WriteBitcodeToFile(*M, outs());
-	
 
 	if (bcFilename.empty()) {
   	M->print(llvm::outs(), nullptr, false, true); // method 1
@@ -410,7 +524,7 @@ void GenerateIR(Program * root) {
 	}
 
 	// Delete the module and all of its contents.
-	delete M;
+	//delete M;
 
 }
 
