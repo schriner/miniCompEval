@@ -1,0 +1,148 @@
+; ModuleID = 'moreComplex'
+source_filename = "moreComplex"
+
+@0 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@2 = private unnamed_addr constant [30 x i8] c"This line should be printed.\0A\00", align 1
+@3 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+@4 = private unnamed_addr constant [44 x i8] c"This line should be printed: 3 > 4 || true\0A\00", align 1
+@5 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+@6 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+@7 = private unnamed_addr constant [57 x i8] c"This line should be printed: 4 >= 5 || 5 <= (6*9 - 100)\0A\00", align 1
+@8 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+@9 = private unnamed_addr constant [58 x i8] c"This line should be printed: (0 > 1) && (2 > 3) || false\0A\00", align 1
+@10 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+@11 = private unnamed_addr constant [58 x i8] c"This line should be printed: (0 > 1) && (3 > 2) || false\0A\00", align 1
+@12 = private unnamed_addr constant [37 x i8] c"This line should be printed: !!true\0A\00", align 1
+@13 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+@14 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+@15 = private unnamed_addr constant [40 x i8] c"This line should be printed: !!(3 > 5)\0A\00", align 1
+@16 = private unnamed_addr constant [39 x i8] c"This line should be printed: !(3 > 5)\0A\00", align 1
+@17 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
+
+declare i32 @printf(ptr %0, ...)
+
+define i32 @main() {
+EntryBlock:
+  %0 = icmp slt i32 2, 3
+  %1 = and i1 true, %0
+  br i1 %1, label %if, label %el
+
+if:                                               ; preds = %EntryBlock
+  %2 = call i32 (ptr, ...) @printf(ptr @2)
+  %3 = sub i32 32, 70
+  %4 = sub i32 %3, 2
+  %5 = add i32 %4, 9
+  %6 = call i32 (ptr, ...) @printf(ptr @1, i32 %5)
+  %7 = add i32 5, 3
+  %8 = mul i32 %7, 17
+  %9 = call i32 (ptr, ...) @printf(ptr @1, i32 %8)
+  br label %s
+
+el:                                               ; preds = %EntryBlock
+  %10 = call i32 (ptr, ...) @printf(ptr @3)
+  br label %s
+
+s:                                                ; preds = %if, %el
+  %11 = icmp sgt i32 3, 4
+  %12 = or i1 %11, true
+  br i1 %12, label %if1, label %el2
+
+if1:                                              ; preds = %s
+  %13 = call i32 (ptr, ...) @printf(ptr @4)
+  br label %s3
+
+el2:                                              ; preds = %s
+  %14 = call i32 (ptr, ...) @printf(ptr @5)
+  br label %s3
+
+s3:                                               ; preds = %if1, %el2
+  %15 = add i32 1, 2
+  %16 = icmp sge i32 %15, 5
+  %17 = mul i32 6, 9
+  %18 = sub i32 %17, 100
+  %19 = icmp sle i32 5, %18
+  %20 = or i1 %16, %19
+  br i1 %20, label %if4, label %el5
+
+if4:                                              ; preds = %s3
+  %21 = call i32 (ptr, ...) @printf(ptr @6)
+  br label %s6
+
+el5:                                              ; preds = %s3
+  %22 = call i32 (ptr, ...) @printf(ptr @7)
+  br label %s6
+
+s6:                                               ; preds = %if4, %el5
+  %23 = icmp sgt i32 0, 1
+  %24 = icmp sgt i32 2, 3
+  %25 = and i1 %23, %24
+  %26 = or i1 %25, false
+  br i1 %26, label %if7, label %el8
+
+if7:                                              ; preds = %s6
+  %27 = call i32 (ptr, ...) @printf(ptr @8)
+  br label %s9
+
+el8:                                              ; preds = %s6
+  %28 = call i32 (ptr, ...) @printf(ptr @9)
+  br label %s9
+
+s9:                                               ; preds = %if7, %el8
+  %29 = icmp sgt i32 0, 1
+  %30 = icmp sgt i32 3, 2
+  %31 = and i1 %29, %30
+  %32 = or i1 %31, false
+  br i1 %32, label %if10, label %el11
+
+if10:                                             ; preds = %s9
+  %33 = call i32 (ptr, ...) @printf(ptr @10)
+  br label %s12
+
+el11:                                             ; preds = %s9
+  %34 = call i32 (ptr, ...) @printf(ptr @11)
+  br label %s12
+
+s12:                                              ; preds = %if10, %el11
+  %35 = xor i1 true, true
+  %36 = xor i1 %35, true
+  br i1 %36, label %if13, label %el14
+
+if13:                                             ; preds = %s12
+  %37 = call i32 (ptr, ...) @printf(ptr @12)
+  br label %s15
+
+el14:                                             ; preds = %s12
+  %38 = call i32 (ptr, ...) @printf(ptr @13)
+  br label %s15
+
+s15:                                              ; preds = %if13, %el14
+  %39 = icmp sgt i32 3, 5
+  %40 = xor i1 %39, true
+  %41 = xor i1 %40, true
+  br i1 %41, label %if16, label %el17
+
+if16:                                             ; preds = %s15
+  %42 = call i32 (ptr, ...) @printf(ptr @14)
+  br label %s18
+
+el17:                                             ; preds = %s15
+  %43 = call i32 (ptr, ...) @printf(ptr @15)
+  br label %s18
+
+s18:                                              ; preds = %if16, %el17
+  %44 = icmp sgt i32 3, 5
+  %45 = xor i1 %44, true
+  br i1 %45, label %if19, label %el20
+
+if19:                                             ; preds = %s18
+  %46 = call i32 (ptr, ...) @printf(ptr @16)
+  br label %s21
+
+el20:                                             ; preds = %s18
+  %47 = call i32 (ptr, ...) @printf(ptr @17)
+  br label %s21
+
+s21:                                              ; preds = %if19, %el20
+  ret i32 0
+}

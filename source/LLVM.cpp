@@ -205,7 +205,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		
 		if (block_s->s) {
 			for (auto state : *block_s->s->sVector ) {
-				i = buildStatement(state, Context, BB);
+				i = buildStatement(state, Context, &BB->getParent()->back());
 			}
 		}
 		return i;
@@ -248,10 +248,11 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		llvm::Value * cond = buildExpression(while_s->e, Context, BB);
 		llvm::BasicBlock * whileBB = 
 			llvm::BasicBlock::Create(Context, "w", BB->getParent());
-		llvm::BasicBlock * succBB = 
-			llvm::BasicBlock::Create(Context, "s_w", BB->getParent());
 		
 		buildStatement(while_s->s, Context, whileBB);
+
+		llvm::BasicBlock * succBB = 
+			llvm::BasicBlock::Create(Context, "s_w", BB->getParent());
 		llvm::BranchInst::Create(whileBB, succBB, cond, BB);
 
 		cond = buildExpression(while_s->e, Context, whileBB);
@@ -270,9 +271,9 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		return CallPrint;
 
 	} else if (PrintString * p_str = dynamic_cast<PrintString * >(s)) {
-		llvm::Constant * StrConstant = llvm::ConstantDataArray::getString(
-				Context, p_str->s->str->c_str()
-		);
+		llvm::Constant * StrConstant = 
+			llvm::ConstantDataArray::getString(
+				Context, p_str->s->str->c_str());
 		auto *GV = new llvm::GlobalVariable(
 				*BB->getParent()->getParent(), StrConstant->getType(), true, llvm::GlobalValue::PrivateLinkage,
 				StrConstant, "", nullptr, llvm::GlobalVariable::NotThreadLocal, 0);
@@ -311,8 +312,6 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		);
 		store->insertInto(BB, BB->end());
 		return store;
-		// store value
-		cerr << "Assign: unimplemented" << endl;
 		
 	// TODO: Array
 	//} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
