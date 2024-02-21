@@ -34,7 +34,7 @@ mjavac [-p | -o <output_file> | --stdout ] <inputfile>.java
 ```
 * Supported functionality would include object method calls, expression evaluation, expression assignment to variables, print() via prtinf, and control flow statements
 * TODO: Symbol table improvements, arrays, class instance variables, `this`, nested method calls, class extends
-* Some sample `.s` output is located in [`test/CompilerOut`](test/CompilerOut)
+* Some sample `.s` output is located in [`test/Armv7Out`](test/Armv7Out)
 
 To utilize the present test compilation env: 
 ```
@@ -127,8 +127,8 @@ From within the root directory:
 ```
 Produces output like:
 ```
-././test/../build/mjavac -o ./test/CompilerOut/basicIf.s ./test/Compiler/basicIf.java
-././test/../build/mjavac -o ./test/CompilerOut/loop.s ./test/Compiler/loop.java
+././test/../build/mjavac -o ./test/Armv7Out/basicIf.s ./test/Armv7Out/basicIf.java
+././test/../build/mjavac -o ./test/Armv7Out/loop.s ./test/Armv7Out/loop.java
 
 ...
 
