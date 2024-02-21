@@ -176,10 +176,14 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 				for (auto erl : *e->e->erlVector) {
 					args.push_back(buildExpression(erl, Context, BB));
 				}
+
 			} else {
 				args = {buildExpression(e->e->e, Context, BB)};
+
 			}
-			return llvm::CallInst::Create(func_table[*e->i->id], args, "", BB);
+			cerr << func_table[*e->i->id] << " " << *e->i->id << endl;
+			return llvm::CallInst::Create(func_table[*e->i->id], std::move(args), "", BB);
+
 		}
 		return llvm::CallInst::Create(func_table[*e->i->id], "", BB);
 
@@ -245,6 +249,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		// FIXME Cond Block
 		// While Block
 		// After Block
+		//
 		llvm::Value * cond = buildExpression(while_s->e, Context, BB);
 		llvm::BasicBlock * whileBB = 
 			llvm::BasicBlock::Create(Context, "w", BB->getParent());
@@ -348,8 +353,10 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 		llvm::Type * RT;
 		if (dynamic_cast<IntType * >(func->t)) {
 			RT = llvm::Type::getInt32Ty(Context);
+
 		} else {
 			RT = llvm::Type::getInt1Ty(Context);
+
 		}
 
 		if (func->f) {
@@ -359,14 +366,12 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					if (dynamic_cast<IntType * >(var->t)) {
 						type.push_back(llvm::Type::getInt32Ty(Context));
 
-					} else if (dynamic_cast<BoolType * >(func->f->t)) {
+					} else if (dynamic_cast<BoolType * >(var->t)) {
 						type.push_back(llvm::Type::getInt1Ty(Context));
 
 					}
 				}
-				FT = llvm::FunctionType::get(
-					RT, type, false
-				);
+				FT = llvm::FunctionType::get(RT, std::move(type), false);
 
 			} else {
 				if (dynamic_cast<IntType * >(func->f->t)) { 
@@ -382,6 +387,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 				} else {
 					cerr << "Error with Formalrest: " << endl;
 					cerr << *func->f->i->id << " is not of an IntType" << endl;
+					abort();
 				}
 			}
 
@@ -389,13 +395,19 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 			FT = llvm::FunctionType::get(RT, false);
 
 		}
+		cerr << RT << " " << *c->i->id + *func->i->id << " " << FT << endl;
 
-		llvm::Function *F = llvm::Function::Create(
+		func_table[*func->i->id] = llvm::Function::Create(
 			FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
 		);
 
+		cerr << *c->i->id + *func->i->id << " " << func_table[*func->i->id] << endl;
+
 		// FIXME: add classname func_table[*c->i->id+*func->i->id] = F;
-		func_table[*func->i->id] = F;
+	}
+	
+	for (auto func : *c->m->mdVector) {
+		llvm::Function *F = func_table[*func->i->id];
 		var_scope = new map<string, llvm::Value *>();
 		
 		llvm::BasicBlock *BB = 
@@ -431,8 +443,8 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 				}
 
 				auto store = new llvm::StoreInst(
-						F->getArg(0), (*var_scope)[*func->f->i->id], BB
-						);
+					F->getArg(0), (*var_scope)[*func->f->i->id], BB
+				);
 				store->insertInto(BB, BB->end());
 			}
 		}
@@ -448,7 +460,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 				} else if (dynamic_cast<BoolType * >(var->t)) {
 					(*var_scope)[*var->i->id] = new llvm::AllocaInst(
 						llvm::Type::getInt1Ty(Context), 0, 
-						llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), 
+						llvm::ConstantInt::getFalse(Context),
 						llvm::Align(4), "", BB);
 				
 				} else {

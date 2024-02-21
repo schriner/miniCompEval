@@ -14,7 +14,7 @@ class Hanoi {
 		return 1;
 	}
 
-	public int  recursive  (int n, int start, int middle, int end) {
+	public int recursive(int n, int start, int middle, int end) {
 		int dummy;
 		if (n <= 1) {
 			System.out.print("move 1 from ");
