@@ -18,27 +18,28 @@ define i32 @Factorialcompute10() {
 EntryBlock:
   %0 = alloca i32, i32 0, align 4
   %1 = alloca i32, i32 0, align 4
+  %2 = alloca i1, i32 0, align 4
   store i32 1, ptr %1, align 4
   store i32 1, ptr %0, align 4
-  %2 = load i32, ptr %1, align 4
-  %3 = icmp sle i32 %2, 10
-  br i1 %3, label %w, label %s_w
+  %3 = load i32, ptr %1, align 4
+  %4 = icmp sle i32 %3, 10
+  br i1 %4, label %w, label %s_w
 
 w:                                                ; preds = %w, %EntryBlock
-  %4 = load i32, ptr %0, align 4
-  %5 = load i32, ptr %1, align 4
-  %6 = mul i32 %4, %5
-  store i32 %6, ptr %0, align 4
-  %7 = load i32, ptr %1, align 4
-  %8 = add i32 %7, 1
-  store i32 %8, ptr %1, align 4
-  %9 = load i32, ptr %1, align 4
-  %10 = icmp sle i32 %9, 10
-  br i1 %10, label %w, label %s_w
+  %5 = load i32, ptr %0, align 4
+  %6 = load i32, ptr %1, align 4
+  %7 = mul i32 %5, %6
+  store i32 %7, ptr %0, align 4
+  %8 = load i32, ptr %1, align 4
+  %9 = add i32 %8, 1
+  store i32 %9, ptr %1, align 4
+  %10 = load i32, ptr %1, align 4
+  %11 = icmp sle i32 %10, 10
+  br i1 %11, label %w, label %s_w
 
 s_w:                                              ; preds = %w, %EntryBlock
-  %11 = load i32, ptr %0, align 4
-  ret i32 %11
+  %12 = load i32, ptr %0, align 4
+  ret i32 %12
 }
 
 define i32 @main() {
