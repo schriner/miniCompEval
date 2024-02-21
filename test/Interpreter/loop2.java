@@ -1,6 +1,4 @@
-// You are supposed to support method calling for testing this case.
-// The minimum required would be calling a method with an empty parameter list and belongs to a class without instance variables.
-class loop {
+class loop2 {
     public static void main(String [] args) {
         {
 				if (new PrintFactorial10().printFact()) {
@@ -11,8 +9,6 @@ class loop {
         }
     }
 }
-
-// This test case tests while loop execution.
 class PrintFactorial10 {
 	Factorial f;
 	boolean b;
