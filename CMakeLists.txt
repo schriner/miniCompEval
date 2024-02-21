@@ -65,6 +65,7 @@ include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 add_subdirectory(${TEST_DIR})
 add_executable(mjavacllvm source/mjavacllvm.cpp source/LLVM.cpp source/Evaluate.cpp source/TreeNode.cpp ${parser})
 target_link_libraries(mjavacllvm ${llvm_libs})
+find_program(BASH_EXECUTABLE NAMES bash REQUIRED)
 
 if(PNG)
 	add_custom_command(

@@ -126,3 +126,13 @@ set_property (TEST EvalFactorialFor
 
 add_test(NAME EvalMultiplePrintCompiler COMMAND mjavac ${TEST_DIR}/Compiler/multiplePrint.java)
 
+#set (passRegex "Success\n")
+#add_test(NAME LLVM_HANOI COMMAND "./test_llvm.sh"
+#	${TEST_DIR}/Interpreter/HanoiDemo.java
+#)
+#set_property(TEST LLVM_HANOI
+#	PROPERTY 
+#	PATH  "${TEST_DIR}/test_llvm.sh:${PATH}"
+#	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+#)
+
