@@ -8,8 +8,8 @@
 
 TEST_PATH=${0%/*}
 BUILD_DIR=$TEST_PATH/../build
-TEST_DIR=$TEST_PATH/Compiler
-OUT_DIR=$TEST_PATH/CompilerOut
+TEST_DIR=$TEST_PATH/CodeGen
+OUT_DIR=$TEST_PATH/ARMv7Out
 
 echo "Checking for exe"
 if [ -d "$BUILD" ]; then

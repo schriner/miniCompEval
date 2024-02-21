@@ -64,7 +64,7 @@ set_property (TEST EvalArrayPrint
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
-add_test(NAME EvalMultiplePrint COMMAND meval ${TEST_DIR}/Compiler/multiplePrint.java)
+add_test(NAME EvalMultiplePrint COMMAND meval ${TEST_DIR}/CodeGen/multiplePrint.java)
 set (passRegex
   "The answer\nto the meaning\nof life\nis:\n42\n"
 )
@@ -124,5 +124,18 @@ set_property (TEST EvalFactorialFor
 	PASS_REGULAR_EXPRESSION "${passRegex}"
 )
 
-add_test(NAME EvalMultiplePrintCompiler COMMAND mjavac ${TEST_DIR}/Compiler/multiplePrint.java)
+add_test(NAME EvalMultiplePrintCodeGen 
+	COMMAND mjavac 
+	${TEST_DIR}/CodeGen/multiplePrint.java
+)
+
+#set (passRegex "Success\n")
+#add_test(NAME LLVM_HANOI COMMAND "./test_llvm.sh"
+#	${TEST_DIR}/Interpreter/HanoiDemo.java
+#)
+#set_property(TEST LLVM_HANOI
+#	PROPERTY 
+#	PATH  "${TEST_DIR}/test_llvm.sh:${PATH}"
+#	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+#)
 
