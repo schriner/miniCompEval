@@ -41,12 +41,6 @@ llvm::Function *_printf;
 llvm::GlobalVariable *_exp_format;
 llvm::GlobalVariable *_exp_format_n;
 
-typedef struct FUNC_SYM {
-	llvm::Function * func;
-	map<string, llvm::Value *> * sym; 
-} _FUNC_SYM;
-
-//map<string, FUNC_SYM> func_table;
 map<string, llvm::Function *> func_table;
 map<string, llvm::Value *> * var_scope;
 
