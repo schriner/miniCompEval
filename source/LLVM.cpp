@@ -181,7 +181,6 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 				args = {buildExpression(e->e->e, Context, BB)};
 
 			}
-			cerr << func_table[*e->i->id] << " " << *e->i->id << endl;
 			return llvm::CallInst::Create(func_table[*e->i->id], std::move(args), "", BB);
 
 		}
@@ -395,15 +394,12 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 			FT = llvm::FunctionType::get(RT, false);
 
 		}
-		cerr << RT << " " << *c->i->id + *func->i->id << " " << FT << endl;
 
+		// FIXME: add classname func_table[*c->i->id+*func->i->id] = F;
 		func_table[*func->i->id] = llvm::Function::Create(
 			FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
 		);
 
-		cerr << *c->i->id + *func->i->id << " " << func_table[*func->i->id] << endl;
-
-		// FIXME: add classname func_table[*c->i->id+*func->i->id] = F;
 	}
 	
 	for (auto func : *c->m->mdVector) {
