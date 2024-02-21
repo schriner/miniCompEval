@@ -18,6 +18,7 @@ mjavacllvm [-p | -o <output_file> | --stdout ] <inputfile>.java
 ```
 Functionality is tested for the files contained within:
 * Some sample LLVM IR output is located in [`test/LLVM_IR`](test/LLVM_IR)
+* `test/test_llvm.sh <input/path>` runs a diff between generated IR and javac output
 * Test via compiling bitcode and comparing output with `java`
 * Supported: `if`/`while`, method calls with integer/boolean arguments, integer/boolean variable declarations, and recursion with integer/boolean arguments
 * TODO: `for`, Arrays, classes, class extensions, ID objects
