@@ -1,13 +1,13 @@
 class loop2 {
-    public static void main(String [] args) {
-        {
-				if (new PrintFactorial10().printFact()) {
-        	System.out.println("Success");
-				} else {
-					System.out.println("Failure");
-				}
-        }
-    }
+	public static void main(String [] args) {
+		{
+			if (new PrintFactorial10().printFact()) {
+				System.out.println("Success");
+			} else {
+				System.out.println("Failure");
+			}
+		}
+	}
 }
 class PrintFactorial10 {
 	Factorial f;
@@ -25,24 +25,24 @@ class PrintFactorial10 {
 	}
 }
 class Factorial {
-		int f;
-		public boolean factorial(int fact) {
-			f = fact;
-			return f == fact;
+	int f;
+	public boolean factorial(int fact) {
+		f = fact;
+		return f == fact;
+	}
+	public int fact() {
+		return f;
+	}
+	public int computeDec() {
+		int prod;
+		int multiplier;
+		multiplier = 1;
+		prod = 1;
+		while (multiplier <= f) {
+			prod = prod * multiplier;
+			multiplier = multiplier + 1;
 		}
-		public int fact() {
-			return f;
-		}
-    public int computeDec() {
-        int prod;
-        int multiplier;
-        multiplier = 1;
-        prod = 1;
-        while (multiplier <= f) {
-            prod = prod * multiplier;
-            multiplier = multiplier + 1;
-        }
-				f = f - 1;
-        return prod;
-    }
+		f = f - 1;
+		return prod;
+	}
 }

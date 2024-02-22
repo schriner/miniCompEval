@@ -149,6 +149,7 @@ llvm::Value * buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::Basic
 
 	} else if (ExpObject* e = dynamic_cast<ExpObject * >(exp)) {
 		if (IdObj * id_obj = dynamic_cast<IdObj * >(e->o)) {
+			// FIXME TYPES
 			return new llvm::LoadInst(
 				llvm::Type::getInt32Ty(Context),
 				(*var_scope)[*id_obj->i->id], "", BB);
@@ -304,6 +305,7 @@ llvm::Instruction * buildStatement(Statement *s, llvm::LLVMContext &Context, llv
 		return CallPrint;
 		
 	} else if (Assign * assign = dynamic_cast<Assign * >(s)) {
+		// TODO assign within a class
 		auto store = new llvm::StoreInst(
 			buildExpression(assign->e, Context, BB),
 			(*var_scope)[*assign->i->id], BB
@@ -338,6 +340,19 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 	// VarDeclList * v = nullptr;
 	// TODO create constructor
 	// map<string, llvm::Value *> class_var_decl;
+	if (c->v) {
+		llvm::PointerType::get(llvm::Type::getInt8Ty(Context), 0);
+		func_table[*c->i->id] = llvm::Function::Create(
+			llvm::FunctionType::get(
+				llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), false), 
+			llvm::Function::ExternalLinkage, *c->i->id, M
+		);
+
+		// allocate enough space for the set of variables
+		// return value is pointer to variable struct
+		for (auto var : *c->v->vdVector) {
+		}
+	}
 
 	for (auto func : *c->m->mdVector) {
 		// TODO(ss) FIXME return and arg type for ID
@@ -362,7 +377,10 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					} else if (dynamic_cast<BoolType * >(var->t)) {
 						type.push_back(llvm::Type::getInt1Ty(Context));
 
+					} else {
+						// TODO: ID TYPE
 					}
+
 				}
 				FT = llvm::FunctionType::get(RT, std::move(type), false);
 
@@ -378,6 +396,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					);
 
 				} else {
+						// TODO: ID TYPE
 					cerr << "Error with Formalrest: " << endl;
 					cerr << *func->f->i->id << " is not of an IntType" << endl;
 					abort();
@@ -430,6 +449,8 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					(*var_scope)[*func->f->i->id] = new llvm::AllocaInst(
 						llvm::Type::getInt1Ty(Context), 0, "", BB);
 
+				} else {
+					// TODO: ID TYPE
 				}
 
 				auto store = new llvm::StoreInst(
