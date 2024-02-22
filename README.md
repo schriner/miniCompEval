@@ -115,7 +115,7 @@ Create Tree PNG:
 make png
 ```
 
-## Automated Testing for Parser and Interpreter
+## Automated Testing for Parser, Interpreter, and LLVM IR
 From within the build directory:
 ```
 ctest
