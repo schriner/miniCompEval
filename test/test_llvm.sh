@@ -12,7 +12,7 @@ OUT_DIR=$TEST_PATH/LLVM_IR
 BUILD_DIR=$TEST_PATH/../build
 file=$(basename -- "$1")
 
-./$BUILD_DIR/mjavacllvm -o $OUT_DIR/"${file%.*}.bc" $1
+$BUILD_DIR/mjavacllvm -o $OUT_DIR/"${file%.*}.bc" $1
 clang $OUT_DIR/${file%.*}.bc -o $OUT_DIR/${file%.*}
 javac $1
 

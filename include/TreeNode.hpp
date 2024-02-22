@@ -248,7 +248,7 @@ class VarDeclExpList : public TreeNode {
 			vdeVector->push_back(vde);
 		}
 		void traverse() {
-			cerr << "ERROR(unimplemented): assemArmv7 VarDeclExpList";
+			cerr << "ERROR(unimplemented): traverse VarDeclExpList";
 		}
 #ifdef ASSEM
 		void assemArmv7(string * stmt_str, map<string, string*> *) {
