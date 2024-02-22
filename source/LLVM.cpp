@@ -341,7 +341,6 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 	// TODO create constructor
 	// map<string, llvm::Value *> class_var_decl;
 	if (c->v) {
-		llvm::PointerType::get(llvm::Type::getInt8Ty(Context), 0);
 		func_table[*c->i->id] = llvm::Function::Create(
 			llvm::FunctionType::get(
 				llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), false), 
@@ -350,8 +349,23 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 
 		// allocate enough space for the set of variables
 		// return value is pointer to variable struct
-		for (auto var : *c->v->vdVector) {
-		}
+		//(*var_scope)[*var->i->id] = new llvm::AllocaInst(
+		//		llvm::Type::getInt1Ty(Context), 0, "", BB);
+
+		/*for (auto var : *c->v->vdVector) {
+			if (dynamic_cast<IntType * >(var->t)) { 
+				(*var_scope)[*var->i->id] = new llvm::AllocaInst(
+						llvm::Type::getInt32Ty(Context), 0, 
+						llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), 
+						llvm::Align(4), "", BB);
+
+			} else if (dynamic_cast<BoolType * >(var->t)) {
+				(*var_scope)[*var->i->id] = new llvm::AllocaInst(
+						llvm::Type::getInt1Ty(Context), 0, 
+						llvm::ConstantInt::getFalse(Context),
+						llvm::Align(4), "", BB);
+			}
+		}*/
 	}
 
 	for (auto func : *c->m->mdVector) {
@@ -379,6 +393,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 
 					} else {
 						// TODO: ID TYPE
+						//type.push_back();
 					}
 
 				}
@@ -397,9 +412,10 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 
 				} else {
 						// TODO: ID TYPE
-					cerr << "Error with Formalrest: " << endl;
-					cerr << *func->f->i->id << " is not of an IntType" << endl;
-					abort();
+					FT = llvm::FunctionType::get(RT,
+						{ llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0) }, 
+						false
+					);
 				}
 			}
 
