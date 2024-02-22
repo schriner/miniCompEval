@@ -129,13 +129,26 @@ add_test(NAME EvalMultiplePrintCodeGen
 	${TEST_DIR}/CodeGen/multiplePrint.java
 )
 
-#set (passRegex "Success\n")
-#add_test(NAME LLVM_HANOI COMMAND "./test_llvm.sh"
-#	${TEST_DIR}/Interpreter/HanoiDemo.java
-#)
-#set_property(TEST LLVM_HANOI
-#	PROPERTY 
-#	PATH  "${TEST_DIR}/test_llvm.sh:${PATH}"
-#	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
-#)
+add_executable(test_llvm
+	test_llvm.cpp
+)
+set (passRegex "Success\n")
+add_test(NAME LLVM_Complex COMMAND test_llvm
+	${TEST_DIR}/CodeGen/moreComplex.java
+)
+set_property(TEST LLVM_Complex
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME LLVM_number COMMAND test_llvm
+	${TEST_DIR}/CodeGen/number.java
+)
+set_property(TEST LLVM_number
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME LLVM_HANOI COMMAND test_llvm
+	${TEST_DIR}/Interpreter/HanoiDemo.java
+)
+set_property(TEST LLVM_HANOI
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
 
