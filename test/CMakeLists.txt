@@ -151,4 +151,27 @@ add_test(NAME LLVM_HANOI COMMAND test_llvm
 set_property(TEST LLVM_HANOI
 	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
 )
-
+add_test(NAME LLVM_SimpleMethodCall COMMAND test_llvm
+	${TEST_DIR}/CodeGen/simpleMethodCall.java
+)
+set_property(TEST LLVM_SimpleMethodCall
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME LLVM_multiplePrintWAdd COMMAND test_llvm
+	${TEST_DIR}/CodeGen/multiplePrintWAdd.java
+)
+set_property(TEST LLVM_multiplePrintWAdd
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME LLVM_basicIf COMMAND test_llvm
+	${TEST_DIR}/CodeGen/basicIf.java
+)
+set_property(TEST LLVM_basicIf
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME LLVM_multiplePrintNumber COMMAND test_llvm
+	${TEST_DIR}/CodeGen/multiplePrintNumber.java
+)
+set_property(TEST LLVM_multiplePrintNumber
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
