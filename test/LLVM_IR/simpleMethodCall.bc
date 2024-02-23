@@ -43,6 +43,6 @@ el:                                               ; preds = %EntryBlock
   %5 = call i32 (ptr, ...) @printf(ptr @5)
   br label %s
 
-s:                                                ; preds = %el, %if
+s:                                                ; preds = %if, %el
   ret i32 0
 }

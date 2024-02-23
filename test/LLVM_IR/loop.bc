@@ -18,7 +18,7 @@ define i32 @Factorialcompute10() {
 EntryBlock:
   %0 = alloca i32, i32 0, align 4
   %1 = alloca i32, i32 0, align 4
-  %2 = alloca i1, i32 0, align 4
+  %2 = alloca i1, i1 false, align 4
   store i32 1, ptr %1, align 4
   store i32 1, ptr %0, align 4
   %3 = load i32, ptr %1, align 4

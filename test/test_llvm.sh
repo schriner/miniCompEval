@@ -46,7 +46,8 @@ error=$?
 if [ $error -eq 0 ]
 then
 	echo "Success"
-	rm -r $OUT_DIR tmpllvm $TEST_DIR/tmpjavac
+	rm -r $OUT_DIR 
+	rm tmpllvm $TEST_DIR/tmpjavac
 elif [ $error -eq 1 ]
 then
 	echo "Test Failure: ${file%.*}"

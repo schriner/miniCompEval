@@ -1,5 +1,5 @@
-; ModuleID = 'simple'
-source_filename = "simple"
+; ModuleID = 'multiplePrint'
+source_filename = "multiplePrint"
 
 @0 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
 @1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1

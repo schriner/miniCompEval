@@ -6,6 +6,8 @@ source_filename = "simple"
 @2 = private unnamed_addr constant [54 x i8] c"This line should be printed. A bunch of expressions:\0A\00", align 1
 @3 = private unnamed_addr constant [33 x i8] c"This line should not be printed\0A\00", align 1
 
+declare i32 @printf(ptr %0, ...)
+
 define i32 @main() {
 EntryBlock:
   %0 = icmp slt i32 2, 3
@@ -32,8 +34,6 @@ el:                                               ; preds = %EntryBlock
   %15 = call i32 (ptr, ...) @printf(ptr @3)
   br label %s
 
-s:                                                ; preds = %el, %if
+s:                                                ; preds = %if, %el
   ret i32 0
 }
-
-declare i32 @printf(ptr %0, ...)
