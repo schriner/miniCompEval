@@ -175,3 +175,33 @@ add_test(NAME LLVM_multiplePrintNumber COMMAND test_llvm
 set_property(TEST LLVM_multiplePrintNumber
 	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
 )
+add_test(NAME LLVM_loop COMMAND test_llvm
+	${TEST_DIR}/CodeGen/loop.java
+)
+set_property(TEST LLVM_loop
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME LLVM_simple COMMAND test_llvm
+	${TEST_DIR}/CodeGen/simple.java
+)
+set_property(TEST LLVM_simple
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME LLVM_singlePrint COMMAND test_llvm
+	${TEST_DIR}/CodeGen/singlePrint.java
+)
+set_property(TEST LLVM_singlePrint
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+add_test(NAME LLVM_multiplePrint COMMAND test_llvm
+	${TEST_DIR}/CodeGen/multiplePrint.java
+)
+set_property(TEST LLVM_multiplePrint
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
+#add_test(NAME LLVM_loop2 COMMAND test_llvm
+#	${TEST_DIR}/CodeGen/loop2.java
+#)
+#set_property(TEST LLVM_loop2
+#	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+#)

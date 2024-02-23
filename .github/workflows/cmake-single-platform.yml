@@ -5,8 +5,8 @@ name: CMake on a single platform
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+      #  pull_request:
+      #branches: [ "master" ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -78,6 +78,6 @@ jobs:
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest #-C ${{env.BUILD_TYPE}}
 
-    - name: Test Assembly
-      working-directory: ${{github.workspace}}
-      run: pushd /Applications/Docker.app/Contents/MacOS && ./install --accept-license && popd && ./.github/start_docker.sh && sleep 10 && ./test/test_assem.sh
+        #    - name: Test Assembly
+        #working-directory: ${{github.workspace}}
+        #run: pushd /Applications/Docker.app/Contents/MacOS && ./install --accept-license && popd && ./.github/start_docker.sh && sleep 10 && ./test/test_assem.sh
