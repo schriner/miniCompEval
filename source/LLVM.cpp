@@ -399,9 +399,7 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		llvm::BranchInst::Create(whileBB, succBB, cond, whileBB);
 		return &succBB->back();
 
-	// TODO: For
 	} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
-		//cerr << "ForStatement: unimplemented" << endl;
 		block_scope->push_back();
 		if (dynamic_cast<IntType * >(for_s->vd->t)) { 
 			block_scope->insert(*for_s->vd->i->id, new llvm::AllocaInst(
@@ -424,6 +422,7 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 				(*block_scope)[*for_s->vd->i->id], BB
 				);
 		store->insertInto(BB, BB->end());
+
 		llvm::Value * cond = buildExpression(for_s->e, Context, BB);
 		llvm::BasicBlock * forBB = 
 			llvm::BasicBlock::Create(Context, "for", BB->getParent());
