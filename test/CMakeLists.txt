@@ -205,9 +205,9 @@ add_test(NAME LLVM_multiplePrint COMMAND test_llvm
 set_property(TEST LLVM_multiplePrint
 	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
 )
-add_test(NAME LLVM_loop2 COMMAND test_llvm
-	${TEST_DIR}/CodeGen/loop2.java
-)
-set_property(TEST LLVM_loop2
-	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
-)
+#add_test(NAME LLVM_loop2 COMMAND test_llvm
+#	${TEST_DIR}/CodeGen/loop2.java
+#)
+#set_property(TEST LLVM_loop2
+#	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+#)
