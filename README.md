@@ -9,6 +9,7 @@ meval [-o <output_file>] <inputfile>.java
 ```
 Functionality is tested for the files contained within: [`test/Interpreter`](test/Interpreter)
 * class method calls, variables, recursion with arguments, class variable delarations, keyword `extends`, multi dimensional arrays, `if`/`while`/`for` control flow, and variable declarations within `{` `}` statements
+* TODO: Return of array type
 
 ## mjavacllvm:  Generator for LLVM Bitcode
 From the build directory: 

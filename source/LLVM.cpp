@@ -186,13 +186,13 @@ buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		);
 
 	// TODO: Array
-	//} else if (ArrayAccess* e = dynamic_cast< * >(exp)) {
+	//} else if (ArrayAccess* e = dynamic_cast<ArrayAccess * >(exp)) {
 
 	// TODO: Array
-	//} else if (Length* e = dynamic_cast< * >(exp)) {
+	//} else if (Length* e = dynamic_cast<Length * >(exp)) {
 
 	// TODO: Array
-	//} else if (ArrayAccessLength* e = dynamic_cast< * >(exp)) {
+	//} else if (ArrayAccessLength* e = dynamic_cast<ArrayAccessLength * >(exp)) {
 
 	} else if (LitInt* e = dynamic_cast<LitInt * >(exp)) {
 		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), e->i);
@@ -217,6 +217,8 @@ buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 
 			} else {
 				// FIXME TYPES
+				// ID Type
+				// Arrays
 				cerr << "ExpObject type unimplemented " << endl;
 				abort();
 			}
@@ -305,6 +307,7 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 
 					} else {
 						// TODO: IdentType
+						// TODO: Array
 						cerr << "Error with VarDecl: " << endl;
 						cerr << *var->i->id << " is not of an IntType" << endl;
 						abort();
@@ -328,6 +331,7 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 
 					} else {
 						// TODO: IdentType
+						// TODO: Array
 						cerr << "Error with VarDecl: " << endl;
 						cerr << *var->i->id << " is not of an IntType" << endl;
 						abort();
@@ -411,6 +415,7 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 
 		} else {
 			// TODO: IdentType
+			// TODO: Array
 			cerr << "Error with VarDecl: " << endl;
 			cerr << *for_s->vd->i->id << " is not of an IntType" << endl;
 			abort();
@@ -560,8 +565,13 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 		} else if (dynamic_cast<BoolType * >(func->t)) {
 			RT = llvm::Type::getInt1Ty(Context);
 
-		} else {
+		} else if (dynamic_cast<IdentType * >(func->t)){
 			RT = llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0);
+
+		} else {
+			// Arrays
+			abort();
+
 		}
 
 		if (func->f) {
@@ -576,9 +586,13 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					} else if (dynamic_cast<BoolType * >(var->t)) {
 						type.push_back(llvm::Type::getInt1Ty(Context));
 
-					} else {
+					} else if (dynamic_cast<IdentType * >(var->t)) {
 						type.push_back(llvm::PointerType::get(
 									llvm::Type::getInt32Ty(Context), 0));
+					} else {
+						// Arrays
+						abort();
+
 					}
 
 				}
@@ -597,12 +611,15 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 						llvm::Type::getInt1Ty(Context) }, false
 					);
 
-				} else {
+				} else if (dynamic_cast<IdentType * >(func->f->t) {
 					FT = llvm::FunctionType::get(RT,
-						{llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), 
-						llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0) }, 
-						false
-					);
+							{llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), 
+							llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0) }, 
+							false
+							);
+				} else {
+					// Arrays
+					abort();
 				}
 			}
 
@@ -648,6 +665,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 
 					} else { 
 						// TODO: ID TYPE
+						// Arrays
 						abort();
 					}
 					auto store = new llvm::StoreInst(
@@ -666,6 +684,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 
 				} else {
 					// TODO: ID TYPE
+					// Arrays
 					abort();
 				}
 
@@ -692,6 +711,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 				
 				} else {
 					// TODO: ID TYPE
+					// Arrays
 					cerr << "Error with VarDecl: " << endl;
 					cerr << *var->i->id << " is not of an IntType" << endl;
 					abort();
