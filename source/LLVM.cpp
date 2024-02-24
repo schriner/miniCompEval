@@ -50,7 +50,6 @@ struct _SYMBOL {
 struct _BLOCK_SCOPE;
 _BLOCK_SCOPE * block_scope;
 struct _BLOCK_SCOPE {
-	//map<string, llvm::Value *> stack;
 	map<string, _SYMBOL> stack;
 	_BLOCK_SCOPE * parent;
 	const typename map<string, _SYMBOL>::iterator
@@ -305,6 +304,7 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 									llvm::Type::getInt1Ty(Context), 0, "", BB), var->t);
 
 					} else {
+						// TODO: IdentType
 						cerr << "Error with VarDecl: " << endl;
 						cerr << *var->i->id << " is not of an IntType" << endl;
 						abort();
@@ -327,6 +327,7 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 									llvm::Type::getInt1Ty(Context), 0, "", BB), var->t);
 
 					} else {
+						// TODO: IdentType
 						cerr << "Error with VarDecl: " << endl;
 						cerr << *var->i->id << " is not of an IntType" << endl;
 						abort();
@@ -383,7 +384,7 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		// FIXME Cond Block
 		// While Block
 		// After Block
-		//
+
 		llvm::Value * cond = buildExpression(while_s->e, Context, BB);
 		llvm::BasicBlock * whileBB = 
 			llvm::BasicBlock::Create(Context, "w", BB->getParent());
@@ -399,8 +400,46 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		return &succBB->back();
 
 	// TODO: For
-	//} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
-	//	cerr << "ForStatement: unimplemented" << endl;
+	} else if (ForStatement * for_s = dynamic_cast<ForStatement * >(s)) {
+		//cerr << "ForStatement: unimplemented" << endl;
+		block_scope->push_back();
+		if (dynamic_cast<IntType * >(for_s->vd->t)) { 
+			block_scope->insert(*for_s->vd->i->id, new llvm::AllocaInst(
+						llvm::Type::getInt32Ty(Context), 0, "", BB), for_s->vd->t);
+
+		} else if (dynamic_cast<BoolType * >(for_s->vd->t)) {
+			block_scope->insert(*for_s->vd->i->id, new llvm::AllocaInst(
+						llvm::Type::getInt1Ty(Context), 0, "", BB), for_s->vd->t);
+
+		} else {
+			// TODO: IdentType
+			cerr << "Error with VarDecl: " << endl;
+			cerr << *for_s->vd->i->id << " is not of an IntType" << endl;
+			abort();
+
+		}
+
+		auto store = new llvm::StoreInst(
+				buildExpression(for_s->vd->a->e, Context, BB),
+				(*block_scope)[*for_s->vd->i->id], BB
+				);
+		store->insertInto(BB, BB->end());
+		llvm::Value * cond = buildExpression(for_s->e, Context, BB);
+		llvm::BasicBlock * forBB = 
+			llvm::BasicBlock::Create(Context, "for", BB->getParent());
+
+		buildStatement(for_s->s, Context, forBB);
+		buildStatement(for_s->a, Context, forBB);
+
+		llvm::BasicBlock * succBB = 
+			llvm::BasicBlock::Create(Context, "s_for", BB->getParent());
+		llvm::BranchInst::Create(forBB, succBB, cond, BB);
+
+		cond = buildExpression(for_s->e, Context, forBB);
+		llvm::BranchInst::Create(forBB, succBB, cond, forBB);
+
+		block_scope->pop_back();
+		return &succBB->back();
 
 	} else if (PrintExp * p_exp = dynamic_cast<PrintExp * >(s)) {
 		llvm::CallInst *CallPrint = llvm::CallInst::Create(
@@ -609,6 +648,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 								llvm::Type::getInt1Ty(Context), 0, "", BB), var->t);
 
 					} else { 
+						// TODO: ID TYPE
 						abort();
 					}
 					auto store = new llvm::StoreInst(
@@ -652,6 +692,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 						llvm::Align(4), "", BB), var->t);
 				
 				} else {
+					// TODO: ID TYPE
 					cerr << "Error with VarDecl: " << endl;
 					cerr << *var->i->id << " is not of an IntType" << endl;
 					abort();
