@@ -187,6 +187,12 @@ add_test(NAME LLVM_simple COMMAND test_llvm
 set_property(TEST LLVM_simple
 	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
 )
+add_test(NAME LLVM_simplefor COMMAND test_llvm
+	${TEST_DIR}/CodeGen/simplefor.java
+)
+set_property(TEST LLVM_simplefor
+	PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}"
+)
 add_test(NAME LLVM_singlePrint COMMAND test_llvm
 	${TEST_DIR}/CodeGen/singlePrint.java
 )
