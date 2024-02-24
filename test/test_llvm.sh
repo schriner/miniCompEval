@@ -38,6 +38,7 @@ if [ ! -f "${file%.*}.class" ]; then
 	exit -1
 fi
 java ${file%.*} > tmpjavac
+rm *.class
 popd > /dev/null 2>&1
 $OUT_DIR/${file%.*} > tmpllvm
 

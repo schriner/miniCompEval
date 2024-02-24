@@ -55,7 +55,6 @@ class Exp;
 class Object;
 class ExpList;
 class Ident;
-class IntLiteral;
 class StringLiteral;
 
 using Interpreter::VAL;

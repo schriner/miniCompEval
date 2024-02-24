@@ -10,21 +10,23 @@ source_filename = "simpleMethodCall"
 
 declare i32 @printf(ptr %0, ...)
 
-define i32 @dummyFunctionfunction() {
+define i32 @dummyFunctionfunction(ptr %0) {
 EntryBlock:
-  %0 = call i32 (ptr, ...) @printf(ptr @1, i32 49)
-  %1 = call i32 (ptr, ...) @printf(ptr @2)
-  %2 = call i32 (ptr, ...) @printf(ptr @3)
-  %3 = mul i32 9, 9
-  %4 = mul i32 1, %3
-  %5 = mul i32 %4, 2
-  %6 = mul i32 %5, 67
-  %7 = mul i32 10, 2
-  %8 = add i32 %6, %7
-  %9 = sub i32 %8, 39
-  %10 = mul i32 10, 8
-  %11 = add i32 %9, %10
-  ret i32 %11
+  %1 = alloca i32, align 4
+  store ptr %0, ptr %1, align 8
+  %2 = call i32 (ptr, ...) @printf(ptr @1, i32 49)
+  %3 = call i32 (ptr, ...) @printf(ptr @2)
+  %4 = call i32 (ptr, ...) @printf(ptr @3)
+  %5 = mul i32 9, 9
+  %6 = mul i32 1, %5
+  %7 = mul i32 %6, 2
+  %8 = mul i32 %7, 67
+  %9 = mul i32 10, 2
+  %10 = add i32 %8, %9
+  %11 = sub i32 %10, 39
+  %12 = mul i32 10, 8
+  %13 = add i32 %11, %12
+  ret i32 %13
 }
 
 define i32 @main() {
@@ -35,7 +37,7 @@ EntryBlock:
 
 if:                                               ; preds = %EntryBlock
   %2 = call i32 (ptr, ...) @printf(ptr @4)
-  %3 = call i32 @dummyFunctionfunction()
+  %3 = call i32 @dummyFunctionfunction(i32 0)
   %4 = call i32 (ptr, ...) @printf(ptr @1, i32 %3)
   br label %s
 

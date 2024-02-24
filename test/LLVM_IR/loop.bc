@@ -14,32 +14,34 @@ source_filename = "loop"
 
 declare i32 @printf(ptr %0, ...)
 
-define i32 @Factorialcompute10() {
+define i32 @Factorialcompute10(ptr %0) {
 EntryBlock:
-  %0 = alloca i32, i32 0, align 4
-  %1 = alloca i32, i32 0, align 4
-  %2 = alloca i1, i1 false, align 4
-  store i32 1, ptr %1, align 4
-  store i32 1, ptr %0, align 4
-  %3 = load i32, ptr %1, align 4
-  %4 = icmp sle i32 %3, 10
-  br i1 %4, label %w, label %s_w
+  %1 = alloca i32, align 4
+  store ptr %0, ptr %1, align 8
+  %2 = alloca i32, i32 0, align 4
+  %3 = alloca i32, i32 0, align 4
+  %4 = alloca i1, i1 false, align 4
+  store i32 1, ptr %3, align 4
+  store i32 1, ptr %2, align 4
+  %5 = load i32, ptr %3, align 4
+  %6 = icmp sle i32 %5, 10
+  br i1 %6, label %w, label %s_w
 
 w:                                                ; preds = %w, %EntryBlock
-  %5 = load i32, ptr %0, align 4
-  %6 = load i32, ptr %1, align 4
-  %7 = mul i32 %5, %6
-  store i32 %7, ptr %0, align 4
-  %8 = load i32, ptr %1, align 4
-  %9 = add i32 %8, 1
-  store i32 %9, ptr %1, align 4
-  %10 = load i32, ptr %1, align 4
-  %11 = icmp sle i32 %10, 10
-  br i1 %11, label %w, label %s_w
+  %7 = load i32, ptr %2, align 4
+  %8 = load i32, ptr %3, align 4
+  %9 = mul i32 %7, %8
+  store i32 %9, ptr %2, align 4
+  %10 = load i32, ptr %3, align 4
+  %11 = add i32 %10, 1
+  store i32 %11, ptr %3, align 4
+  %12 = load i32, ptr %3, align 4
+  %13 = icmp sle i32 %12, 10
+  br i1 %13, label %w, label %s_w
 
 s_w:                                              ; preds = %w, %EntryBlock
-  %12 = load i32, ptr %0, align 4
-  ret i32 %12
+  %14 = load i32, ptr %2, align 4
+  ret i32 %14
 }
 
 define i32 @main() {
@@ -69,7 +71,7 @@ EntryBlock:
   %22 = sdiv i32 %21, 3
   %23 = call i32 (ptr, ...) @printf(ptr @1, i32 %22)
   %24 = call i32 (ptr, ...) @printf(ptr @9)
-  %25 = call i32 @Factorialcompute10()
+  %25 = call i32 @Factorialcompute10(i32 0)
   %26 = call i32 (ptr, ...) @printf(ptr @1, i32 %25)
   ret i32 0
 }
