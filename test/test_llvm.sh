@@ -38,6 +38,7 @@ if [ ! -f "${file%.*}.class" ]; then
 	exit -1
 fi
 java ${file%.*} > tmpjavac
+rm *.class
 popd > /dev/null 2>&1
 $OUT_DIR/${file%.*} > tmpllvm
 
@@ -51,12 +52,12 @@ then
 elif [ $error -eq 1 ]
 then
 	echo "Test Failure: ${file%.*}"
-	pushd "$TEST_DIR"
-	java $file
-	popd
 	echo "Expected: "
-	$OUT_DIR/${file%.*}
+	cat $TEST_DIR/tmpjavac
+	echo
 	echo "Actual ${file%.*}: "
+	$OUT_DIR/${file%.*}
+	echo
 	exit -1
 else
 	echo "There was something wrong with the diff command"

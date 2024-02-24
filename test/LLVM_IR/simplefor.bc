@@ -1,0 +1,31 @@
+; ModuleID = 'simplefor'
+source_filename = "simplefor"
+
+@0 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+
+declare i32 @printf(ptr %0, ...)
+
+define i32 @main() {
+EntryBlock:
+  %0 = alloca i32, align 4
+  store i32 0, ptr %0, align 4
+  %1 = load i32, ptr %0, align 4
+  %2 = mul i32 -1, 15
+  %3 = icmp sgt i32 %1, %2
+  br i1 %3, label %for, label %s_for
+
+for:                                              ; preds = %for, %EntryBlock
+  %4 = load i32, ptr %0, align 4
+  %5 = call i32 (ptr, ...) @printf(ptr @1, i32 %4)
+  %6 = load i32, ptr %0, align 4
+  %7 = sub i32 %6, 1
+  store i32 %7, ptr %0, align 4
+  %8 = load i32, ptr %0, align 4
+  %9 = mul i32 -1, 15
+  %10 = icmp sgt i32 %8, %9
+  br i1 %10, label %for, label %s_for
+
+s_for:                                            ; preds = %for, %EntryBlock
+  ret i32 0
+}
