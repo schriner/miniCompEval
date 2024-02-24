@@ -534,26 +534,37 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), false), 
 				llvm::Function::ExternalLinkage, *c->i->id, M
 				);
+		
+		llvm::BasicBlock *BB = 
+			llvm::BasicBlock::Create(Context, "EntryBlock", func_table[*c->i->id]);
 
 		// allocate enough space for the set of variables
 		// return value is pointer to variable struct
-		//(*block_scope)[*var->i->id] = new llvm::AllocaInst(
-		//		llvm::Type::getInt1Ty(Context), 0, "", BB);
 
-		/*for (auto var : *c->v->vdVector) {
+		vector<llvm::Type *> type;
+		for (auto var : *c->v->vdVector) {
 			if (dynamic_cast<IntType * >(var->t)) { 
-			(*block_scope)[*var->i->id] = new llvm::AllocaInst(
+				type.push_back(llvm::Type::getInt32Ty(Context));
+			/*(*block_scope)[*var->i->id] = new llvm::AllocaInst(
 			llvm::Type::getInt32Ty(Context), 0, 
 			llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), 
-			llvm::Align(4), "", BB);
+			llvm::Align(4), "", BB);*/
 
 			} else if (dynamic_cast<BoolType * >(var->t)) {
-			(*block_scope)[*var->i->id] = new llvm::AllocaInst(
+				type.push_back(llvm::Type::getInt1Ty(Context));
+			/*(*block_scope)[*var->i->id] = new llvm::AllocaInst(
 			llvm::Type::getInt1Ty(Context), 0, 
 			llvm::ConstantInt::getFalse(Context),
-			llvm::Align(4), "", BB);
+			llvm::Align(4), "", BB);*/
+			} else {
+				// ID Type
+				// Array
+				abort();
 			}
-			}*/
+		} 
+		auto temp = 
+			new llvm::AllocaInst(llvm::StructType::create(Context, std::move(type)), 0, "", BB);
+		llvm::ReturnInst::Create(Context, temp, BB);
 	}
 
 	for (auto func : *c->m->mdVector) {
@@ -612,23 +623,23 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 							);
 
 				} else if (dynamic_cast<IdentType * >(func->f->t)) {
-						FT = llvm::FunctionType::get(RT,
-								{llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), 
-								llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0) }, 
-								false
-								);
-			  } else {
-			 		// Arrays
+					FT = llvm::FunctionType::get(RT,
+							{llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), 
+							llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0) }, 
+							false
+							);
+				} else {
+					// Arrays
 					abort();
-			 	}
-		 	}
+				}
+			}
 
 		} else {
 			FT = llvm::FunctionType::get(RT, {llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0)}, false);
 
-			}
+		}
 
-			func_table[*c->i->id + *func->i->id] = llvm::Function::Create(
+		func_table[*c->i->id + *func->i->id] = llvm::Function::Create(
 				FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
 				);
 
