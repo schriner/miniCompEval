@@ -52,12 +52,12 @@ then
 elif [ $error -eq 1 ]
 then
 	echo "Test Failure: ${file%.*}"
-	pushd "$TEST_DIR"
-	java $file
-	popd
 	echo "Expected: "
-	$OUT_DIR/${file%.*}
+	cat $TEST_DIR/tmpjavac
+	echo
 	echo "Actual ${file%.*}: "
+	$OUT_DIR/${file%.*}
+	echo
 	exit -1
 else
 	echo "There was something wrong with the diff command"

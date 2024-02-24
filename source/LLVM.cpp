@@ -47,14 +47,18 @@ struct _SYMBOL {
 	Type * t;
 };
 
+struct _BLOCK_SCOPE;
+_BLOCK_SCOPE * block_scope;
 struct _BLOCK_SCOPE {
 	//map<string, llvm::Value *> stack;
 	map<string, _SYMBOL> stack;
 	_BLOCK_SCOPE * parent;
-	const typename map<string, _SYMBOL>::iterator end() {
+	const typename map<string, _SYMBOL>::iterator
+		end() {
 		return stack.end();
 	}
-	typename map<string, _SYMBOL>::iterator find(string id) {
+	typename map<string, _SYMBOL>::iterator
+		find(string id) {
 		_BLOCK_SCOPE * s = this;
 		while (s) {
 			if (s->stack.find(id) != s->stack.end()) {
@@ -81,19 +85,19 @@ struct _BLOCK_SCOPE {
 	_BLOCK_SCOPE()
 		: parent(nullptr){}
 	_BLOCK_SCOPE * push_back() { 
-		return new _BLOCK_SCOPE(parent); 
+		block_scope = new _BLOCK_SCOPE(this);
+		return block_scope; 
 	}
   _BLOCK_SCOPE * pop_back() { 
 		if (parent == nullptr) {
 			stack.clear();
-			return this; 
+			return this;
 		}
-		auto tmp = parent;
+		block_scope = parent;
 		delete this;
-		return tmp;
+		return block_scope;
 	}
 };
-_BLOCK_SCOPE * block_scope;
 string * _this;
 
 llvm::Value *
@@ -222,8 +226,13 @@ buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 			return new llvm::LoadInst(
 					llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0),
 					(*block_scope)["this"], "", BB);
+
 		//} else if (NewIdObj * nid = dynamic_cast<NewIdObj * >(e->o)) {
+		// call constructor
+
+		// TODO: Arrays
 		//} else if (NewTypeObj * ntype = dynamic_cast<NewTypeObj * >(e->o)) {
+
 		} else {
 			// load object
 			cerr << "Error processing buildExpression: " << endl;
@@ -233,8 +242,6 @@ buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		}
 
 	} else if (ObjectMethodCall* e = dynamic_cast<ObjectMethodCall * >(exp)) {
-		//return llvm::CallInst::Create(func_table[*e->o->id+*e->i->id], "", BB);
-		// TODO classname
 		llvm::Function * F;
 		if (NewIdObj * obj = dynamic_cast<NewIdObj *>(e->o)) {
 			F = func_table[*obj->i->id + *e->i->id];
@@ -284,11 +291,50 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 
 	if (BlockStatements * block_s = dynamic_cast<BlockStatements * >(s)) {
 		llvm::Instruction * i = nullptr;
-		// TODO: VarDeclExpList * vdel = nullptr;
-		//if (block_s->vdel) {
-		//	for (auto var : *block_s->vdel->vdeVector) {
-		//	}
-		//}
+
+		if (block_s->vdel) {
+			block_scope->push_back();
+			for (auto var : *block_s->vdel->vdeVector) {
+				if (VarDeclExp * var_e = dynamic_cast<VarDeclExp *>(var)) {
+					if (dynamic_cast<IntType * >(var->t)) { 
+						block_scope->insert(*var->i->id, new llvm::AllocaInst(
+									llvm::Type::getInt32Ty(Context), 0, "", BB), var->t);
+
+					} else if (dynamic_cast<BoolType * >(var->t)) {
+						block_scope->insert(*var->i->id, new llvm::AllocaInst(
+									llvm::Type::getInt1Ty(Context), 0, "", BB), var->t);
+
+					} else {
+						cerr << "Error with VarDecl: " << endl;
+						cerr << *var->i->id << " is not of an IntType" << endl;
+						abort();
+
+					}
+
+					auto store = new llvm::StoreInst(
+							buildExpression(var_e->a->e, Context, BB),
+							(*block_scope)[*var->i->id], BB
+							);
+					store->insertInto(BB, BB->end());
+
+				} else {
+					if (dynamic_cast<IntType * >(var->t)) { 
+						block_scope->insert(*var->i->id, new llvm::AllocaInst(
+									llvm::Type::getInt32Ty(Context), 0, "", BB), var->t);
+
+					} else if (dynamic_cast<BoolType * >(var->t)) {
+						block_scope->insert(*var->i->id, new llvm::AllocaInst(
+									llvm::Type::getInt1Ty(Context), 0, "", BB), var->t);
+
+					} else {
+						cerr << "Error with VarDecl: " << endl;
+						cerr << *var->i->id << " is not of an IntType" << endl;
+						abort();
+
+					}
+				}
+			}
+		}
 		
 		if (block_s->s) {
 			for (auto state : *block_s->s->sVector ) {
@@ -296,10 +342,9 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 			}
 		}
 
-		//if (block_s->vdel) {
-		//	for (auto var : *block_s->vdel->vdeVector) {
-		//	}
-		//}
+		if (block_s->vdel) {
+			block_scope->pop_back();
+		}
 
 		return i;
 
@@ -400,7 +445,10 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		return CallPrint;
 		
 	} else if (Assign * assign = dynamic_cast<Assign * >(s)) {
-		// TODO assign within a class
+		if (block_scope->find(*assign->i->id) == block_scope->end()) {
+			cerr << *assign->i->id << " is not found at Assign" << endl;
+			abort();
+		}
 		auto store = new llvm::StoreInst(
 			buildExpression(assign->e, Context, BB),
 			(*block_scope)[*assign->i->id], BB
@@ -435,6 +483,8 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 	// VarDeclList * v = nullptr;
 	// TODO create constructor
 	// map<string, llvm::Value *> class_var_decl;
+	block_scope = new _BLOCK_SCOPE;
+
 	if (c->v) {
 		func_table[*c->i->id] = llvm::Function::Create(
 			llvm::FunctionType::get(
@@ -523,7 +573,6 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 
 		}
 
-		// FIXME: add classname func_table[*c->i->id+*func->i->id] = F;
 		func_table[*c->i->id + *func->i->id] = llvm::Function::Create(
 			FT, llvm::Function::ExternalLinkage, *c->i->id + *func->i->id, M
 		);
@@ -533,16 +582,19 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 	for (auto func : *c->m->mdVector) {
 		llvm::Function *F = func_table[*c->i->id + *func->i->id];
 		_this = c->i->id;
-		block_scope = new _BLOCK_SCOPE;
+		block_scope->push_back();
 		
 		llvm::BasicBlock *BB = 
 			llvm::BasicBlock::Create(Context, "EntryBlock", F);
+
 
 		block_scope->insert("this", new llvm::AllocaInst(
 					llvm::Type::getInt32Ty(Context), 0, "", BB), new IdentType(c->i));
 		auto store = new llvm::StoreInst(
 				F->getArg(0), (*block_scope)["this"], BB);
 		store->insertInto(BB, BB->end());
+
+		// Calculate the offset to a variable and add to the var table
 
 		if (func->f) {
 			if (func->f->frVector) {
@@ -621,6 +673,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 		block_scope->pop_back();
 	}
 
+	block_scope->pop_back();
 }
 
 void buildMain(MainClass * main, llvm::LLVMContext &Context, llvm::Module *M) {
