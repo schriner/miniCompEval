@@ -287,6 +287,18 @@ return i;
 
 }
 
+llvm::Value *
+buildIndex(Index * ind, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
+	if (SingleIndex * s_i = dynamic_cast<SingleIndex *>(ind)) {
+		return buildExpression(s_i->e, Context, BB);
+	}
+	MultipleIndices * m_i = (MultipleIndices *) ind;
+	for (auto m : *m_i->ind) {
+		buildExpression(((SingleIndex *) m)->e, Context, BB);
+	}
+	return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0);
+}
+
 llvm::Instruction *
 buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 
@@ -494,27 +506,29 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		}
 		auto store = new llvm::StoreInst(
 				buildExpression(assign->e, Context, BB),
-				(*block_scope)[*assign->i->id], BB
-				);
+				(*block_scope)[*assign->i->id], BB);
 		store->insertInto(BB, BB->end());
 		return store;
 
 		// TODO: Array
-		//} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
-		//	cerr << "IndexAssign: unimplemented" << endl;
+	/*} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
+		auto ind = buildIndex(idx->ind, Context, BB);
+		llvm::Value * ptr = GetElementPtrInst::Create((*block_scope)[*i->id]);
+		auto store = new llvm::StoreInst(buildExpression(idx->e, Context, BB), ptr, BB);
+		store->insertInto(BB, BB->end());
+*/
+	} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
+		llvm::ReturnInst::Create(Context, 
+				buildExpression(ret_s->e, Context, BB), 
+				&BB->getParent()->back());
 
-} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
-	llvm::ReturnInst::Create(Context, 
-			buildExpression(ret_s->e, Context, BB), 
-			&BB->getParent()->back());
+	} else {
+		cerr << "Error processing buildStatement: " << endl;
+		cerr << "Statement s cast error " << endl;
+		abort();
+	}
 
-} else {
-	cerr << "Error processing buildStatement: " << endl;
-	cerr << "Statement s cast error " << endl;
-	abort();
-}
-
-return nullptr;
+	return nullptr;
 }
 
 void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) {
@@ -534,7 +548,7 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), false), 
 				llvm::Function::ExternalLinkage, *c->i->id, M
 				);
-		
+
 		llvm::BasicBlock *BB = 
 			llvm::BasicBlock::Create(Context, "EntryBlock", func_table[*c->i->id]);
 
@@ -545,17 +559,17 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 		for (auto var : *c->v->vdVector) {
 			if (dynamic_cast<IntType * >(var->t)) { 
 				type.push_back(llvm::Type::getInt32Ty(Context));
-			/*(*block_scope)[*var->i->id] = new llvm::AllocaInst(
-			llvm::Type::getInt32Ty(Context), 0, 
-			llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), 
-			llvm::Align(4), "", BB);*/
+				/*(*block_scope)[*var->i->id] = new llvm::AllocaInst(
+					llvm::Type::getInt32Ty(Context), 0, 
+					llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), 
+					llvm::Align(4), "", BB);*/
 
 			} else if (dynamic_cast<BoolType * >(var->t)) {
 				type.push_back(llvm::Type::getInt1Ty(Context));
-			/*(*block_scope)[*var->i->id] = new llvm::AllocaInst(
-			llvm::Type::getInt1Ty(Context), 0, 
-			llvm::ConstantInt::getFalse(Context),
-			llvm::Align(4), "", BB);*/
+				/*(*block_scope)[*var->i->id] = new llvm::AllocaInst(
+					llvm::Type::getInt1Ty(Context), 0, 
+					llvm::ConstantInt::getFalse(Context),
+					llvm::Align(4), "", BB);*/
 			} else {
 				// ID Type
 				// Array

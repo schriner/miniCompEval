@@ -648,9 +648,9 @@ class SingleIndex : public Index {
 };
 class MultipleIndices : public Index {
 	public:
-		vector<Index *> * ind = nullptr;
-		MultipleIndices(Index * i, Exp * e) :
-			ind( new vector<Index *> {i, new SingleIndex( e )} ) {}
+		vector<SingleIndex *> * ind = nullptr;
+		MultipleIndices(SingleIndex * i, Exp * e) :
+			ind( new vector<SingleIndex *> {i, new SingleIndex( e )} ) {}
 		void traverse();
 #ifdef ASSEM
 #endif

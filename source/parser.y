@@ -408,7 +408,12 @@ index :
 		$$ = new SingleIndex( $2 );
 	}
 	| index O_SQ full_exp C_SQ {
-		$$ = new MultipleIndices( $1, $3 );
+		if (SingleIndex * s = dynamic_cast<SingleIndex *>($1)) {
+			$$ = new MultipleIndices( s, $3 );
+		} else {
+			((MultipleIndices *) $1)->ind->push_back(new SingleIndex( $3 ));
+			$$ = $1;
+		}
 	}
 	; 
 	
