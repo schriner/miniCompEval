@@ -98,6 +98,8 @@ struct _BLOCK_SCOPE {
 	}
 };
 string * _this;
+llvm::Value *
+buildIndex(Index * ind, llvm::LLVMContext &Context, llvm::BasicBlock *BB);
 
 llvm::Value *
 buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
@@ -186,10 +188,24 @@ buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 				);
 
 		// TODO: Array
-		//} else if (ArrayAccess* e = dynamic_cast<ArrayAccess * >(exp)) {
+	} else if (ArrayAccess * e = dynamic_cast<ArrayAccess * >(exp)) {
+		auto ind = buildIndex(e->ind, Context, BB);
+		llvm::Value * ptr = new llvm::LoadInst(llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), (*block_scope)[*e->i->id], "", BB);
+		return llvm::GetElementPtrInst::Create(
+				//llvm::ArrayType::get(llvm::Type::getInt32Ty(Context), 8),
+				llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0),
+				ptr,
+				{ind}, "", BB
+		);
+		return new llvm::LoadInst(llvm::Type::getInt32Ty(Context), ptr, "", BB);
+		return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 100);
+		cerr << "ArrayAccess" << endl;
+		abort();
 
 		// TODO: Array
-		//} else if (Length* e = dynamic_cast<Length * >(exp)) {
+	} else if (Length * e = dynamic_cast<Length * >(exp)) {
+		cerr << "Length" << endl;
+		abort();
 
 		// TODO: Array
 		//} else if (ArrayAccessLength* e = dynamic_cast<ArrayAccessLength * >(exp)) {
@@ -232,7 +248,16 @@ buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		// call constructor
 
 		// TODO: Arrays
-		//} else if (NewTypeObj * ntype = dynamic_cast<NewTypeObj * >(e->o)) {
+} else if (NewTypeObj * ntype = dynamic_cast<NewTypeObj * >(e->o)) {
+	if (dynamic_cast<IntType * >(ntype->p)) {
+		auto size = buildIndex(ntype->i, Context, BB);
+		return new llvm::AllocaInst(
+					llvm::Type::getInt32Ty(Context), 0, 
+					size, llvm::Align(4), "", BB);
+	}
+	//return new llvm::
+	cerr << "NewTypeObj" << endl;
+	abort();
 
 } else {
 	// load object
@@ -244,20 +269,30 @@ buildExpression(Exp * exp, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 
 } else if (ObjectMethodCall* e = dynamic_cast<ObjectMethodCall * >(exp)) {
 	llvm::Function * F;
+	vector<llvm::Value *> args;
 	if (NewIdObj * obj = dynamic_cast<NewIdObj *>(e->o)) {
 		F = func_table[*obj->i->id + *e->i->id];
+		args = {llvm::ConstantInt::get(
+				llvm::Type::getInt32Ty(Context), 0
+				)};
+		//args = {llvm::CallInst::Create(func_table[*obj->i->id], "", BB)}
 
 	} else if (ThisObj * obj = dynamic_cast<ThisObj *>(e->o)) {
 		F = func_table[*_this + *e->i->id];
+		args = {llvm::ConstantInt::get(
+				llvm::Type::getInt32Ty(Context), 0
+				)};
+		//args = {buildExpression((*block_scope)["this"], Context, BB)};
+
 		//} else if (IdObj * obj = dynamic_cast<NewIdObj * >(e->o)) {
+		//F = func_table[block_scope->get_type(i->id) + *e->i->id];
+		//args = {buildExpression((*block_scope)[*obj->i->id], Context, BB)};
+
 } else {
 	cerr << "Object Type error in ObjectMethodCall";
 	abort();
 }
 
-vector<llvm::Value *> args{llvm::ConstantInt::get(
-		llvm::Type::getInt32Ty(Context), 0
-		)};
 if (e->e) {
 	if (e->e->erlVector) {
 		for (auto erl : *e->e->erlVector) {
@@ -269,7 +304,6 @@ if (e->e) {
 
 	}
 	return llvm::CallInst::Create(F, std::move(args), "", BB);
-
 }
 return llvm::CallInst::Create(F, std::move(args), "", BB);
 
@@ -290,12 +324,24 @@ return i;
 llvm::Value *
 buildIndex(Index * ind, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 	if (SingleIndex * s_i = dynamic_cast<SingleIndex *>(ind)) {
-		return buildExpression(s_i->e, Context, BB);
+		auto i = llvm::BinaryOperator::Create(llvm::Instruction::Add,
+				buildExpression(s_i->e, Context, BB),
+				llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 2),
+				""
+				);
+		i->insertInto(BB, BB->end());
+		return i;
 	}
+	cerr << "MultipleIndices err" << endl;
+	abort();
+
 	MultipleIndices * m_i = (MultipleIndices *) ind;
-	for (auto m : *m_i->ind) {
+	/*int offset = s->second.val.exp_array[0] + 1;
+		int a = 1;
+		for (auto m : *m_i->ind) {
 		buildExpression(((SingleIndex *) m)->e, Context, BB);
-	}
+		offset += s->second.val.exp_array[a++]*(dynamic_cast<SingleIndex *>(m)->e->evaluate().exp);
+		}*/
 	return llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0);
 }
 
@@ -317,20 +363,21 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 						block_scope->insert(*var->i->id, new llvm::AllocaInst(
 									llvm::Type::getInt1Ty(Context), 0, "", BB), var->t);
 
+						//} else if (dynamic_cast<IdentType * >(var->t)) {
+
 					} else {
 						// TODO: IdentType
 						// TODO: Array
 						cerr << "Error with VarDecl: " << endl;
 						cerr << *var->i->id << " is not of an IntType" << endl;
 						abort();
-
 					}
 
-					auto store = new llvm::StoreInst(
-							buildExpression(var_e->a->e, Context, BB),
-							(*block_scope)[*var->i->id], BB
-							);
-					store->insertInto(BB, BB->end());
+				auto store = new llvm::StoreInst(
+						buildExpression(var_e->a->e, Context, BB),
+						(*block_scope)[*var->i->id], BB
+						);
+				store->insertInto(BB, BB->end());
 
 				} else {
 					if (dynamic_cast<IntType * >(var->t)) { 
@@ -511,12 +558,15 @@ buildStatement(Statement *s, llvm::LLVMContext &Context, llvm::BasicBlock *BB) {
 		return store;
 
 		// TODO: Array
-	/*} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
+	} else if (IndexAssign * idx = dynamic_cast<IndexAssign * >(s)) {
 		auto ind = buildIndex(idx->ind, Context, BB);
-		llvm::Value * ptr = GetElementPtrInst::Create((*block_scope)[*i->id]);
+		llvm::Value * ptr = new llvm::LoadInst(llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0), (*block_scope)[*idx->i->id], "", BB);
+		ptr = llvm::GetElementPtrInst::CreateInBounds(
+				llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0),
+				ptr, ind, "", BB);
 		auto store = new llvm::StoreInst(buildExpression(idx->e, Context, BB), ptr, BB);
 		store->insertInto(BB, BB->end());
-*/
+
 	} else if (ReturnStatement * ret_s = dynamic_cast<ReturnStatement * >(s)) {
 		llvm::ReturnInst::Create(Context, 
 				buildExpression(ret_s->e, Context, BB), 
@@ -602,8 +652,8 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 		if (func->f) {
 			if (func->f->frVector) {
 				vector<llvm::Type *> type{llvm::PointerType::get(
-						llvm::Type::getInt32Ty(Context), 0)
-				};
+						llvm::Type::getInt32Ty(Context), 0)};
+
 				for (auto var : *func->f->frVector) {
 					if (dynamic_cast<IntType * >(var->t)) {
 						type.push_back(llvm::Type::getInt32Ty(Context));
@@ -732,6 +782,12 @@ void buildClassDecl(ClassDecl * c, llvm::LLVMContext &Context, llvm::Module *M) 
 					block_scope->insert(*var->i->id,  new llvm::AllocaInst(
 								llvm::Type::getInt1Ty(Context), 0, 
 								llvm::ConstantInt::getFalse(Context),
+								llvm::Align(4), "", BB), var->t);
+
+				} else if (dynamic_cast<TypeIndexList * >(var->t)) {
+					block_scope->insert(*var->i->id,  new llvm::AllocaInst(
+								llvm::PointerType::get(llvm::Type::getInt32Ty(Context), 0),
+								0, llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 0), 
 								llvm::Align(4), "", BB), var->t);
 
 				} else {
